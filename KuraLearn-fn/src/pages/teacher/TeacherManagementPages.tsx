@@ -1,0 +1,12 @@
+export { TeacherClassesPage } from "./TeacherClassesPage";
+export { TeacherStudentsPage } from "./TeacherStudentsPage";
+export { TeacherLessonsPage } from "./TeacherLessonsPage";
+export { TeacherDeliveryPage } from "./TeacherDeliveryPage";
+export { TeacherQuizzesPage } from "./TeacherQuizzesPage";
+export { TeacherReportsPage } from "./TeacherReportsPage";
+export { TeacherMessagesPage } from "./TeacherMessagesPage";
+export { TeacherResourcesPage } from "./TeacherResourcesPage";
+export { TeacherNotificationsPage } from "./TeacherNotificationsPage";
+export { TeacherAuditPage } from "./TeacherAuditPage";
+export { TeacherSettingsPage } from "./TeacherSettingsPage";
+export { TeacherMarksPage } from "./TeacherMarksPage";

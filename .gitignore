@@ -147,3 +147,16 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# KuraLearn
+/AGENTGUIDE.md
+/GUIDELINE.md
+/ROADMAP.md
+/backups
+/.claude
+/LOGIN_CREDENTIALS.md
+**/public/uploads/
+.DS_Store
+.expo/
+*.env.secret
+!.env.example

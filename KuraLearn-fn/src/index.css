@@ -1,0 +1,131 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #1f2937;
+  background: #f8fafc;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  @apply text-base text-slate-650;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+textarea {
+  font-weight: 400;
+}
+
+/* Global Polish */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply tracking-tight text-slate-900;
+    font-family: "Outfit", sans-serif;
+  }
+
+  /* Lighter Typography Standard */
+  .font-black {
+    @apply font-bold; /* Downgrade 900 to 700 for a cleaner look */
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}
+
+/* Premium Web App styles */
+.mesh-gradient-bg {
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(109, 62, 235, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.05) 0px, transparent 50%);
+}
+
+.glow-card {
+  position: relative;
+}
+
+.glow-card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(
+    90deg,
+    rgba(109, 62, 235, 0.15) 0%,
+    rgba(56, 189, 248, 0.15) 50%,
+    rgba(236, 72, 153, 0.1) 100%
+  );
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.glow-card:hover::after {
+  opacity: 1;
+}
+
+.moving-grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(109, 62, 235, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(109, 62, 235, 0.04) 1px, transparent 1px);
+}
+
+/* Custom Styled Dropdowns avoiding default browser arrow style */
+.custom-select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url('data:image/svg+xml;utf8,<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" stroke="%2364748b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  background-size: 16px !important;
+  padding-right: 2.5rem !important; /* Make sure text doesn't overlap the arrow */
+}
+
+/* Keyboard users can always see where they are. */
+:focus-visible {
+  outline: 2px solid #6d3eeb;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

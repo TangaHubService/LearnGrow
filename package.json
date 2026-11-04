@@ -1,0 +1,16 @@
+{
+  "name": "kuralearn-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "shared:build": "npm run build -w packages/shared",
+    "mobile:dev": "cd KuraLearn-app && npx expo start",
+    "mobile:ios": "cd KuraLearn-app && npx expo run:ios",
+    "mobile:android": "cd KuraLearn-app && npx expo run:android"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
