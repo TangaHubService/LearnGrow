@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { authApi, type ApiUser } from "@/lib/api";
+import { authApi, clearDeviceData, type ApiUser } from "@/lib/api";
+import { queryClient } from "@/app/queryClient";
 
 interface AuthContextType {
   user: ApiUser | null;
@@ -59,8 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem("kuralearn_user", JSON.stringify(apiUser));
           setUser(apiUser);
         })
-        .catch(() => {
-          // Token may be expired, clear session once to prevent infinite refresh loop
+        .catch((error) => {
+          // No connection: keep the saved session so the app still works offline.
+          if (!navigator.onLine || error instanceof TypeError) return;
+          // The server rejected the session: clear it once to prevent an endless refresh loop.
           localStorage.removeItem("kuralearn_user");
           localStorage.removeItem("kuralearn_token");
           localStorage.removeItem("kuralearn_refresh_token");
@@ -97,6 +100,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("kuralearn_user");
     localStorage.removeItem("kuralearn_token");
     localStorage.removeItem("kuralearn_refresh_token");
+    queryClient.clear();
+    void clearDeviceData();
     setUser(null);
   }
 

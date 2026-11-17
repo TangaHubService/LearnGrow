@@ -7,8 +7,10 @@ import { StudentCard, PrimaryLink, SecondaryLink } from "@/components/student/St
 import { useLessonDetails } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
 import { RefreshCw } from "lucide-react";
+import { useT } from "@/i18n/I18nContext";
 
 export function PracticePage() {
+  const t = useT();
   const { lessonId } = useParams<{ lessonId: string }>();
   const dispatch = useAppDispatch();
   const { data, isLoading, error, refetch } = useLessonDetails(lessonId || "");
@@ -18,7 +20,11 @@ export function PracticePage() {
   if (isLoading) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Practice activity" subtitle="Loading..." />
+        <PageHeader
+          brand={t("KuraLearn Learning")}
+          title={t("Practice activity")}
+          subtitle={t("Loading...")}
+        />
         <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     );
@@ -27,12 +33,16 @@ export function PracticePage() {
   if (error || !data?.lesson) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Practice activity" subtitle="Error" />
+        <PageHeader
+          brand={t("KuraLearn Learning")}
+          title={t("Practice activity")}
+          subtitle={t("Error")}
+        />
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <RefreshCw size={48} className="mb-4 text-red-600" />
-          <h3 className="text-xl font-bold">Failed to load practice activity</h3>
+          <h3 className="text-xl font-bold">{t("Failed to load practice activity")}</h3>
           <button onClick={() => refetch()} className="mt-4 text-indigo-600 font-bold">
-            Retry
+            {t("Retry")}
           </button>
         </div>
       </div>
@@ -46,7 +56,7 @@ export function PracticePage() {
     questionText: `What is the main concept of ${lesson.title}?`,
     options: ["Option A", "Option B", "Option C"],
     correctAnswer: "Option A",
-    hint: "Think about the lesson title.",
+    hint: t("Think about the lesson title."),
     explanation:
       "This is a placeholder practice question. Real practice questions will be loaded from the assessment module.",
   };
@@ -56,10 +66,10 @@ export function PracticePage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
-        title="Practice activity"
+        brand={t("KuraLearn Learning")}
+        title={t("Practice activity")}
         subtitle={lesson.title}
-        actions={<SecondaryLink to={`/lessons/${lesson.id}`}>Back to lesson</SecondaryLink>}
+        actions={<SecondaryLink to={`/lessons/${lesson.id}`}>{t("Back to lesson")}</SecondaryLink>}
       />
       <StudentCard>
         <p className="text-lg font-bold text-slate-900">{question.questionText}</p>
@@ -80,13 +90,13 @@ export function PracticePage() {
             disabled={!selected}
             className="h-11 rounded-lg bg-emerald-700 px-5 font-bold text-white disabled:opacity-50"
           >
-            Check answer
+            {t("Check answer")}
           </button>
           <button
             onClick={() => dispatch(pushToast({ tone: "info", message: `Hint: ${question.hint}` }))}
             className="h-11 rounded-lg border border-slate-200 px-5 font-bold text-slate-700"
           >
-            Hint
+            {t("Hint")}
           </button>
           <button
             onClick={() => {
@@ -95,15 +105,15 @@ export function PracticePage() {
             }}
             className="h-11 rounded-lg border border-slate-200 px-5 font-bold text-slate-700"
           >
-            Retry
+            {t("Retry")}
           </button>
-          <PrimaryLink to={`/ai?lessonId=${lesson.id}&mode=explain`}>AI explain</PrimaryLink>
+          <PrimaryLink to={`/ai?lessonId=${lesson.id}&mode=explain`}>{t("AI explain")}</PrimaryLink>
         </div>
         {checked ? (
           <div
             className={`mt-5 rounded-lg p-4 font-bold animate-in fade-in slide-in-from-top-2 ${isCorrect ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800"}`}
           >
-            {isCorrect ? "Correct! " : "Good try! "}
+            {isCorrect ? t("Correct! ") : t("Good try! ")}
             {question.explanation}
           </div>
         ) : null}

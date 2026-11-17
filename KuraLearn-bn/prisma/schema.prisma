@@ -335,6 +335,7 @@ model Subject {
   combinationSubjects CombinationSubject[]
   timetablePeriods  TimetablePeriod[]
   nationalExamResults NationalExamResult[]
+  syllabusUnits     SyllabusUnit[]
 
   @@unique([levelId, name])
   @@index([category])
@@ -443,6 +444,8 @@ model Lesson {
   status              ContentStatus                  @default(DRAFT)
   linkedLessonPlanId  String?
   linkedLessonPlan    LessonPlan?                    @relation(fields: [linkedLessonPlanId], references: [id], onDelete: SetNull)
+  syllabusUnitId      String?
+  syllabusUnit        SyllabusUnit?                  @relation(fields: [syllabusUnitId], references: [id], onDelete: SetNull)
   aiMessages          AIMessage[]
   activities          Activity[]
   assessments         Assessment[]
@@ -466,6 +469,10 @@ model LessonPlan {
   classId             String
   subjectId           String
   topicId             String?
+  syllabusUnitId      String?
+  topic               String?
+  content             String?        @db.Text
+  status              ContentStatus  @default(DRAFT)
   title               String         @default("Untitled Lesson Plan")
   objectives          String?        @db.Text
   competencies        String[]       @default([])
@@ -483,7 +490,36 @@ model LessonPlan {
   teacher             Teacher        @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   class               Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
   subject             Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  syllabusUnit        SyllabusUnit?  @relation(fields: [syllabusUnitId], references: [id], onDelete: SetNull)
   lessons             Lesson[]
+
+  @@index([syllabusUnitId])
+}
+
+/// A unit of the national (REB) competence-based syllabus for one subject at one level.
+model SyllabusUnit {
+  id                 String       @id @default(uuid())
+  subjectId          String
+  number             Int
+  title              String
+  keyUnitCompetence  String       @db.Text
+  knowledge          String[]     @default([])
+  skills             String[]     @default([])
+  attitudes          String[]     @default([])
+  content            String[]     @default([])
+  genericCompetences String[]     @default([])
+  crossCuttingIssues String[]     @default([])
+  suggestedPeriods   Int?
+  term               Int?
+  source             String       @default("SAMPLE")
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  subject            Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  lessonPlans        LessonPlan[]
+  lessons            Lesson[]
+  assessments        Assessment[]
+
+  @@unique([subjectId, number])
 }
 
 model Activity {
@@ -1089,6 +1125,8 @@ model Assessment {
   courseId            String
   unitId              String?
   topicId             String?
+  syllabusUnitId      String?
+  syllabusUnit        SyllabusUnit?          @relation(fields: [syllabusUnitId], references: [id], onDelete: SetNull)
   lessonId            String?
   teacherId           String
   title               String

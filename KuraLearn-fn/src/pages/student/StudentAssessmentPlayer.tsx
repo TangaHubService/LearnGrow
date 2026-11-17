@@ -20,6 +20,7 @@ import {
 } from "@/services/assessmentApi";
 import { Card } from "@/components/common/Card";
 import { Button } from "@/components/common/Button";
+import { useT } from "@/i18n/I18nContext";
 
 // ─── Status Badge ─────────────────────────────────────────────────────
 const STATUS_COLOR: Record<string, string> = {
@@ -51,6 +52,7 @@ export function StudentAssessmentPlayer({
   submission: AssessmentSubmission | null;
   onBack: () => void;
 }) {
+  const t = useT();
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>(
     (submission?.answers as Record<string, any>) ?? {},
@@ -139,9 +141,9 @@ export function StudentAssessmentPlayer({
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertCircle size={48} className="text-slate-300 mb-4" />
-        <p className="text-lg font-bold text-slate-700">No questions found</p>
+        <p className="text-lg font-bold text-slate-700">{t("No questions found")}</p>
         <button onClick={onBack} className="mt-4 text-violet-600 font-semibold underline">
-          Go back
+          {t("Go back")}
         </button>
       </div>
     );
@@ -155,11 +157,13 @@ export function StudentAssessmentPlayer({
           onClick={onBack}
           className="mb-6 flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors"
         >
-          <ArrowLeft size={16} /> Quit Assessment
+          <ArrowLeft size={16} /> {t("Quit Assessment")}
         </button>
 
         <div className="mb-6">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Questions</p>
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
+            {t("Questions")}
+          </p>
           <div className="grid grid-cols-5 gap-2 lg:grid-cols-4">
             {questions.map((q, idx) => (
               <button
@@ -181,7 +185,7 @@ export function StudentAssessmentPlayer({
 
         <div className="mt-auto pt-6 border-t border-slate-100 hidden lg:block">
           <div className="flex items-center justify-between text-xs font-medium text-slate-500 mb-2">
-            <span>Progress</span>
+            <span>{t("Progress")}</span>
             <span>
               {Object.keys(answers).length} / {questions.length}
             </span>
@@ -217,7 +221,7 @@ export function StudentAssessmentPlayer({
             )}
             <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
               {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-              {saving ? "Saving..." : "All changes saved"}
+              {saving ? t("Saving...") : t("All changes saved")}
             </div>
             <button
               onClick={handleSubmit}
@@ -225,7 +229,7 @@ export function StudentAssessmentPlayer({
               className="flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-800 transition-colors shadow-lg disabled:opacity-50"
             >
               {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-              Submit
+              {t("Submit")}
             </button>
           </div>
         </header>
@@ -304,7 +308,7 @@ export function StudentAssessmentPlayer({
                   value={answers[currentQ.id] ?? ""}
                   onChange={(e) => setAnswers((p) => ({ ...p, [currentQ.id]: e.target.value }))}
                   rows={currentQ.type === "ESSAY" ? 10 : 3}
-                  placeholder="Type your answer here..."
+                  placeholder={t("Type your answer here...")}
                   className="w-full rounded-xl border-2 border-slate-100 bg-white p-5 text-base outline-none focus:border-violet-500 transition-all resize-none shadow-sm"
                 />
               )}
@@ -313,16 +317,16 @@ export function StudentAssessmentPlayer({
               {(currentQ.type === "MATCHING" || currentQ.type === "ORDERING") && (
                 <div className="rounded-xl bg-amber-50 p-6 text-center border border-amber-100">
                   <p className="text-amber-800 font-medium">
-                    This question type requires specialized interactive UI.
+                    {t("This question type requires specialized interactive UI.")}
                   </p>
                   <p className="text-xs text-amber-700 mt-2">
-                    Currently available for text submission.
+                    {t("Currently available for text submission.")}
                   </p>
                   <textarea
                     value={answers[currentQ.id] ?? ""}
                     onChange={(e) => setAnswers((p) => ({ ...p, [currentQ.id]: e.target.value }))}
                     rows={4}
-                    placeholder="Describe your matching/order here..."
+                    placeholder={t("Describe your matching/order here...")}
                     className="mt-4 w-full rounded-lg border border-amber-200 p-3 text-sm"
                   />
                 </div>
@@ -338,7 +342,7 @@ export function StudentAssessmentPlayer({
             disabled={currentIdx === 0}
             className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-50 disabled:opacity-30"
           >
-            <ChevronLeft size={20} /> Previous
+            <ChevronLeft size={20} /> {t("Previous")}
           </button>
 
           <span className="text-sm font-bold text-slate-500">
@@ -355,7 +359,7 @@ export function StudentAssessmentPlayer({
             }}
             className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-6 py-2 text-sm font-bold text-white hover:bg-black shadow-lg shadow-slate-200 transition-all"
           >
-            {currentIdx === questions.length - 1 ? "Finish & Submit" : "Next Question"}
+            {currentIdx === questions.length - 1 ? t("Finish & Submit") : t("Next Question")}
             {currentIdx !== questions.length - 1 && <ChevronRight size={20} />}
           </button>
         </footer>

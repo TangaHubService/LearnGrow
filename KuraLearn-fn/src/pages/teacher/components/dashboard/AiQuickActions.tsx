@@ -7,19 +7,21 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { DashboardPanel } from "../../teacherShared";
+import { useT } from "@/i18n/I18nContext";
 
 export function AiQuickActions({ onOpenAi }: { onOpenAi: (kind: string, label: string) => void }) {
+  const t = useT();
   const quickActions = [
-    { label: "Prepare Lesson Plan", kind: "ai-lesson", icon: GraduationCap, tone: "#6d3eeb" },
-    { label: "Generate Assessment", kind: "ai-quiz", icon: ClipboardCheck, tone: "#2563eb" },
-    { label: "Create Homework", kind: "ai-homework", icon: BookOpen, tone: "#16a34a" },
-    { label: "Create Activity", kind: "ai-activity", icon: FileText, tone: "#f97316" },
-    { label: "Analyze Performance", kind: "ai-report", icon: BarChart3, tone: "#e85d8f" },
-    { label: "Write Parent Message", kind: "ai-message", icon: MessageSquare, tone: "#0ea5e9" },
+    { label: t("Prepare Lesson Plan"), kind: "ai-lesson", icon: GraduationCap, tone: "#6d3eeb" },
+    { label: t("Generate Assessment"), kind: "ai-quiz", icon: ClipboardCheck, tone: "#2563eb" },
+    { label: t("Create Homework"), kind: "ai-homework", icon: BookOpen, tone: "#16a34a" },
+    { label: t("Create Activity"), kind: "ai-activity", icon: FileText, tone: "#f97316" },
+    { label: t("Analyze Performance"), kind: "ai-report", icon: BarChart3, tone: "#e85d8f" },
+    { label: t("Write Parent Message"), kind: "ai-message", icon: MessageSquare, tone: "#0ea5e9" },
   ];
 
   return (
-    <DashboardPanel title="AI Assistant - Quick Actions">
+    <DashboardPanel title={t("AI Assistant - Quick Actions")}>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {quickActions.map((item) => (
           <button

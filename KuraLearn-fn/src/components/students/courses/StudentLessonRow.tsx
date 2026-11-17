@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Circle, Lock, Clock, CheckCircle2 } from "lucide-react";
 import { CourseLesson } from "@/services/courseApi";
+import { useT } from "@/i18n/I18nContext";
 
 interface StudentLessonRowProps {
   lesson: any; // Using any for extended properties
@@ -8,6 +9,7 @@ interface StudentLessonRowProps {
 }
 
 export function StudentLessonRow({ lesson, onViewDetails }: StudentLessonRowProps) {
+  const t = useT();
   const isCompleted = lesson.status === "COMPLETED";
   const isInProgress = lesson.status === "IN_PROGRESS";
 
@@ -44,7 +46,7 @@ export function StudentLessonRow({ lesson, onViewDetails }: StudentLessonRowProp
           </p>
           {isInProgress && (
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-              Resume
+              {t("Resume")}
             </span>
           )}
         </div>
@@ -68,7 +70,7 @@ export function StudentLessonRow({ lesson, onViewDetails }: StudentLessonRowProp
               : "bg-emerald-700 text-white border-transparent hover:bg-emerald-700"
           }`}
         >
-          {isCompleted ? "Review" : isInProgress ? "Continue" : "Learn"}
+          {isCompleted ? t("Review") : isInProgress ? t("Continue") : t("Learn")}
         </button>
       </div>
     </div>

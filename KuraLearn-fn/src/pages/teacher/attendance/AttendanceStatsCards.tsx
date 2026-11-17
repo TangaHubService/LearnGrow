@@ -1,6 +1,7 @@
 import React from "react";
 import { AlertTriangle, CheckCircle, Clock, Users, XCircle, Percent } from "lucide-react";
 import type { AttendanceSummary, AttendanceSummaryBreakdown } from "@/services/attendanceApi";
+import { useT } from "@/i18n/I18nContext";
 
 type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
 type StatTone = "slate" | "emerald" | "rose" | "amber" | "violet";
@@ -60,6 +61,7 @@ const StatCard: React.FC<{
   isClickable = false,
   onClick,
 }) => {
+  const t = useT();
   const theme = toneClasses[tone];
 
   const activeRingClass =
@@ -103,11 +105,12 @@ const StatCard: React.FC<{
       {/* Row 3: Boys vs Girls */}
       <div className="mt-2 flex items-center gap-2 text-[10px] font-medium text-slate-500 border-t border-slate-50 pt-1.5">
         <span>
-          Boys: {isPercentage ? `${Math.round(value.boys)}%` : numberFormatter.format(value.boys)}
+          {t("Boys:")}{" "}
+          {isPercentage ? `${Math.round(value.boys)}%` : numberFormatter.format(value.boys)}
         </span>
         <span className="text-slate-200">|</span>
         <span>
-          Girls:{" "}
+          {t("Girls:")}{" "}
           {isPercentage ? `${Math.round(value.girls)}%` : numberFormatter.format(value.girls)}
         </span>
       </div>
@@ -122,6 +125,7 @@ export const AttendanceStatsCards: React.FC<{
   selectedStatus: AttendanceStatus | undefined;
   onSelectStatus: (status: AttendanceStatus | undefined) => void;
 }> = ({ summary, loading, error, selectedStatus, onSelectStatus }) => {
+  const t = useT();
   if (loading && !summary) {
     return (
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 print:hidden">
@@ -137,7 +141,7 @@ export const AttendanceStatsCards: React.FC<{
       <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 text-rose-800 print:hidden">
         <div className="flex items-center gap-2 text-sm font-bold">
           <AlertTriangle size={18} />
-          Attendance summary could not be loaded
+          {t("Attendance summary could not be loaded")}
         </div>
         <p className="mt-1 text-xs font-semibold text-rose-700">{error}</p>
       </div>
@@ -148,9 +152,9 @@ export const AttendanceStatsCards: React.FC<{
     return (
       <div className="rounded-xl border border-slate-200/60 bg-white p-8 text-center print:hidden shadow-sm">
         <Users size={28} className="mx-auto text-slate-500" />
-        <h3 className="mt-3 text-sm font-bold text-slate-900">No attendance data found</h3>
+        <h3 className="mt-3 text-sm font-bold text-slate-900">{t("No attendance data found")}</h3>
         <p className="mt-1 text-xs font-semibold text-slate-500">
-          Choose a class and date to view attendance totals.
+          {t("Choose a class and date to view attendance totals.")}
         </p>
       </div>
     );

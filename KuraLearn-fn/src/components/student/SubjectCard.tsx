@@ -5,8 +5,10 @@ import {
   PrimaryLink,
   SecondaryLink,
 } from "./StudentShared";
+import { useT } from "@/i18n/I18nContext";
 
 export function SubjectCard({ subject }: { subject: any }) {
+  const t = useT();
   if (!subject) return null;
   const courseCount = subject.courses?.length || subject.courseCount || 0;
   const firstCourseId = subject.courses?.[0]?.id;
@@ -35,8 +37,10 @@ export function SubjectCard({ subject }: { subject: any }) {
         />
       </div>
       <div className="mt-4 flex gap-2">
-        <PrimaryLink to={`/subjects/${subject.id}`}>Continue</PrimaryLink>
-        {firstCourseId && <SecondaryLink to={`/courses/${firstCourseId}/path`}>Path</SecondaryLink>}
+        <PrimaryLink to={`/subjects/${subject.id}`}>{t("Continue")}</PrimaryLink>
+        {firstCourseId && (
+          <SecondaryLink to={`/courses/${firstCourseId}/path`}>{t("Path")}</SecondaryLink>
+        )}
       </div>
     </StudentCard>
   );

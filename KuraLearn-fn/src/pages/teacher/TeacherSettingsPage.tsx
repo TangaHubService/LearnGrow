@@ -5,8 +5,10 @@ import { openDrawer, pushToast } from "@/store/uiSlice";
 import { useAppDispatch } from "@/store/appStore";
 import { lmsService } from "@/services/lmsService";
 import { Button, Card, PageHeader, Skeleton } from "./teacherShared";
+import { useT } from "@/i18n/I18nContext";
 
 export function TeacherSettingsPage() {
+  const t = useT();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -37,7 +39,7 @@ export function TeacherSettingsPage() {
   const saveScalesMutation = useMutation({
     mutationFn: (payload: any) => lmsService.saveGradingSettings(payload),
     onSuccess: () => {
-      dispatch(pushToast({ tone: "success", message: "Grading scales updated successfully!" }));
+      dispatch(pushToast({ tone: "success", message: t("Grading scales updated successfully!") }));
       queryClient.invalidateQueries({ queryKey: ["grading-settings"] });
       setShowGradingModal(false);
     },
@@ -101,18 +103,20 @@ export function TeacherSettingsPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-12 font-sans antialiased">
       <PageHeader
-        title="Teacher & School Settings"
-        subtitle="Manage personal preferences, account properties, and institutional configurations."
+        title={t("Teacher & School Settings")}
+        subtitle={t(
+          "Manage personal preferences, account properties, and institutional configurations.",
+        )}
       />
       <div className="px-4 md:px-8 grid gap-6 lg:grid-cols-2">
         <Card className="p-6 bg-white shadow-md border border-slate-100 rounded-2xl">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-extrabold text-slate-800 text-base">
-                Profile and Account Settings
+                {t("Profile and Account Settings")}
               </p>
               <p className="text-xs text-slate-500 mt-1">
-                Update your email, password, and registration data.
+                {t("Update your email, password, and registration data.")}
               </p>
             </div>
             <Button
@@ -127,7 +131,7 @@ export function TeacherSettingsPage() {
                 )
               }
             >
-              Configure
+              {t("Configure")}
             </Button>
           </div>
         </Card>
@@ -136,16 +140,18 @@ export function TeacherSettingsPage() {
           <Card className="p-6 bg-white shadow-md border border-slate-100 rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-extrabold text-slate-800 text-base">Rwandan Grading Scales</p>
+                <p className="font-extrabold text-slate-800 text-base">
+                  {t("Rwandan Grading Scales")}
+                </p>
                 <p className="text-xs text-slate-500 mt-1">
-                  Configure letters, percentages, and grade points (A-F).
+                  {t("Configure letters, percentages, and grade points (A-F).")}
                 </p>
               </div>
               <Button
                 className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold border-none"
                 onClick={() => setShowGradingModal(true)}
               >
-                Configure Scales
+                {t("Configure Scales")}
               </Button>
             </div>
           </Card>
@@ -179,7 +185,7 @@ export function TeacherSettingsPage() {
                 <p className="text-xs text-slate-500 mt-1">{item.desc}</p>
               </div>
               <Button className="bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold border-none">
-                Configure
+                {t("Configure")}
               </Button>
             </div>
           </Card>
@@ -192,7 +198,7 @@ export function TeacherSettingsPage() {
           <div className="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-lg border border-slate-100 transform transition-all scale-100">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
               <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                🎓 Edit School Grading Scale
+                {t("🎓 Edit School Grading Scale")}
               </h3>
               <button
                 className="text-slate-500 hover:text-slate-600 text-lg font-extrabold focus:outline-none"
@@ -206,16 +212,32 @@ export function TeacherSettingsPage() {
               <Skeleton />
             ) : (
               <div className="space-y-4">
-                <div className="max-h-[50vh] overflow-y-auto space-y-3">
-                  <table className="w-full text-left text-sm text-slate-500">
+                <div className="flex flex-col gap-2 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-900 sm:flex-row sm:items-center sm:justify-between">
+                  <p>
+                    {t("National preset: A–F with grade points 6 to 0. The pass mark is {mark}%.", {
+                      mark: gradingQuery.data?.passMark ?? 50,
+                    })}
+                  </p>
+                  <Button
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold border-none"
+                    disabled={!gradingQuery.data?.preset}
+                    onClick={() =>
+                      setScales((gradingQuery.data?.preset ?? []).map((band: any) => ({ ...band })))
+                    }
+                  >
+                    {t("Use Rwanda (NESA) preset")}
+                  </Button>
+                </div>
+                <div className="max-h-[50vh] overflow-auto space-y-3">
+                  <table className="w-full min-w-[640px] text-left text-sm text-slate-500">
                     <thead>
                       <tr className="bg-slate-50 text-xs font-bold text-slate-600 uppercase tracking-wide">
-                        <th className="px-4 py-3">Grade Letter</th>
-                        <th className="px-4 py-3 text-center">Min %</th>
-                        <th className="px-4 py-3 text-center">Max %</th>
-                        <th className="px-4 py-3 text-center">Grade Points</th>
-                        <th className="px-4 py-3">Remarks / Description</th>
-                        <th className="px-4 py-3 text-center">Action</th>
+                        <th className="px-4 py-3">{t("Grade Letter")}</th>
+                        <th className="px-4 py-3 text-center">{t("Min %")}</th>
+                        <th className="px-4 py-3 text-center">{t("Max %")}</th>
+                        <th className="px-4 py-3 text-center">{t("Grade Points")}</th>
+                        <th className="px-4 py-3">{t("Remarks / Description")}</th>
+                        <th className="px-4 py-3 text-center">{t("Action")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -252,7 +274,7 @@ export function TeacherSettingsPage() {
                           <td className="px-4 py-2">
                             <input
                               type="number"
-                              value={scale.points || ""}
+                              value={scale.points ?? ""}
                               onChange={(e) =>
                                 handleScaleFieldChange(idx, "points", Number(e.target.value))
                               }
@@ -266,7 +288,7 @@ export function TeacherSettingsPage() {
                               onChange={(e) =>
                                 handleScaleFieldChange(idx, "remarks", e.target.value)
                               }
-                              placeholder="Remarks"
+                              placeholder={t("Remarks")}
                               className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs"
                             />
                           </td>
@@ -289,7 +311,7 @@ export function TeacherSettingsPage() {
                     className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border-none"
                     onClick={handleAddScaleRow}
                   >
-                    + Add Grade Scale Row
+                    {t("+ Add Grade Scale Row")}
                   </Button>
 
                   <div className="flex items-center gap-3">
@@ -297,14 +319,14 @@ export function TeacherSettingsPage() {
                       className="bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-bold"
                       onClick={() => setShowGradingModal(false)}
                     >
-                      Cancel
+                      {t("Cancel")}
                     </Button>
                     <Button
                       className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold"
                       disabled={saveScalesMutation.isPending}
                       onClick={handleSaveScales}
                     >
-                      {saveScalesMutation.isPending ? "Saving..." : "Save Settings"}
+                      {saveScalesMutation.isPending ? t("Saving...") : t("Save Settings")}
                     </Button>
                   </div>
                 </div>

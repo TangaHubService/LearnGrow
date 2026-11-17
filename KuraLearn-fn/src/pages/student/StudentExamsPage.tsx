@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/common/Card";
 import { Skeleton } from "@/components/common/Skeleton";
 import { useStudentNationalExams } from "@/hooks/useStudentPortal";
+import { useT } from "@/i18n/I18nContext";
 
 function GradeBadge({ grade }: { grade: string | null }) {
   if (!grade) return null;
@@ -32,6 +33,7 @@ function isPass(score: number | null, grade: string | null): boolean {
 }
 
 function ExamsContent() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useStudentNationalExams();
 
   if (isLoading) {
@@ -48,9 +50,9 @@ function ExamsContent() {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <RefreshCw size={48} className="mb-4 text-red-400" />
-        <p className="text-lg font-bold text-slate-600">Failed to load exam data</p>
+        <p className="text-lg font-bold text-slate-600">{t("Failed to load exam data")}</p>
         <button onClick={() => refetch()} className="mt-4 text-indigo-600 font-bold">
-          Retry
+          {t("Retry")}
         </button>
       </div>
     );
@@ -66,7 +68,7 @@ function ExamsContent() {
           <div className="mb-4 flex items-center gap-2">
             <ScrollText size={18} className="text-indigo-700" />
             <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-              National Exam Registrations
+              {t("National Exam Registrations")}
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -81,7 +83,7 @@ function ExamsContent() {
                 {r.className && <p className="text-sm font-bold text-slate-700">{r.className}</p>}
                 {r.candidateNumber && (
                   <p className="mt-2 rounded bg-slate-50 px-2 py-1 text-[11px] font-mono font-bold text-slate-500">
-                    Candidate: {r.candidateNumber}
+                    {t("Candidate:")} {r.candidateNumber}
                   </p>
                 )}
                 <div className="mt-2">
@@ -108,7 +110,7 @@ function ExamsContent() {
           <div className="mb-4 flex items-center gap-2">
             <Award size={18} className="text-amber-700" />
             <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-              National Exam Results
+              {t("National Exam Results")}
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -155,9 +157,9 @@ function ExamsContent() {
         registrations.length === 0 && (
           <Card className="py-12 text-center">
             <FileCheck size={48} className="mx-auto text-slate-500 mb-3" />
-            <p className="text-lg font-bold text-slate-600">No national exam data</p>
+            <p className="text-lg font-bold text-slate-600">{t("No national exam data")}</p>
             <p className="mt-1 text-sm text-slate-500">
-              Your national exam registrations and results will appear here.
+              {t("Your national exam registrations and results will appear here.")}
             </p>
           </Card>
         )
@@ -167,12 +169,13 @@ function ExamsContent() {
 }
 
 export function StudentExamsPage() {
+  const t = useT();
   return (
     <div>
       <PageHeader
-        brand="KuraLearn"
-        title="National Exams"
-        subtitle="Track your national exam registrations (P6, S3, S6) and view results."
+        brand={t("KuraLearn")}
+        title={t("National Exams")}
+        subtitle={t("Track your national exam registrations (P6, S3, S6) and view results.")}
       />
       <ExamsContent />
     </div>

@@ -6,6 +6,7 @@ import {
   InlineEmptyState,
 } from "../../teacherShared";
 import { ModernTable } from "@/components/ModernUi";
+import { useT } from "@/i18n/I18nContext";
 
 export function LearnerSupportPanel({
   support,
@@ -14,12 +15,13 @@ export function LearnerSupportPanel({
   support: any;
   onOpenSupportDrawer: (row: any) => void;
 }) {
+  const t = useT();
   return (
     <DashboardPanel
-      title="Learners Needing Support"
+      title={t("Learners Needing Support")}
       action={
         <Link to="/teacher/students" className="text-sm font-bold text-[#6d3eeb]">
-          View all
+          {t("View all")}
         </Link>
       }
     >
@@ -34,11 +36,11 @@ export function LearnerSupportPanel({
         <ModernTable
           data={support.data.slice(0, 6)}
           columns={[
-            { header: "Learner", accessor: "learnerName" },
-            { header: "Class", accessor: "className" },
-            { header: "Issue", accessor: "issue", className: "max-w-[150px] truncate" },
+            { header: t("Learner"), accessor: "learnerName" },
+            { header: t("Class"), accessor: "className" },
+            { header: t("Issue"), accessor: "issue", className: "max-w-[150px] truncate" },
             {
-              header: "Action",
+              header: t("Action"),
               align: "right",
               accessor: (row: any) => (
                 <button
@@ -52,7 +54,7 @@ export function LearnerSupportPanel({
           ]}
         />
       ) : (
-        <InlineEmptyState message="No learners currently flagged for support." />
+        <InlineEmptyState message={t("No learners currently flagged for support.")} />
       )}
     </DashboardPanel>
   );

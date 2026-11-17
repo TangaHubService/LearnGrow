@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, Loader2, Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/i18n/I18nContext";
 
 export type DropdownOption = {
   value: string;
@@ -43,6 +44,7 @@ export function CustomDropdown({
   className?: string;
   multiple?: boolean;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -201,7 +203,7 @@ export function CustomDropdown({
             <span
               role="button"
               tabIndex={0}
-              aria-label="Clear selected values"
+              aria-label={t("Clear selected values")}
               onClick={handleClear}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
@@ -259,7 +261,7 @@ export function CustomDropdown({
                       if (option) selectOption(option);
                     }
                   }}
-                  placeholder="Search options..."
+                  placeholder={t("Search options...")}
                   className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-700 outline-none placeholder:text-slate-400 placeholder:font-medium"
                 />
               </div>
@@ -268,7 +270,7 @@ export function CustomDropdown({
               {loading ? (
                 <div className="flex items-center gap-2 p-3 text-sm font-bold text-slate-500">
                   <Loader2 size={15} className="animate-spin text-[#6d3eeb]" />
-                  <span>Loading options...</span>
+                  <span>{t("Loading options...")}</span>
                 </div>
               ) : null}
               {!loading && filtered.length === 0 ? (

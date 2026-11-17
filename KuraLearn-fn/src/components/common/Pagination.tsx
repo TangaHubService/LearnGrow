@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from "lucide-react";
 import { CustomDropdown } from "./CustomDropdown";
+import { useT } from "@/i18n/I18nContext";
 
 export interface PaginationProps {
   page: number; // Current page (1-indexed)
@@ -27,6 +28,7 @@ export function Pagination({
   disabled = false,
   pageSizeOptions = [10, 25, 50, 100],
 }: PaginationProps) {
+  const t = useT();
   const isInteractionDisabled = disabled || isLoading;
 
   const dropdownOptions = useMemo(() => {
@@ -71,7 +73,7 @@ export function Pagination({
       {/* Left: Stats & Information (Showing X to Y of Z) */}
       <div className="flex items-center gap-3 text-center sm:text-left">
         <p className="text-xs font-semibold text-slate-500">
-          Showing <span className="font-bold text-slate-800">{startRange}</span> to{" "}
+          {t("Showing")} <span className="font-bold text-slate-800">{startRange}</span> to{" "}
           <span className="font-bold text-slate-800">{endRange}</span> of{" "}
           <span className="font-bold text-slate-800">{total}</span> {itemLabel}
         </p>
@@ -84,7 +86,7 @@ export function Pagination({
         {onLimitChange && (
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide select-none">
-              Show
+              {t("Show")}
             </span>
             <div className="w-20">
               <CustomDropdown
@@ -98,7 +100,7 @@ export function Pagination({
               />
             </div>
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide select-none">
-              per page
+              {t("per page")}
             </span>
           </div>
         )}
@@ -111,7 +113,7 @@ export function Pagination({
               type="button"
               disabled={page <= 1 || isInteractionDisabled}
               onClick={() => onChange(1)}
-              title="First Page"
+              title={t("First Page")}
               className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200/80 bg-white text-slate-500 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:text-slate-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-200 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
             >
               <ChevronsLeft size={16} />
@@ -122,7 +124,7 @@ export function Pagination({
               type="button"
               disabled={page <= 1 || isInteractionDisabled}
               onClick={() => onChange(page - 1)}
-              title="Previous Page"
+              title={t("Previous Page")}
               className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200/80 bg-white text-slate-500 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:text-slate-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-200 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
             >
               <ChevronLeft size={16} />
@@ -130,7 +132,7 @@ export function Pagination({
 
             {/* Mobile-friendly page indicator */}
             <span className="text-xs font-bold text-slate-600 px-3 select-none sm:hidden">
-              Page {page} of {totalPages}
+              {t("Page")} {page} of {totalPages}
             </span>
 
             {/* Large screen numbered buttons */}
@@ -171,7 +173,7 @@ export function Pagination({
               type="button"
               disabled={page >= totalPages || isInteractionDisabled}
               onClick={() => onChange(page + 1)}
-              title="Next Page"
+              title={t("Next Page")}
               className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200/80 bg-white text-slate-500 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:text-slate-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-200 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
             >
               <ChevronRight size={16} />
@@ -182,7 +184,7 @@ export function Pagination({
               type="button"
               disabled={page >= totalPages || isInteractionDisabled}
               onClick={() => onChange(totalPages)}
-              title="Last Page"
+              title={t("Last Page")}
               className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200/80 bg-white text-slate-500 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:text-slate-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-purple-200 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-sm"
             >
               <ChevronsRight size={16} />

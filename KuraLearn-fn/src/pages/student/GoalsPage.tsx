@@ -4,14 +4,16 @@ import { ProgressBar } from "@/components/common/ProgressBar";
 import { StudentCard } from "@/components/student/StudentShared";
 import { useStudentDashboard } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
+import { useT } from "@/i18n/I18nContext";
 
 export function GoalsPage() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useStudentDashboard();
 
   if (isLoading) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Goals" subtitle="Loading..." />
+        <PageHeader brand={t("KuraLearn Learning")} title={t("Goals")} subtitle={t("Loading...")} />
         <div className="grid gap-4 lg:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="h-40 w-full rounded-2xl" />
@@ -24,12 +26,12 @@ export function GoalsPage() {
   if (error) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Goals" subtitle="Error" />
+        <PageHeader brand={t("KuraLearn Learning")} title={t("Goals")} subtitle={t("Error")} />
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <RefreshCw size={48} className="mb-4 text-red-600" />
-          <h3 className="text-xl font-bold">Failed to load goals</h3>
+          <h3 className="text-xl font-bold">{t("Failed to load goals")}</h3>
           <button onClick={() => refetch()} className="mt-4 text-indigo-600 font-bold">
-            Retry
+            {t("Retry")}
           </button>
         </div>
       </div>
@@ -41,9 +43,9 @@ export function GoalsPage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
-        title="Goals"
-        subtitle="Daily, weekly, subject, reading, quiz score and streak goals."
+        brand={t("KuraLearn Learning")}
+        title={t("Goals")}
+        subtitle={t("Daily, weekly, subject, reading, quiz score and streak goals.")}
       />
       <div className="grid gap-4 lg:grid-cols-2">
         {goals.length > 0 ? (
@@ -71,7 +73,7 @@ export function GoalsPage() {
           ))
         ) : (
           <p className="col-span-full py-16 text-center text-slate-500 font-bold italic">
-            No active goals found. Set some goals in your profile!
+            {t("No active goals found. Set some goals in your profile!")}
           </p>
         )}
       </div>

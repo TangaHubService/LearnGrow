@@ -27,21 +27,25 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StudentCard, PrimaryLink } from "@/components/student/StudentShared";
 import { EmptyState } from "@/components/common/States";
+import { useT } from "@/i18n/I18nContext";
 
 export function ComingSoonPage({ title = "Coming soon" }: { title?: string }) {
+  const t = useT();
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
+        brand={t("KuraLearn Learning")}
         title={title}
-        subtitle="This role area is scaffolded and protected while the student learning flow comes first."
+        subtitle={t(
+          "This role area is scaffolded and protected while the student learning flow comes first.",
+        )}
       />
       <StudentCard>
         <p className="font-bold text-slate-600">
-          The backend has role-based routes ready for expansion.
+          {t("The backend has role-based routes ready for expansion.")}
         </p>
         <div className="mt-4">
-          <PrimaryLink to="/">Back to dashboard</PrimaryLink>
+          <PrimaryLink to="/">{t("Back to dashboard")}</PrimaryLink>
         </div>
       </StudentCard>
     </div>
@@ -49,11 +53,15 @@ export function ComingSoonPage({ title = "Coming soon" }: { title?: string }) {
 }
 
 export function AdminPlaceholderPage() {
+  const t = useT();
   const { resource } = useParams();
   const { user } = useAuth();
   if (user?.role !== "ADMIN" && user?.role !== "SUPER_ADMIN") {
     return (
-      <EmptyState title="Admin access blocked" message="Students cannot access admin routes." />
+      <EmptyState
+        title={t("Admin access blocked")}
+        message={t("Students cannot access admin routes.")}
+      />
     );
   }
   return <ComingSoonPage title={`Admin ${resource ?? "module"}`} />;

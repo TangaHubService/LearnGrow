@@ -1,4 +1,6 @@
 import bcrypt from "bcryptjs";
+import { RWANDA_NESA_GRADING_SCALE, gradeForPercentage } from "../src/config/grading.js";
+import { SAMPLE_SYLLABUS } from "./syllabus-sample.js";
 import {
   ActivityType,
   AIInsightType,
@@ -266,14 +268,7 @@ const occupations = [
   "Construction worker"
 ];
 
-const gradingScale = [
-  { minPercentage: 80, maxPercentage: 100, grade: "A", description: "Excellent", points: 1, remarks: "Outstanding performance" },
-  { minPercentage: 70, maxPercentage: 79.99, grade: "B", description: "Very Good", points: 2, remarks: "Very strong understanding" },
-  { minPercentage: 60, maxPercentage: 69.99, grade: "C", description: "Good", points: 3, remarks: "Good conceptual grasp" },
-  { minPercentage: 50, maxPercentage: 59.99, grade: "D", description: "Satisfactory", points: 4, remarks: "Meets basic requirements" },
-  { minPercentage: 40, maxPercentage: 49.99, grade: "E", description: "Adequate", points: 5, remarks: "Requires improvement" },
-  { minPercentage: 0, maxPercentage: 39.99, grade: "F", description: "Fail", points: 6, remarks: "Significant support needed" }
-];
+const gradingScale = RWANDA_NESA_GRADING_SCALE;
 
 function isoDate(value: string) {
   return new Date(`${value}T00:00:00.000Z`);
@@ -302,13 +297,11 @@ function nameFor(index: number, gender: Gender) {
 }
 
 function getGradeFromPercentage(percentage: number) {
-  const found = gradingScale.find((scale) => percentage >= scale.minPercentage && percentage <= scale.maxPercentage);
-  return found?.grade ?? "F";
+  return gradeForPercentage(percentage).grade;
 }
 
 function getRemarks(percentage: number) {
-  const found = gradingScale.find((scale) => percentage >= scale.minPercentage && percentage <= scale.maxPercentage);
-  return found?.remarks ?? "Significant support needed";
+  return (gradeForPercentage(percentage) as (typeof gradingScale)[number]).remarks;
 }
 
 function scoreFor(student: StudentSeed, subjectIndex: number, classOrder: number) {
@@ -886,6 +879,19 @@ async function main() {
     subjectsByLevelName.set(level.name, levelSubjects);
   }
 
+  // Sample national syllabus units (replace with the official REB syllabus via /api/v1/syllabus/import).
+  const firstSyllabusUnitBySubjectId = new Map<string, string>();
+
+  for (const entry of SAMPLE_SYLLABUS) {
+    const subject = (subjectsByLevelName.get(entry.level) ?? []).find((item) => item.name === entry.subject);
+    if (!subject) throw new Error(`Sample syllabus refers to unknown subject ${entry.level} ${entry.subject}`);
+    for (const unit of entry.units) {
+      const created = await prisma.syllabusUnit.create({ data: { ...unit, subjectId: subject.id, source: "SAMPLE" } });
+      if (unit.number === 1) firstSyllabusUnitBySubjectId.set(subject.id, created.id);
+
+    }
+  }
+
   const teachers: TeacherSeed[] = [];
   for (const [index, teacherName] of teacherNames.entries()) {
     const user = await prisma.user.create({
@@ -1393,8 +1399,9 @@ async function main() {
           subjectId: subject.id,
           title: `${classRecord.name} ${subject.name}: Competence-Based Lesson`,
           objectives: `Learners will practise core ${subject.name} skills and explain one connection to home or community life.`,
-          competencies: ["Critical thinking", "Communication", "Cooperation"],
-          crossCuttingIssues: ["Inclusive education", "Gender education"],
+          syllabusUnitId: firstSyllabusUnitBySubjectId.get(subject.id) ?? null,
+          competencies: ["Critical thinking and problem solving", "Communication in official languages", "Cooperation, interpersonal relations and life skills"],
+          crossCuttingIssues: ["Inclusive education", "Gender"],
           teachingActivities: "Review prior knowledge, demonstrate the task, guide group practice, and check understanding.",
           learningActivities: "Learners answer warm-up questions, work in pairs, present findings, and complete an exit ticket.",
           materialsNeeded: ["Learner books", "Teacher guide", "Manila paper", "Locally available materials"],
@@ -2561,6 +2568,7 @@ async function main() {
     classes: await prisma.class.count(),
     subjects: await prisma.subject.count(),
     secondaryCombinations: await prisma.secondaryCombination.count(),
+    syllabusUnits: await prisma.syllabusUnit.count(),
     supportPlans: await prisma.learnerSupportPlan.count(),
     timetablePeriods: await prisma.timetablePeriod.count(),
     nationalExamRegistrations: await prisma.nationalExamRegistration.count(),

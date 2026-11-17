@@ -11,6 +11,7 @@ import { resolveActorSchoolId } from "../../middleware/access.js";
 import { AppError } from "../../http/errors.js";
 import { prisma } from "../../prisma/client.js";
 import { saveMarkSubmissionDraft } from "../marks/marks.service.js";
+import { notifyParentsOfAttendance } from "../../services/notifications/notification.service.js";
 
 const teacherRoles = ["TEACHER", "HEAD_TEACHER", "DIRECTOR_OF_STUDIES", "ADMIN", "SUPER_ADMIN"];
 const teacherOnlyRole = UserRole.TEACHER;
@@ -2051,8 +2052,25 @@ export async function submitAttendance(userId: string, input: {
   date: Date;
   records: Array<{ studentId: string; status: AttendanceStatus; reason?: string }>;
 }) {
-  const { teacher, schoolId } = await context(userId);
+  const scope = await teacherScope(userId);
+  const { teacher, schoolId } = scope;
   const teacherId = teacher?.id ?? userId;
+
+  const cls = await prisma.class.findFirst({ where: { id: input.classId, schoolId }, select: { id: true } });
+  if (!cls) throw new AppError(404, "Class not found in your school", "CLASS_NOT_FOUND");
+  if (isTeacherOnly(scope) && !scope.classIds.includes(input.classId)) {
+    throw new AppError(403, "You can only mark attendance for your assigned classes", "CLASS_NOT_ASSIGNED");
+  }
+  const studentIds = [...new Set(input.records.map((record) => record.studentId))];
+  const inClass = await prisma.student.count({ where: { id: { in: studentIds }, classId: input.classId } });
+  if (inClass !== studentIds.length) {
+    throw new AppError(403, "Attendance can only be marked for learners in this class", "STUDENT_FORBIDDEN");
+  }
+  const previous = await prisma.attendanceRecord.findMany({
+    where: { classId: input.classId, date: input.date, teacherId },
+    select: { studentId: true, status: true },
+  });
+  const previousStatus = new Map(previous.map((record) => [record.studentId, record.status]));
 
   const data = input.records.map((record) => ({
     schoolId,
@@ -2076,6 +2094,13 @@ export async function submitAttendance(userId: string, input: {
       },
     });
     return tx.attendanceRecord.createMany({ data });
+  }).then((result) => {
+    for (const record of input.records) {
+      if ((record.status === "ABSENT" || record.status === "LATE") && previousStatus.get(record.studentId) !== record.status) {
+        void notifyParentsOfAttendance(record.studentId, record.status, input.date, schoolId);
+      }
+    }
+    return result;
   });
 }
 
@@ -2131,8 +2156,47 @@ export async function savePerformanceRecords(userId: string, input: {
   };
 }
 
-function computeLessonPlanStatus(lessons: any[]) {
-  if (!lessons || lessons.length === 0) return "DRAFT";
+/** Accept both the API field names and the ones the web lesson form sends. */
+function normalizeLessonPlanInput(input: any) {
+  const pick = (primary: unknown, alias: unknown) => (primary !== undefined ? primary : alias);
+  const status = typeof input.status === "string" ? input.status.toUpperCase() : undefined;
+  return {
+    ...input,
+    objectives: pick(input.objectives, input.learningObjectives),
+    competencies: input.competencies?.length ? input.competencies : (input.genericCompetencies ?? input.competencies),
+    teachingActivities: pick(input.teachingActivities, input.teacherActivities),
+    learningActivities: pick(input.learningActivities, input.learnerActivities),
+    assessmentStrategy: pick(input.assessmentStrategy, input.assessmentCriteria),
+    content: pick(input.content, input.lessonContentHtml),
+    status: status === "PUBLISHED" ? ContentStatus.PUBLISHED : status === "DRAFT" ? ContentStatus.DRAFT : undefined,
+  };
+}
+
+/** Return lesson plans with the field names the web form reads as well as the stored ones. */
+function serializeLessonPlan<T extends Record<string, any>>(plan: T) {
+  return {
+    ...plan,
+    status: computeLessonPlanStatus(plan.lessons ?? [], plan.status),
+    learningObjectives: plan.objectives,
+    genericCompetencies: plan.competencies,
+    teacherActivities: plan.teachingActivities,
+    learnerActivities: plan.learningActivities,
+    assessmentCriteria: plan.assessmentStrategy,
+    lessonContentHtml: plan.content,
+  };
+}
+
+async function assertSyllabusUnitMatchesSubject(syllabusUnitId: string | null | undefined, subjectId: string | undefined) {
+  if (!syllabusUnitId || !subjectId) return;
+  const unit = await prisma.syllabusUnit.findUnique({ where: { id: syllabusUnitId }, select: { subjectId: true } });
+  if (!unit || unit.subjectId !== subjectId) {
+    throw new AppError(400, "The syllabus unit does not belong to this subject", "SYLLABUS_UNIT_MISMATCH");
+  }
+}
+
+function computeLessonPlanStatus(lessons: any[], planStatus?: string) {
+  if (planStatus === "ARCHIVED") return "ARCHIVED";
+  if (!lessons || lessons.length === 0) return planStatus === "PUBLISHED" ? "PUBLISHED" : "DRAFT";
   const allPublished = lessons.every((l) => l.status === "PUBLISHED");
   const allArchived = lessons.every((l) => l.status === "ARCHIVED");
   if (allPublished) return "PUBLISHED";
@@ -2163,21 +2227,20 @@ export async function listLessonPlans(userId: string, query: ListQuery) {
       include: {
         subject: true,
         class: true,
-        lessons: true
+        lessons: true,
+        syllabusUnit: true
       },
       ...pageArgs(query),
       orderBy: { updatedAt: query.sortDir }
     }),
     prisma.lessonPlan.count({ where })
   ]);
-  const mappedItems = items.map((item) => ({
-    ...item,
-    status: computeLessonPlanStatus(item.lessons)
-  }));
+  const mappedItems = items.map(serializeLessonPlan);
   return { items: mappedItems, meta: { page: query.page, pageSize: query.pageSize, total } };
 }
 
-export async function createLessonPlan(userId: string, input: any) {
+export async function createLessonPlan(userId: string, rawInput: any) {
+  const input = normalizeLessonPlanInput(rawInput);
   const scope = await teacherScope(userId);
   const { user, teacher, schoolId } = scope;
   if (!teacher) throw new AppError(403, "Teacher profile required", "TEACHER_PROFILE_REQUIRED");
@@ -2185,6 +2248,7 @@ export async function createLessonPlan(userId: string, input: any) {
   if (isTeacherOnly(scope) && input.classId && !scope.classIds.includes(input.classId)) {
     throw new AppError(403, "You can only create lesson plans for your assigned classes", "CLASS_NOT_ASSIGNED");
   }
+  await assertSyllabusUnitMatchesSubject(input.syllabusUnitId, input.subjectId);
 
   const lessonPlan = await prisma.lessonPlan.create({
     data: {
@@ -2203,15 +2267,20 @@ export async function createLessonPlan(userId: string, input: any) {
       homework: input.homework,
       notes: input.notes,
       duration: input.duration || 40,
+      syllabusUnitId: input.syllabusUnitId || null,
+      topic: input.topic,
+      content: input.content,
+      status: input.status ?? ContentStatus.DRAFT,
     },
     include: {
       subject: true,
-      class: true
+      class: true,
+      syllabusUnit: true
     }
   });
 
   await audit(user.id, user.role, "CREATE_LESSON_PLAN", "LessonPlan", lessonPlan.id, {});
-  return lessonPlan;
+  return serializeLessonPlan(lessonPlan);
 }
 
 export async function getLessonPlanDetails(userId: string, id: string) {
@@ -2221,20 +2290,19 @@ export async function getLessonPlanDetails(userId: string, id: string) {
     include: {
       subject: true,
       class: true,
-      lessons: true
+      lessons: true,
+      syllabusUnit: true
     }
   });
   if (!lessonPlan) throw new AppError(404, "Lesson Plan not found", "LESSON_PLAN_NOT_FOUND");
   if (lessonPlan.teacherId !== teacher?.id) {
     throw new AppError(403, "You can only view your own lesson plans", "LESSON_PLAN_FORBIDDEN");
   }
-  return {
-    ...lessonPlan,
-    status: computeLessonPlanStatus(lessonPlan.lessons)
-  };
+  return serializeLessonPlan(lessonPlan);
 }
 
-export async function updateLessonPlan(userId: string, id: string, input: any) {
+export async function updateLessonPlan(userId: string, id: string, rawInput: any) {
+  const input = normalizeLessonPlanInput(rawInput);
   const scope = await teacherScope(userId);
   const { user, teacher } = scope;
   const existing = await prisma.lessonPlan.findUnique({ where: { id } });
@@ -2245,6 +2313,7 @@ export async function updateLessonPlan(userId: string, id: string, input: any) {
   if (input.classId && isTeacherOnly(scope) && !scope.classIds.includes(input.classId)) {
     throw new AppError(403, "You can only move lesson plans into your assigned classes", "CLASS_NOT_ASSIGNED");
   }
+  await assertSyllabusUnitMatchesSubject(input.syllabusUnitId, input.subjectId ?? existing.subjectId);
 
   const lessonPlan = await prisma.lessonPlan.update({
     where: { id },
@@ -2263,15 +2332,20 @@ export async function updateLessonPlan(userId: string, id: string, input: any) {
       ...(input.homework !== undefined && { homework: input.homework }),
       ...(input.notes !== undefined && { notes: input.notes }),
       ...(input.duration !== undefined && { duration: input.duration }),
+      ...(input.syllabusUnitId !== undefined && { syllabusUnitId: input.syllabusUnitId || null }),
+      ...(input.topic !== undefined && { topic: input.topic }),
+      ...(input.content !== undefined && { content: input.content }),
+      ...(input.status && { status: input.status }),
     },
     include: {
       subject: true,
-      class: true
+      class: true,
+      syllabusUnit: true
     }
   });
 
   await audit(user.id, user.role, "UPDATE_LESSON_PLAN", "LessonPlan", lessonPlan.id, { title: lessonPlan.title });
-  return lessonPlan;
+  return serializeLessonPlan(lessonPlan);
 }
 
 export async function deleteLessonPlan(userId: string, id: string) {
@@ -2294,6 +2368,7 @@ export async function archiveLessonPlan(userId: string, lessonPlanId: string) {
   if (user.role === UserRole.TEACHER && existing.teacherId !== teacher?.id) {
     throw new AppError(403, "You can only archive your own lesson plans", "LESSON_PLAN_FORBIDDEN");
   }
+  await prisma.lessonPlan.update({ where: { id: lessonPlanId }, data: { status: ContentStatus.ARCHIVED } });
   // Update all associated lessons to ARCHIVED
   await prisma.lesson.updateMany({
     where: { linkedLessonPlanId: lessonPlanId },
@@ -2310,6 +2385,7 @@ export async function publishLessonPlan(userId: string, lessonPlanId: string) {
   if (user.role === UserRole.TEACHER && existing.teacherId !== teacher?.id) {
     throw new AppError(403, "You can only publish your own lesson plans", "LESSON_PLAN_FORBIDDEN");
   }
+  await prisma.lessonPlan.update({ where: { id: lessonPlanId }, data: { status: ContentStatus.PUBLISHED } });
   // Update all associated lessons to PUBLISHED
   await prisma.lesson.updateMany({
     where: { linkedLessonPlanId: lessonPlanId },
@@ -2343,6 +2419,9 @@ export async function duplicateLessonPlan(userId: string, lessonPlanId: string) 
       homework: original.homework,
       notes: original.notes,
       duration: original.duration,
+      syllabusUnitId: original.syllabusUnitId,
+      topic: original.topic,
+      content: original.content,
     }
   });
   await audit(user.id, user.role, "DUPLICATE_LESSON_PLAN", "LessonPlan", copy.id, { sourceId: lessonPlanId });

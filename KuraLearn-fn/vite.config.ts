@@ -23,6 +23,22 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [
           {
+            // Read-only API data, so pages already visited still open without a connection.
+            // Cleared at logout so the next person on a shared device never sees it.
+            urlPattern: ({ url, request }) =>
+              request.method === "GET" &&
+              url.pathname.includes("/api/v1/") &&
+              !url.pathname.includes("/api/v1/auth/") &&
+              !url.pathname.includes("/api/v1/ai/"),
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              networkTimeoutSeconds: 6,
+              expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
             urlPattern: /^https?:\/\/.*\/api\/v1\/lessons\/.*/,
             handler: "NetworkFirst",
             options: {

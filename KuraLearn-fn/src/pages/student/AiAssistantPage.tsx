@@ -4,6 +4,7 @@ import { History, Plus } from "lucide-react";
 import { studentApi, type AiConversationMessage, type AiConversationSummary } from "@/lib/api";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StudentCard } from "@/components/student/StudentShared";
+import { useT } from "@/i18n/I18nContext";
 
 type AiChatItem = { role: "user" | "assistant"; content: string };
 
@@ -35,6 +36,7 @@ function toChatItems(messages: AiConversationMessage[]): AiChatItem[] {
 }
 
 export function AiAssistantPage() {
+  const t = useT();
   const [searchParams] = useSearchParams();
   const defaultPrompt =
     searchParams.get("mode") === "translate"
@@ -127,15 +129,17 @@ export function AiAssistantPage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
-        title="AI Learning Assistant"
-        subtitle="Ask questions about your lessons, continue saved conversations from the sidebar, and get safe step-by-step explanations, translations, hints, and practice support in simple language."
+        brand={t("KuraLearn Learning")}
+        title={t("AI Learning Assistant")}
+        subtitle={t(
+          "Ask questions about your lessons, continue saved conversations from the sidebar, and get safe step-by-step explanations, translations, hints, and practice support in simple language.",
+        )}
         actions={
           <button
             onClick={startNewChat}
             className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-4 focus:ring-emerald-100"
           >
-            <Plus size={16} /> New chat
+            <Plus size={16} /> {t("New chat")}
           </button>
         }
       />
@@ -145,21 +149,21 @@ export function AiAssistantPage() {
             <div className="flex items-center justify-between gap-3 border-b border-slate-100 p-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 font-bold text-slate-950">
-                  <History size={18} className="text-emerald-700" /> Chat history
+                  <History size={18} className="text-emerald-700" /> {t("Chat history")}
                 </div>
-                <p className="mt-1 text-xs font-bold text-slate-500">Saved conversations</p>
+                <p className="mt-1 text-xs font-bold text-slate-500">{t("Saved conversations")}</p>
               </div>
               <button
                 onClick={startNewChat}
                 className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg bg-emerald-700 px-3 text-xs font-semibold text-white transition hover:bg-emerald-800 focus:outline-none focus:ring-4 focus:ring-emerald-100"
               >
-                <Plus size={15} /> New chat
+                <Plus size={15} /> {t("New chat")}
               </button>
             </div>
             <div className="max-h-[560px] overflow-y-auto p-3">
               {isHistoryLoading ? (
                 <p className="rounded-lg bg-slate-50 p-3 text-sm font-bold text-slate-500">
-                  Loading chats...
+                  {t("Loading chats...")}
                 </p>
               ) : null}
               {!isHistoryLoading && conversations.length ? (
@@ -187,7 +191,7 @@ export function AiAssistantPage() {
               ) : null}
               {!isHistoryLoading && !conversations.length ? (
                 <p className="rounded-lg bg-slate-50 p-3 text-sm font-bold text-slate-500">
-                  No saved chats yet.
+                  {t("No saved chats yet.")}
                 </p>
               ) : null}
               {historyError ? (
@@ -207,18 +211,18 @@ export function AiAssistantPage() {
               value={message}
               onChange={(event) => setMessage(event.target.value)}
               className="h-12 rounded-lg border border-slate-200 px-4 font-bold"
-              placeholder="Ask about a lesson"
+              placeholder={t("Ask about a lesson")}
             />
             <button
               disabled={isSending || !message.trim()}
               className="h-12 rounded-lg bg-emerald-700 px-5 font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
-              {isSending ? "Sending" : "Send"}
+              {isSending ? t("Sending") : t("Send")}
             </button>
           </form>
           {isConversationLoading ? (
             <span className="mt-4 w-fit rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
-              Opening...
+              {t("Opening...")}
             </span>
           ) : null}
           <div className="mt-5 flex-1 space-y-3 overflow-y-auto pr-1">

@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useT } from "@/i18n/I18nContext";
 
 export interface TableColumn<T> {
   header: string;
@@ -22,11 +23,12 @@ export function ModernTable<T>({
   emptyMessage?: string;
   rowIdKey?: keyof T;
 }) {
+  const t = useT();
   return (
     <div
       tabIndex={0}
       role="region"
-      aria-label="Table, scroll to see more"
+      aria-label={t("Table, scroll to see more")}
       className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm"
     >
       <table className="w-full text-left text-sm border-collapse">
@@ -65,7 +67,7 @@ export function ModernTable<T>({
           ) : (
             data.map((row, i) => (
               <tr
-                key={String(row[rowIdKey] ?? i)}
+                key={`${String(row[rowIdKey] ?? "")}:${i}`}
                 onClick={() => onRowClick?.(row)}
                 className={`group transition-colors ${onRowClick ? "cursor-pointer hover:bg-slate-50/80" : "hover:bg-slate-50/40"}`}
               >

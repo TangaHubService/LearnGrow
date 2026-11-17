@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, CheckCircle2, Circle } from "lucide-react";
 import { CourseUnit, CourseLesson } from "@/services/courseApi";
 import { Card } from "@/components/common/Card";
 import { StudentLessonRow } from "./StudentLessonRow";
+import { useT } from "@/i18n/I18nContext";
 
 interface StudentUnitCardProps {
   unit: any; // Using any for extended properties
@@ -11,6 +12,7 @@ interface StudentUnitCardProps {
 }
 
 export function StudentUnitCard({ unit, index, onViewDetails }: StudentUnitCardProps) {
+  const t = useT();
   const [expanded, setExpanded] = useState(index === 0);
   const lessons = unit.lessons || [];
   const completedLessons = lessons.filter((l: any) => l.status === "COMPLETED").length;
@@ -37,7 +39,7 @@ export function StudentUnitCard({ unit, index, onViewDetails }: StudentUnitCardP
             <h3 className="text-base font-bold text-slate-900 tracking-tight">{unit.title}</h3>
             {isFullyCompleted && (
               <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700 border border-emerald-100">
-                Completed
+                {t("Completed")}
               </span>
             )}
           </div>
@@ -47,7 +49,7 @@ export function StudentUnitCard({ unit, index, onViewDetails }: StudentUnitCardP
             </p>
           ) : (
             <p className="mt-1 text-[10px] font-bold text-slate-500 uppercase tracking-tight">
-              {lessons.length} Learning Sessions
+              {lessons.length} {t("Learning Sessions")}
             </p>
           )}
         </div>
@@ -78,7 +80,7 @@ export function StudentUnitCard({ unit, index, onViewDetails }: StudentUnitCardP
         <div className="border-t border-slate-50 bg-slate-50/20 px-2 pb-3 pt-1">
           {lessons.length === 0 ? (
             <p className="py-8 text-center text-xs font-bold text-slate-500 italic">
-              No lessons have been added to this unit yet.
+              {t("No lessons have been added to this unit yet.")}
             </p>
           ) : (
             <div className="space-y-1">

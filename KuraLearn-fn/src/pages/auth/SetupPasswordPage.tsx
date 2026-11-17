@@ -3,8 +3,10 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { apiRequest } from "@/lib/api";
 import { Shield, Eye, EyeOff, CheckCircle, AlertTriangle } from "lucide-react";
 import kuraLogo from "@/assets/kuraLogo.png";
+import { useT } from "@/i18n/I18nContext";
 
 export function SetupPasswordPage() {
+  const t = useT();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get("token") ?? "";
@@ -69,15 +71,15 @@ export function SetupPasswordPage() {
           <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5">
             <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Password Set!</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">{t("Password Set!")}</h2>
           <p className="text-sm font-semibold text-slate-500 mb-8">
-            Your account is now active. You can log in to the KuraLearn portal.
+            {t("Your account is now active. You can log in to the KuraLearn portal.")}
           </p>
           <button
             onClick={() => navigate("/login")}
             className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-colors"
           >
-            Go to Login
+            {t("Go to Login")}
           </button>
         </div>
       </div>
@@ -91,10 +93,11 @@ export function SetupPasswordPage() {
           <div className="h-16 w-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-5">
             <AlertTriangle className="h-8 w-8 text-red-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Link Expired</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">{t("Link Expired")}</h2>
           <p className="text-sm font-semibold text-slate-500 mb-2">
-            This setup link has expired (valid for 48 hours). Please contact your school
-            administrator to resend the invitation.
+            {t(
+              "This setup link has expired (valid for 48 hours). Please contact your school administrator to resend the invitation.",
+            )}
           </p>
         </div>
       </div>
@@ -107,8 +110,8 @@ export function SetupPasswordPage() {
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-3">
-            <img src={kuraLogo} alt="KuraLearn" className="h-10 w-10 object-contain" />
-            <span className="text-xl font-bold text-[#0b1f4d]">KuraLearn</span>
+            <img src={kuraLogo} alt={t("KuraLearn")} className="h-10 w-10 object-contain" />
+            <span className="text-xl font-bold text-[#0b1f4d]">{t("KuraLearn")}</span>
           </div>
         </div>
 
@@ -117,9 +120,9 @@ export function SetupPasswordPage() {
             <div className="h-14 w-14 rounded-2xl bg-indigo-100 flex items-center justify-center mx-auto mb-4">
               <Shield className="h-7 w-7 text-indigo-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Set Up Your Password</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{t("Set Up Your Password")}</h2>
             <p className="text-sm font-semibold text-slate-500 mt-1">
-              Create a secure password to activate your staff account.
+              {t("Create a secure password to activate your staff account.")}
             </p>
           </div>
 
@@ -133,7 +136,7 @@ export function SetupPasswordPage() {
             {/* Password */}
             <div>
               <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                New Password
+                {t("New Password")}
               </label>
               <div className="relative">
                 <input
@@ -141,7 +144,7 @@ export function SetupPasswordPage() {
                   type={showPwd ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
+                  placeholder={t("At least 8 characters")}
                   required
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-sm font-semibold focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-200"
                 />
@@ -165,10 +168,10 @@ export function SetupPasswordPage() {
                     className={`text-xs font-bold mt-1 ${strength === "strong" ? "text-green-600" : strength === "medium" ? "text-yellow-600" : "text-red-600"}`}
                   >
                     {strength === "strong"
-                      ? "Strong password"
+                      ? t("Strong password")
                       : strength === "medium"
-                        ? "Moderate password"
-                        : "Weak password"}
+                        ? t("Moderate password")
+                        : t("Weak password")}
                   </p>
                 </div>
               )}
@@ -177,19 +180,19 @@ export function SetupPasswordPage() {
             {/* Confirm */}
             <div>
               <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                Confirm Password
+                {t("Confirm Password")}
               </label>
               <input
                 id="setup-password-confirm"
                 type={showPwd ? "text" : "password"}
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Repeat your password"
+                placeholder={t("Repeat your password")}
                 required
                 className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-200"
               />
               {confirm.length > 0 && password !== confirm && (
-                <p className="text-xs font-bold text-red-600 mt-1">Passwords do not match</p>
+                <p className="text-xs font-bold text-red-600 mt-1">{t("Passwords do not match")}</p>
               )}
             </div>
 
@@ -199,15 +202,15 @@ export function SetupPasswordPage() {
               disabled={loading}
               className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white hover:bg-indigo-700 transition-colors disabled:opacity-60 shadow-md"
             >
-              {loading ? "Setting up account…" : "Set Password & Activate Account"}
+              {loading ? t("Setting up account…") : t("Set Password & Activate Account")}
             </button>
           </form>
         </div>
 
         <p className="text-center text-xs font-semibold text-slate-500 mt-6">
-          Already have an account?{" "}
+          {t("Already have an account?")}{" "}
           <a href="/login" className="text-indigo-600 hover:text-indigo-800">
-            Sign in
+            {t("Sign in")}
           </a>
         </p>
       </div>

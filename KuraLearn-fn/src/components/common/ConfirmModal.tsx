@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { AlertTriangle, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/i18n/I18nContext";
 
 function useBodyLock(active: boolean) {
   useEffect(() => {
@@ -46,6 +47,7 @@ export function ConfirmModal({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const t = useT();
   useBodyLock(open);
   useEscape(open, onCancel);
 
@@ -95,7 +97,7 @@ export function ConfirmModal({
               </div>
               <button
                 type="button"
-                aria-label="Close confirmation"
+                aria-label={t("Close confirmation")}
                 onClick={onCancel}
                 className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
               >

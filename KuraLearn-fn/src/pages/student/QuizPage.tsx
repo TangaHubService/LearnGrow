@@ -5,8 +5,10 @@ import { StudentCard, StudentEmptyState } from "@/components/student/StudentShar
 import { useQuizDetails, useSubmitQuiz } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
 import { RefreshCw, Timer } from "lucide-react";
+import { useT } from "@/i18n/I18nContext";
 
 export function QuizPage() {
+  const t = useT();
   const { quizId } = useParams<{ quizId: string }>();
   const navigate = useNavigate();
   const { data, isLoading, error, refetch } = useQuizDetails(quizId || "");
@@ -35,7 +37,7 @@ export function QuizPage() {
   if (isLoading) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Quiz" subtitle="Loading..." />
+        <PageHeader brand={t("KuraLearn Learning")} title={t("Quiz")} subtitle={t("Loading...")} />
         <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     );
@@ -44,14 +46,14 @@ export function QuizPage() {
   if (error || !quiz)
     return (
       <StudentEmptyState
-        title="Quiz not found"
-        message="Choose a quiz from a learning path."
+        title={t("Quiz not found")}
+        message={t("Choose a quiz from a learning path.")}
         action={
           <button
             onClick={() => refetch()}
             className="mt-4 text-indigo-600 font-bold flex items-center gap-2"
           >
-            <RefreshCw size={16} /> Retry
+            <RefreshCw size={16} /> {t("Retry")}
           </button>
         }
       />
@@ -61,7 +63,9 @@ export function QuizPage() {
   const question = questions[index];
 
   if (!question)
-    return <StudentEmptyState title="No questions" message="This quiz has no questions." />;
+    return (
+      <StudentEmptyState title={t("No questions")} message={t("This quiz has no questions.")} />
+    );
 
   function submit() {
     submitMutation.mutate(
@@ -86,7 +90,7 @@ export function QuizPage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
+        brand={t("KuraLearn Learning")}
         title={quiz.title}
         subtitle={`Question ${index + 1} of ${questions.length}.`}
         actions={
@@ -119,14 +123,14 @@ export function QuizPage() {
             onClick={() => setIndex(index - 1)}
             className="h-11 rounded-lg border border-slate-200 px-5 font-bold disabled:opacity-50"
           >
-            Previous
+            {t("Previous")}
           </button>
           {index < questions.length - 1 ? (
             <button
               onClick={() => setIndex(index + 1)}
               className="h-11 rounded-lg bg-sky-600 px-5 font-bold text-white"
             >
-              Next
+              {t("Next")}
             </button>
           ) : (
             <button
@@ -135,7 +139,7 @@ export function QuizPage() {
               className="h-11 rounded-lg bg-emerald-700 px-5 font-bold text-white disabled:opacity-70 flex items-center gap-2"
             >
               {submitMutation.isPending && <RefreshCw size={18} className="animate-spin" />}
-              {submitMutation.isPending ? "Submitting..." : "Submit quiz"}
+              {submitMutation.isPending ? t("Submitting...") : t("Submit quiz")}
             </button>
           )}
         </div>

@@ -37,6 +37,7 @@ import {
   Briefcase,
   Edit3,
 } from "lucide-react";
+import { useT } from "@/i18n/I18nContext";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -169,6 +170,7 @@ function AnalyticsCard({
 // ─── Analytics cards row ──────────────────────────────────────────────────────
 
 function AnalyticsRow() {
+  const t = useT();
   const { data, isLoading } = useQuery({
     queryKey: ["staff-analytics"],
     queryFn: staffApi.analytics,
@@ -188,31 +190,31 @@ function AnalyticsRow() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
       <AnalyticsCard
-        label="Total Staff"
+        label={t("Total Staff")}
         value={data.totalStaff}
         icon={Users}
         color="border-slate-200"
       />
       <AnalyticsCard
-        label="Teachers"
+        label={t("Teachers")}
         value={data.teachers}
         icon={BookOpen}
         color="border-blue-100"
       />
       <AnalyticsCard
-        label="Active"
+        label={t("Active")}
         value={data.activeStaff}
         icon={CheckCircle}
         color="border-green-100"
       />
       <AnalyticsCard
-        label="Pending Invitations"
+        label={t("Pending Invitations")}
         value={data.pendingInvitations}
         icon={Clock}
         color="border-amber-100"
       />
       <AnalyticsCard
-        label="Inactive"
+        label={t("Inactive")}
         value={data.inactiveStaff}
         icon={UserX}
         color="border-red-100"
@@ -224,6 +226,7 @@ function AnalyticsRow() {
 // ─── Add Staff Drawer ─────────────────────────────────────────────────────────
 
 function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
+  const t = useT();
   const queryClient = useQueryClient();
   const { data: refData } = useTeacherReferenceData();
 
@@ -303,9 +306,9 @@ function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Add New Staff Member</h3>
+            <h3 className="text-lg font-bold text-slate-900">{t("Add New Staff Member")}</h3>
             <p className="text-sm text-slate-500 font-medium mt-0.5">
-              Fill in details and optionally send an invitation email.
+              {t("Fill in details and optionally send an invitation email.")}
             </p>
           </div>
           <button
@@ -326,22 +329,22 @@ function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated
           {/* Name row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>First Name *</label>
+              <label className={labelCls}>{t("First Name *")}</label>
               <input
                 required
                 value={form.firstName}
                 onChange={(e) => set("firstName", e.target.value)}
-                placeholder="e.g. Jean"
+                placeholder={t("e.g. Jean")}
                 className={inputCls}
               />
             </div>
             <div>
-              <label className={labelCls}>Last Name *</label>
+              <label className={labelCls}>{t("Last Name *")}</label>
               <input
                 required
                 value={form.lastName}
                 onChange={(e) => set("lastName", e.target.value)}
-                placeholder="e.g. Uwimana"
+                placeholder={t("e.g. Uwimana")}
                 className={inputCls}
               />
             </div>
@@ -349,20 +352,20 @@ function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated
 
           {/* Email */}
           <div>
-            <label className={labelCls}>Email Address *</label>
+            <label className={labelCls}>{t("Email Address *")}</label>
             <input
               required
               type="email"
               value={form.email}
               onChange={(e) => set("email", e.target.value)}
-              placeholder="e.g. jean@school.rw"
+              placeholder={t("e.g. jean@school.rw")}
               className={inputCls}
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label className={labelCls}>Phone Number</label>
+            <label className={labelCls}>{t("Phone Number")}</label>
             <input
               value={form.phone ?? ""}
               onChange={(e) => set("phone", e.target.value)}
@@ -374,7 +377,7 @@ function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated
           {/* Role */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>Staff Role *</label>
+              <label className={labelCls}>{t("Staff Role *")}</label>
               <CustomDropdown
                 value={form.staffRole}
                 onChange={(val) => set("staffRole", val)}
@@ -383,19 +386,19 @@ function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated
               />
             </div>
             <div>
-              <label className={labelCls}>Gender</label>
+              <label className={labelCls}>{t("Gender")}</label>
               <CustomDropdown
                 value={form.gender ?? ""}
                 onChange={(val) => set("gender", val || undefined)}
                 options={genderOptions}
-                placeholder="Not specified"
+                placeholder={t("Not specified")}
               />
             </div>
           </div>
 
           {/* Employment */}
           <div>
-            <label className={labelCls}>Employment Status *</label>
+            <label className={labelCls}>{t("Employment Status *")}</label>
             <CustomDropdown
               value={form.employmentStatus}
               onChange={(val) => set("employmentStatus", val)}
@@ -409,7 +412,7 @@ function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated
             <>
               {classes.length > 0 && (
                 <div>
-                  <label className={labelCls}>Assign Classes (optional)</label>
+                  <label className={labelCls}>{t("Assign Classes (optional)")}</label>
                   <div className="flex flex-wrap gap-2 mt-1">
                     {classes.map((c: any) => (
                       <button
@@ -431,7 +434,7 @@ function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated
 
               {subjects.length > 0 && (
                 <div>
-                  <label className={labelCls}>Assign Subjects (optional)</label>
+                  <label className={labelCls}>{t("Assign Subjects (optional)")}</label>
                   <div className="flex flex-wrap gap-2 mt-1">
                     {subjects.map((s: any) => (
                       <button
@@ -465,9 +468,9 @@ function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated
               />
             </button>
             <div>
-              <p className="text-sm font-bold text-slate-800">Send Invitation Email</p>
+              <p className="text-sm font-bold text-slate-800">{t("Send Invitation Email")}</p>
               <p className="text-xs text-slate-500">
-                Staff will receive a link to set their password
+                {t("Staff will receive a link to set their password")}
               </p>
             </div>
           </div>
@@ -479,14 +482,14 @@ function AddStaffDrawer({ onClose, onCreated }: { onClose: () => void; onCreated
               onClick={onClose}
               className="flex-1 rounded-lg border border-slate-200 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
             >
-              Cancel
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               disabled={mutation.isPending}
               className="flex-1 rounded-lg bg-indigo-600 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors disabled:opacity-60"
             >
-              {mutation.isPending ? "Adding..." : "Add Staff Member"}
+              {mutation.isPending ? t("Adding...") : t("Add Staff Member")}
             </button>
           </div>
         </form>
@@ -506,6 +509,7 @@ function EditStaffDrawer({
   onClose: () => void;
   onUpdated: () => void;
 }) {
+  const t = useT();
   const queryClient = useQueryClient();
   const nameParts = staff.name.split(" ");
   const [form, setForm] = useState<UpdateStaffPayload>({
@@ -545,7 +549,7 @@ function EditStaffDrawer({
       <div className="h-full w-full max-w-lg bg-white shadow-lg overflow-y-auto flex flex-col animate-in slide-in-from-right duration-300">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Edit Staff Member</h3>
+            <h3 className="text-lg font-bold text-slate-900">{t("Edit Staff Member")}</h3>
             <p className="text-sm text-slate-500 mt-0.5">{staff.name}</p>
           </div>
           <button
@@ -563,7 +567,7 @@ function EditStaffDrawer({
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>First Name</label>
+              <label className={labelCls}>{t("First Name")}</label>
               <input
                 value={form.firstName ?? ""}
                 onChange={(e) => set("firstName", e.target.value)}
@@ -571,7 +575,7 @@ function EditStaffDrawer({
               />
             </div>
             <div>
-              <label className={labelCls}>Last Name</label>
+              <label className={labelCls}>{t("Last Name")}</label>
               <input
                 value={form.lastName ?? ""}
                 onChange={(e) => set("lastName", e.target.value)}
@@ -580,7 +584,7 @@ function EditStaffDrawer({
             </div>
           </div>
           <div>
-            <label className={labelCls}>Phone Number</label>
+            <label className={labelCls}>{t("Phone Number")}</label>
             <input
               value={form.phone ?? ""}
               onChange={(e) => set("phone", e.target.value)}
@@ -590,7 +594,7 @@ function EditStaffDrawer({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>Staff Role</label>
+              <label className={labelCls}>{t("Staff Role")}</label>
               <CustomDropdown
                 value={form.staffRole ?? ""}
                 onChange={(val) => set("staffRole", val)}
@@ -599,17 +603,17 @@ function EditStaffDrawer({
               />
             </div>
             <div>
-              <label className={labelCls}>Gender</label>
+              <label className={labelCls}>{t("Gender")}</label>
               <CustomDropdown
                 value={form.gender ?? ""}
                 onChange={(val) => set("gender", val || undefined)}
                 options={genderOptions}
-                placeholder="Not specified"
+                placeholder={t("Not specified")}
               />
             </div>
           </div>
           <div>
-            <label className={labelCls}>Employment Status</label>
+            <label className={labelCls}>{t("Employment Status")}</label>
             <CustomDropdown
               value={form.employmentStatus ?? ""}
               onChange={(val) => set("employmentStatus", val)}
@@ -623,14 +627,14 @@ function EditStaffDrawer({
               onClick={onClose}
               className="flex-1 rounded-lg border border-slate-200 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50"
             >
-              Cancel
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               disabled={mutation.isPending}
               className="flex-1 rounded-lg bg-indigo-600 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-60"
             >
-              {mutation.isPending ? "Saving..." : "Save Changes"}
+              {mutation.isPending ? t("Saving...") : t("Save Changes")}
             </button>
           </div>
         </form>
@@ -656,6 +660,7 @@ function AssignClassesModal({
   onClose: () => void;
   onAssigned: () => void;
 }) {
+  const t = useT();
   const queryClient = useQueryClient();
   const { data: refData } = useTeacherReferenceData();
   const classes = refData?.classes ?? [];
@@ -721,7 +726,7 @@ function AssignClassesModal({
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-2xl bg-white shadow-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-          <h3 className="text-lg font-bold text-slate-900">Manage Assignments</h3>
+          <h3 className="text-lg font-bold text-slate-900">{t("Manage Assignments")}</h3>
           <button
             onClick={onClose}
             className="rounded-lg border border-slate-200 p-2 hover:bg-slate-50"
@@ -739,28 +744,28 @@ function AssignClassesModal({
           <div className="flex gap-3 items-end">
             <div className="flex-1">
               <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                Class
+                {t("Class")}
               </label>
               <CustomDropdown
                 value={selectedClassId}
                 onChange={(val) => setSelectedClassId(val || "")}
                 options={classOptions}
-                placeholder="Select class..."
+                placeholder={t("Select class...")}
               />
             </div>
             <div className="flex-1">
               <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">
-                Subject
+                {t("Subject")}
               </label>
               <CustomDropdown
                 value={selectedSubjectId}
                 onChange={(val) => setSelectedSubjectId(val || "")}
                 options={subjectOptions}
-                placeholder="Select subject..."
+                placeholder={t("Select subject...")}
               />
             </div>
             <button
-              aria-label="Add"
+              aria-label={t("Add")}
               type="button"
               onClick={handleAdd}
               disabled={mutation.isPending}
@@ -773,10 +778,10 @@ function AssignClassesModal({
           {/* Current assignments */}
           <div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
-              Current Assignments
+              {t("Current Assignments")}
             </p>
             {existingAssignments.length === 0 ? (
-              <Empty message="No assignments yet. Add one above." />
+              <Empty message={t("No assignments yet. Add one above.")} />
             ) : (
               <div className="space-y-2">
                 {existingAssignments.map((a: any) => (
@@ -795,7 +800,7 @@ function AssignClassesModal({
                       )}
                     </div>
                     <button
-                      aria-label="Delete"
+                      aria-label={t("Delete")}
                       onClick={() => removeMutation.mutate(a.id)}
                       disabled={removeMutation.isPending}
                       className="rounded-lg p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors"
@@ -813,7 +818,7 @@ function AssignClassesModal({
               onClick={onClose}
               className="rounded-lg bg-slate-100 px-6 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-200"
             >
-              Done
+              {t("Done")}
             </button>
           </div>
         </div>
@@ -835,6 +840,7 @@ function StaffProfileDrawer({
   onEdit: (staff: StaffDetail) => void;
   onAssign: (staff: StaffDetail) => void;
 }) {
+  const t = useT();
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
@@ -868,7 +874,7 @@ function StaffProfileDrawer({
       <div className="h-full w-full max-w-2xl bg-white shadow-lg overflow-y-auto flex flex-col animate-in slide-in-from-right duration-300">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-          <h3 className="text-lg font-bold text-slate-900">Staff Profile</h3>
+          <h3 className="text-lg font-bold text-slate-900">{t("Staff Profile")}</h3>
           <button
             onClick={onClose}
             className="rounded-lg border border-slate-200 p-2 hover:bg-slate-50"
@@ -879,7 +885,7 @@ function StaffProfileDrawer({
 
         <div className="flex-1 px-6 py-6">
           {isLoading && <Spinner />}
-          {isError && <ErrMsg message="Failed to load staff profile" />}
+          {isError && <ErrMsg message={t("Failed to load staff profile")} />}
 
           {data && (
             <div className="space-y-6">
@@ -913,22 +919,22 @@ function StaffProfileDrawer({
                 </div>
                 <div className="flex flex-wrap gap-6 mt-5 pt-5 border-t border-white/10 text-xs font-bold">
                   <div>
-                    EMPLOYMENT:{" "}
+                    {t("EMPLOYMENT:")}{" "}
                     <span className="text-indigo-200">
                       {EMPLOYMENT_STATUS_LABELS[data.employmentStatus]}
                     </span>
                   </div>
                   {data.gender && (
                     <div>
-                      GENDER: <span className="text-indigo-200">{data.gender}</span>
+                      {t("GENDER:")} <span className="text-indigo-200">{data.gender}</span>
                     </div>
                   )}
                   <div>
-                    INVITE: <span className="text-indigo-200">{data.invitationStatus}</span>
+                    {t("INVITE:")} <span className="text-indigo-200">{data.invitationStatus}</span>
                   </div>
                   {data.lastLoginAt && (
                     <div>
-                      LAST LOGIN:{" "}
+                      {t("LAST LOGIN:")}{" "}
                       <span className="text-indigo-200">
                         {new Date(data.lastLoginAt).toLocaleDateString()}
                       </span>
@@ -943,7 +949,7 @@ function StaffProfileDrawer({
                   onClick={() => onEdit(data)}
                   className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  <Edit3 className="h-4 w-4" /> Edit Details
+                  <Edit3 className="h-4 w-4" /> {t("Edit Details")}
                 </button>
 
                 {data.staffRole === "TEACHER" && (
@@ -951,7 +957,7 @@ function StaffProfileDrawer({
                     onClick={() => onAssign(data)}
                     className="flex items-center gap-1.5 rounded-lg border border-blue-200 px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50 transition-colors"
                   >
-                    <BookOpen className="h-4 w-4" /> Assign Classes
+                    <BookOpen className="h-4 w-4" /> {t("Assign Classes")}
                   </button>
                 )}
 
@@ -966,7 +972,9 @@ function StaffProfileDrawer({
                     ) : (
                       <Send className="h-4 w-4" />
                     )}
-                    {data.invitationStatus === "PENDING" ? "Send Invitation" : "Resend Invitation"}
+                    {data.invitationStatus === "PENDING"
+                      ? t("Send Invitation")
+                      : t("Resend Invitation")}
                   </button>
                 )}
 
@@ -976,7 +984,7 @@ function StaffProfileDrawer({
                     disabled={statusMutation.isPending}
                     className="flex items-center gap-1.5 rounded-lg border border-red-200 px-4 py-2 text-sm font-bold text-red-700 hover:bg-red-50 transition-colors disabled:opacity-60"
                   >
-                    <UserX className="h-4 w-4" /> Deactivate
+                    <UserX className="h-4 w-4" /> {t("Deactivate")}
                   </button>
                 ) : (
                   <button
@@ -984,7 +992,7 @@ function StaffProfileDrawer({
                     disabled={statusMutation.isPending}
                     className="flex items-center gap-1.5 rounded-lg border border-green-200 px-4 py-2 text-sm font-bold text-green-700 hover:bg-green-50 transition-colors disabled:opacity-60"
                   >
-                    <UserCheck className="h-4 w-4" /> Activate
+                    <UserCheck className="h-4 w-4" /> {t("Activate")}
                   </button>
                 )}
               </div>
@@ -993,14 +1001,14 @@ function StaffProfileDrawer({
               {data.staffRole === "TEACHER" && data.teacherSummary && (
                 <div>
                   <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
-                    Teaching Performance
+                    {t("Teaching Performance")}
                   </h5>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
-                      { label: "Classes", value: data.teacherSummary.assignedClassesCount },
-                      { label: "Lessons", value: data.teacherSummary.lessonsCreated },
-                      { label: "Marks Submitted", value: data.teacherSummary.marksSubmitted },
-                      { label: "Resources", value: data.teacherSummary.resourcesUploaded },
+                      { label: t("Classes"), value: data.teacherSummary.assignedClassesCount },
+                      { label: t("Lessons"), value: data.teacherSummary.lessonsCreated },
+                      { label: t("Marks Submitted"), value: data.teacherSummary.marksSubmitted },
+                      { label: t("Resources"), value: data.teacherSummary.resourcesUploaded },
                     ].map(({ label, value }) => (
                       <div
                         key={label}
@@ -1018,7 +1026,9 @@ function StaffProfileDrawer({
               {data.assignments.length > 0 && (
                 <div>
                   <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
-                    {data.staffRole === "TEACHER" ? "Assigned Classes & Subjects" : "Assignments"}
+                    {data.staffRole === "TEACHER"
+                      ? t("Assigned Classes & Subjects")
+                      : t("Assignments")}
                   </h5>
                   <div className="flex flex-wrap gap-2">
                     {data.assignments.map((a) => (
@@ -1041,24 +1051,24 @@ function StaffProfileDrawer({
               {/* Info row */}
               <div className="rounded-xl border border-slate-100 bg-slate-50 px-5 py-4 space-y-2">
                 <h5 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">
-                  Record Details
+                  {t("Record Details")}
                 </h5>
                 <div className="grid grid-cols-2 gap-y-3 text-sm">
                   {data.invitedBy && (
                     <>
-                      <span className="font-semibold text-slate-500">Invited by</span>
+                      <span className="font-semibold text-slate-500">{t("Invited by")}</span>
                       <span className="font-bold text-slate-800">{data.invitedBy.name}</span>
                     </>
                   )}
                   {data.invitationSentAt && (
                     <>
-                      <span className="font-semibold text-slate-500">Invited on</span>
+                      <span className="font-semibold text-slate-500">{t("Invited on")}</span>
                       <span className="font-bold text-slate-800">
                         {new Date(data.invitationSentAt).toLocaleDateString()}
                       </span>
                     </>
                   )}
-                  <span className="font-semibold text-slate-500">Added on</span>
+                  <span className="font-semibold text-slate-500">{t("Added on")}</span>
                   <span className="font-bold text-slate-800">
                     {new Date(data.createdAt).toLocaleDateString()}
                   </span>
@@ -1081,8 +1091,9 @@ function StaffTable({
   items: StaffListItem[];
   onSelect: (staff: StaffListItem) => void;
 }) {
+  const t = useT();
   if (items.length === 0)
-    return <Empty message="No staff members found for the selected filters." />;
+    return <Empty message={t("No staff members found for the selected filters.")} />;
 
   return (
     <div tabIndex={0} className="overflow-x-auto">
@@ -1090,25 +1101,25 @@ function StaffTable({
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50/60">
             <th className="py-3 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
-              Name
+              {t("Name")}
             </th>
             <th className="py-3 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wide hidden md:table-cell">
-              Contact
+              {t("Contact")}
             </th>
             <th className="py-3 px-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wide">
-              Role
+              {t("Role")}
             </th>
             <th className="py-3 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wide hidden lg:table-cell">
-              Classes
+              {t("Classes")}
             </th>
             <th className="py-3 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wide">
-              Status
+              {t("Status")}
             </th>
             <th className="py-3 px-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wide">
-              Invitation
+              {t("Invitation")}
             </th>
             <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wide hidden xl:table-cell">
-              Last Login
+              {t("Last Login")}
             </th>
             <th className="py-3 px-4" />
           </tr>
@@ -1164,7 +1175,7 @@ function StaffTable({
                 {s.lastLoginAt ? (
                   new Date(s.lastLoginAt).toLocaleDateString()
                 ) : (
-                  <span className="text-slate-300">Never</span>
+                  <span className="text-slate-300">{t("Never")}</span>
                 )}
               </td>
               <td className="py-3.5 px-4 text-right">
@@ -1183,6 +1194,7 @@ function StaffTable({
 type DrawerView = "none" | "add" | "profile" | "edit" | "assign";
 
 export function StaffManagementPage() {
+  const t = useT();
   const [view, setView] = useState<DrawerView>("none");
   const [selectedStaff, setSelectedStaff] = useState<StaffListItem | null>(null);
   const [profileData, setProfileData] = useState<StaffDetail | null>(null);
@@ -1249,9 +1261,9 @@ export function StaffManagementPage() {
       {/* Page heading */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-[#0b1f4d]">Staff Management</h2>
+          <h2 className="text-2xl font-bold text-[#0b1f4d]">{t("Staff Management")}</h2>
           <p className="text-sm text-slate-500 mt-0.5">
-            Manage all school staff — teachers, admin, support, and more.
+            {t("Manage all school staff — teachers, admin, support, and more.")}
           </p>
         </div>
         <button
@@ -1259,7 +1271,7 @@ export function StaffManagementPage() {
           onClick={() => setView("add")}
           className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors shadow-md"
         >
-          <UserPlus className="h-4 w-4" /> Add Staff
+          <UserPlus className="h-4 w-4" /> {t("Add Staff")}
         </button>
       </div>
 
@@ -1274,7 +1286,7 @@ export function StaffManagementPage() {
             type="text"
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder="Search name, email or phone…"
+            placeholder={t("Search name, email or phone…")}
             className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-3 text-sm font-semibold focus:border-indigo-500 focus:outline-none placeholder-slate-400"
           />
           <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -1287,7 +1299,7 @@ export function StaffManagementPage() {
                 setRoleFilter((val || "") as any);
                 setPage(1);
               }}
-              placeholder="All Roles"
+              placeholder={t("All Roles")}
               clearable={true}
               options={STAFF_ROLES.map((r) => ({
                 value: r,
@@ -1302,12 +1314,12 @@ export function StaffManagementPage() {
                 setStatusFilter(val || "");
                 setPage(1);
               }}
-              placeholder="All Statuses"
+              placeholder={t("All Statuses")}
               clearable={true}
               options={[
-                { value: "ACTIVE", label: "Active" },
-                { value: "PENDING", label: "Pending" },
-                { value: "SUSPENDED", label: "Inactive" },
+                { value: "ACTIVE", label: t("Active") },
+                { value: "PENDING", label: t("Pending") },
+                { value: "SUSPENDED", label: t("Inactive") },
               ]}
             />
           </div>
@@ -1318,13 +1330,13 @@ export function StaffManagementPage() {
                 setInviteFilter(val || "");
                 setPage(1);
               }}
-              placeholder="All Invitations"
+              placeholder={t("All Invitations")}
               clearable={true}
               options={[
-                { value: "PENDING", label: "Invite Pending" },
-                { value: "SENT", label: "Invite Sent" },
-                { value: "ACCEPTED", label: "Accepted" },
-                { value: "EXPIRED", label: "Expired" },
+                { value: "PENDING", label: t("Invite Pending") },
+                { value: "SENT", label: t("Invite Sent") },
+                { value: "ACCEPTED", label: t("Accepted") },
+                { value: "EXPIRED", label: t("Expired") },
               ]}
             />
           </div>
@@ -1335,7 +1347,7 @@ export function StaffManagementPage() {
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
           <h3 className="text-base font-bold text-slate-800">
-            Staff Members
+            {t("Staff Members")}
             {pagination && (
               <span className="ml-2 text-sm font-semibold text-slate-500">
                 ({pagination.totalItems})
@@ -1350,7 +1362,7 @@ export function StaffManagementPage() {
         {isLoading && !data ? (
           <Spinner />
         ) : isError ? (
-          <ErrMsg message="Failed to load staff list. Please retry." />
+          <ErrMsg message={t("Failed to load staff list. Please retry.")} />
         ) : (
           <StaffTable items={items} onSelect={openProfile} />
         )}

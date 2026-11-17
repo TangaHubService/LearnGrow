@@ -24,6 +24,7 @@ import { StudentCard, PrimaryLink, SecondaryLink } from "@/components/student/St
 import { lmsService } from "@/services/lmsService";
 import { Skeleton } from "@/components/common/Skeleton";
 import { FolderNode, ResourceItem } from "@/services/resourcesApi";
+import { useT } from "@/i18n/I18nContext";
 
 const fileTypes = [
   "PDF",
@@ -38,6 +39,7 @@ const fileTypes = [
 ];
 
 export function LibraryPage() {
+  const t = useT();
   const [viewMode, setViewMode] = useState<"GRID" | "FOLDERS">("FOLDERS");
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<string>("");
@@ -205,15 +207,15 @@ export function LibraryPage() {
     return (
       <div className="p-6">
         <PageHeader
-          brand="KuraLean Learning"
-          title="Library"
-          subtitle="Error loading learning resources."
+          brand={t("KuraLearn Learning")}
+          title={t("Library")}
+          subtitle={t("Error loading learning resources.")}
         />
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <RefreshCw size={48} className="mb-4 text-red-600" />
-          <h3 className="text-xl font-bold">Failed to load library resources</h3>
+          <h3 className="text-xl font-bold">{t("Failed to load library resources")}</h3>
           <button onClick={() => refetchFlat()} className="mt-4 text-indigo-600 font-bold">
-            Retry
+            {t("Retry")}
           </button>
         </div>
       </div>
@@ -224,15 +226,15 @@ export function LibraryPage() {
     return (
       <div className="p-6">
         <PageHeader
-          brand="KuraLean Learning"
-          title="Library"
-          subtitle="Error loading library folders."
+          brand={t("KuraLearn Learning")}
+          title={t("Library")}
+          subtitle={t("Error loading library folders.")}
         />
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <RefreshCw size={48} className="mb-4 text-red-600" />
-          <h3 className="text-xl font-bold">Failed to load library folder hierarchies</h3>
+          <h3 className="text-xl font-bold">{t("Failed to load library folder hierarchies")}</h3>
           <button onClick={() => refetchFolders()} className="mt-4 text-indigo-600 font-bold">
-            Retry
+            {t("Retry")}
           </button>
         </div>
       </div>
@@ -242,9 +244,11 @@ export function LibraryPage() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader
-        brand="KuraLean Learning"
-        title="Digital Library"
-        subtitle="Access course ebooks, videos, worksheets, stories, audio lessons and PDF notes."
+        brand={t("KuraLearn Learning")}
+        title={t("Digital Library")}
+        subtitle={t(
+          "Access course ebooks, videos, worksheets, stories, audio lessons and PDF notes.",
+        )}
       />
 
       {/* Filter and Search Bar */}
@@ -254,7 +258,7 @@ export function LibraryPage() {
             <Search size={18} className="text-slate-500" />
             <input
               type="text"
-              placeholder="Search resource title..."
+              placeholder={t("Search resource title...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full text-sm font-semibold outline-none placeholder:text-slate-400"
@@ -270,7 +274,7 @@ export function LibraryPage() {
                   : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
               }`}
             >
-              <Folder size={14} /> Folders View
+              <Folder size={14} /> {t("Folders View")}
             </button>
             <button
               onClick={() => setViewMode("GRID")}
@@ -280,14 +284,16 @@ export function LibraryPage() {
                   : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
               }`}
             >
-              <GridIcon size={14} /> Flat Grid View
+              <GridIcon size={14} /> {t("Flat Grid View")}
             </button>
           </div>
         </div>
 
         {/* Secondary Filter Badges */}
         <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-50">
-          <span className="text-xs font-bold text-slate-500 uppercase self-center mr-2">Type:</span>
+          <span className="text-xs font-bold text-slate-500 uppercase self-center mr-2">
+            {t("Type:")}
+          </span>
           <button
             onClick={() => setSelectedType("")}
             className={`rounded-full px-3 py-1 text-xs font-semibold border transition-all ${
@@ -296,7 +302,7 @@ export function LibraryPage() {
                 : "bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100"
             }`}
           >
-            All
+            {t("All")}
           </button>
           {fileTypes.map((t) => (
             <button
@@ -316,7 +322,7 @@ export function LibraryPage() {
         {allTags.length > 0 && (
           <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-50">
             <span className="text-xs font-bold text-slate-500 uppercase self-center mr-2">
-              Tags:
+              {t("Tags:")}
             </span>
             <button
               onClick={() => setSelectedTag("")}
@@ -326,7 +332,7 @@ export function LibraryPage() {
                   : "bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100"
               }`}
             >
-              All Tags
+              {t("All Tags")}
             </button>
             {allTags.map((tag) => (
               <button
@@ -355,7 +361,7 @@ export function LibraryPage() {
               onClick={() => popToBreadcrumb(-1)}
               className="text-slate-500 hover:text-[#6d3eeb] transition-colors flex items-center gap-1"
             >
-              <Library size={15} /> Student Library
+              <Library size={15} /> {t("Student Library")}
             </button>
             {currentPath.map((step, idx) => (
               <span key={step.id} className="flex items-center gap-1.5 text-slate-500">
@@ -387,7 +393,7 @@ export function LibraryPage() {
                 /* show Folders Grid */
                 <div className="space-y-4">
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                    Aligned Folders ({activeFoldersList.length})
+                    {t("Aligned folders ({count})", { count: activeFoldersList.length })}
                   </h3>
                   <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
                     {activeFoldersList.map((folder) => (
@@ -487,7 +493,7 @@ export function LibraryPage() {
               {(!activeFoldersList.length || isSearchingOrFiltering) && (
                 <div className="space-y-4 pt-4 border-t border-slate-100">
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                    Folder Materials {isSearchingOrFiltering ? "(Filtered)" : ""} (
+                    {t("Folder Materials")} {isSearchingOrFiltering ? t("(Filtered)") : ""} (
                     {displayedFolderFiles.length})
                   </h3>
 
@@ -555,7 +561,7 @@ export function LibraryPage() {
                               to={`/library/${resource.id}`}
                               className="flex-1 text-center py-2 text-xs font-bold rounded-lg bg-[#6d3eeb] text-white hover:bg-purple-700 transition-colors inline-flex h-9 items-center justify-center"
                             >
-                              View Material
+                              {t("View Material")}
                             </Link>
                             {resource.fileUrl && (
                               <a
@@ -576,7 +582,7 @@ export function LibraryPage() {
                     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-12 bg-slate-50/50">
                       <BookOpen className="h-8 w-8 text-slate-500 mb-2" />
                       <p className="text-sm font-semibold text-slate-500">
-                        No resources found in this folder path matching the active filters.
+                        {t("No resources found in this folder path matching the active filters.")}
                       </p>
                     </div>
                   )}
@@ -652,7 +658,7 @@ export function LibraryPage() {
                       to={`/library/${resource.id}`}
                       className="flex-1 text-center py-2 text-xs font-bold rounded-lg bg-[#6d3eeb] text-white hover:bg-purple-700 transition-colors inline-flex h-9 items-center justify-center"
                     >
-                      View Material
+                      {t("View Material")}
                     </Link>
                     {resource.fileUrl && (
                       <a
@@ -671,7 +677,10 @@ export function LibraryPage() {
             </div>
           ) : (
             <div className="col-span-full">
-              <EmptyState title="No resources yet" message="Try another search or filter." />
+              <EmptyState
+                title={t("No resources yet")}
+                message={t("Try another search or filter.")}
+              />
             </div>
           )}
         </div>

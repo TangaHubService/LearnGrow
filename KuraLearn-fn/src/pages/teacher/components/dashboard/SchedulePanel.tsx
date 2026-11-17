@@ -9,6 +9,7 @@ import {
   DashboardStatusBadge,
 } from "../../teacherShared";
 import { ModernTable } from "@/components/ModernUi";
+import { useT } from "@/i18n/I18nContext";
 
 export function SchedulePanel({
   schedule,
@@ -19,12 +20,13 @@ export function SchedulePanel({
   onAction: (item: any) => void;
   onPrepareWithAi: () => void;
 }) {
+  const t = useT();
   return (
     <DashboardPanel
-      title="Today's Teaching Schedule"
+      title={t("Today's Teaching Schedule")}
       action={
         <Link to="/teacher/timetable" className="text-sm font-bold text-[#6d3eeb]">
-          View full timetable
+          {t("View full timetable")}
         </Link>
       }
     >
@@ -40,22 +42,22 @@ export function SchedulePanel({
           data={schedule.data}
           columns={[
             {
-              header: "Time",
+              header: t("Time"),
               accessor: (row: any) => (
                 <span className="flex items-center gap-1.5 text-slate-500">
                   <Clock size={14} /> {row.startTime} - {row.endTime}
                 </span>
               ),
             },
-            { header: "Class", accessor: "className" },
-            { header: "Subject", accessor: "subjectName" },
-            { header: "Topic", accessor: "topic" },
+            { header: t("Class"), accessor: "className" },
+            { header: t("Subject"), accessor: "subjectName" },
+            { header: t("Topic"), accessor: "topic" },
             {
-              header: "Status",
+              header: t("Status"),
               accessor: (row: any) => <DashboardStatusBadge status={row.status} />,
             },
             {
-              header: "Action",
+              header: t("Action"),
               align: "right",
               accessor: (row: any) => (
                 <button
@@ -77,10 +79,10 @@ export function SchedulePanel({
         />
       ) : (
         <InlineEmptyState
-          message="No lessons scheduled for today."
+          message={t("No lessons scheduled for today.")}
           action={
             <Button variant="secondary" onClick={onPrepareWithAi}>
-              Prepare Lesson Plan
+              {t("Prepare Lesson Plan")}
             </Button>
           }
         />

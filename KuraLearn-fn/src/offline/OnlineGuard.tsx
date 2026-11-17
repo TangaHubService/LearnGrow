@@ -1,4 +1,5 @@
 import { useOffline } from "./use-offline";
+import { useT } from "@/i18n/I18nContext";
 
 interface OnlineGuardProps {
   children: React.ReactNode;
@@ -6,6 +7,7 @@ interface OnlineGuardProps {
 }
 
 export function OnlineGuard({ children, fallback }: OnlineGuardProps) {
+  const t = useT();
   const { isOnline } = useOffline();
 
   if (!isOnline) {
@@ -27,8 +29,10 @@ export function OnlineGuard({ children, fallback }: OnlineGuardProps) {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-slate-800">You are offline</h3>
-        <p className="mt-1 text-sm text-slate-500">This feature requires an internet connection.</p>
+        <h3 className="text-lg font-semibold text-slate-800">{t("You are offline")}</h3>
+        <p className="mt-1 text-sm text-slate-500">
+          {t("This feature requires an internet connection.")}
+        </p>
       </div>
     );
   }

@@ -77,7 +77,18 @@ export const lessonPlanCreateSchema = z.object({
   assessmentStrategy: z.string().optional().nullable(),
   homework: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-  duration: z.coerce.number().int().min(5).default(40)
+  duration: z.coerce.number().int().min(5).default(40),
+  syllabusUnitId: z.string().uuid().optional().nullable(),
+  topic: z.string().max(300).optional().nullable(),
+  content: z.string().optional().nullable(),
+  status: z.enum(["draft", "published", "DRAFT", "PUBLISHED"]).optional(),
+  // Field names the web lesson form sends; normalised in the service.
+  lessonContentHtml: z.string().optional().nullable(),
+  learningObjectives: z.string().optional().nullable(),
+  genericCompetencies: z.array(z.string()).optional(),
+  teacherActivities: z.string().optional().nullable(),
+  learnerActivities: z.string().optional().nullable(),
+  assessmentCriteria: z.string().optional().nullable()
 });
 
 export const lessonPlanUpdateSchema = lessonPlanCreateSchema.partial();

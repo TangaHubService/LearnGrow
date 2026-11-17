@@ -23,8 +23,10 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { StudentCard, StudentEmptyState, SecondaryLink } from "@/components/student/StudentShared";
 import { useLibraryResource } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
+import { useT } from "@/i18n/I18nContext";
 
 export function ResourceDetailPage() {
+  const t = useT();
   const { resourceId } = useParams<{ resourceId: string }>();
   const { data, isLoading, error, refetch } = useLibraryResource(resourceId || "");
 
@@ -64,9 +66,9 @@ export function ResourceDetailPage() {
     return (
       <div className="p-6">
         <PageHeader
-          brand="KuraLearn Learning"
-          title="Resource"
-          subtitle="Loading learning resources..."
+          brand={t("KuraLearn Learning")}
+          title={t("Resource")}
+          subtitle={t("Loading learning resources...")}
         />
         <Skeleton className="h-96 w-full rounded-2xl" />
       </div>
@@ -76,14 +78,14 @@ export function ResourceDetailPage() {
   if (error || !data) {
     return (
       <StudentEmptyState
-        title="Resource not found"
-        message="Return to the library and choose another resource."
+        title={t("Resource not found")}
+        message={t("Return to the library and choose another resource.")}
         action={
           <button
             onClick={() => refetch()}
             className="mt-4 text-[#6d3eeb] font-bold flex items-center gap-2"
           >
-            <RefreshCw size={16} /> Retry
+            <RefreshCw size={16} /> {t("Retry")}
           </button>
         }
       />
@@ -127,7 +129,7 @@ export function ResourceDetailPage() {
           to="/library"
           className="inline-flex items-center gap-1.5 text-slate-600 hover:text-[#6d3eeb] transition-colors text-sm font-semibold"
         >
-          <ChevronLeft size={16} /> Back to Library
+          <ChevronLeft size={16} /> {t("Back to Library")}
         </Link>
 
         {resolvedUrl && (
@@ -138,7 +140,7 @@ export function ResourceDetailPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-xl bg-[#6d3eeb] px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-purple-700 hover:shadow-lg transition-all"
           >
-            <Download size={16} /> Download
+            <Download size={16} /> {t("Download")}
           </a>
         )}
       </div>
@@ -230,21 +232,21 @@ export function ResourceDetailPage() {
                     <button
                       onClick={() => setScale((s) => Math.min(3, s + 0.25))}
                       className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
-                      title="Zoom In"
+                      title={t("Zoom In")}
                     >
                       <ZoomIn size={18} />
                     </button>
                     <button
                       onClick={() => setScale((s) => Math.max(0.5, s - 0.25))}
                       className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
-                      title="Zoom Out"
+                      title={t("Zoom Out")}
                     >
                       <ZoomOut size={18} />
                     </button>
                     <button
                       onClick={() => setScale(1)}
                       className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
-                      title="Reset"
+                      title={t("Reset")}
                     >
                       <Maximize2 size={18} />
                     </button>
@@ -269,7 +271,7 @@ export function ResourceDetailPage() {
                     {resource.title || "Document Resource"}
                   </h3>
                   <p className="mt-2 text-sm text-slate-500">
-                    {typeUpper} document files are best read locally.
+                    {t("{type} files are best read after downloading.", { type: typeUpper })}
                   </p>
 
                   {resource.fileSize && (
@@ -286,7 +288,7 @@ export function ResourceDetailPage() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#6d3eeb] px-5 py-3 text-sm font-semibold text-white shadow-md hover:bg-purple-700 hover:scale-[1.02] transition-all"
                     >
-                      <Download size={16} /> Download Document
+                      <Download size={16} /> {t("Download Document")}
                     </a>
                     <a
                       href={resolvedUrl}
@@ -294,7 +296,7 @@ export function ResourceDetailPage() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-800 border border-slate-700 px-5 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-700 transition-all"
                     >
-                      <ExternalLink size={16} /> Open in Browser
+                      <ExternalLink size={16} /> {t("Open in Browser")}
                     </a>
                   </div>
                 </div>
@@ -308,7 +310,7 @@ export function ResourceDetailPage() {
           <StudentCard className="border border-slate-100 shadow-xl rounded-2xl bg-white p-5 space-y-5">
             <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
               <Layers size={18} className="text-[#6d3eeb]" />
-              Curriculum Link
+              {t("Curriculum Link")}
             </h2>
 
             <div className="space-y-4">
@@ -319,7 +321,7 @@ export function ResourceDetailPage() {
                   </div>
                   <div>
                     <span className="block text-xs font-semibold text-slate-500 uppercase">
-                      Subject
+                      {t("Subject")}
                     </span>
                     <span className="text-sm font-bold text-slate-800">
                       {resource.subject.name}
@@ -333,7 +335,7 @@ export function ResourceDetailPage() {
                   </div>
                   <div>
                     <span className="block text-xs font-semibold text-slate-500 uppercase">
-                      Subject
+                      {t("Subject")}
                     </span>
                     <span className="text-sm font-bold text-slate-800">{resource.subjectName}</span>
                   </div>
@@ -347,7 +349,7 @@ export function ResourceDetailPage() {
                   </div>
                   <div>
                     <span className="block text-xs font-semibold text-slate-500 uppercase">
-                      Class Enrolled
+                      {t("Class Enrolled")}
                     </span>
                     <span className="text-sm font-bold text-slate-800">{resource.class.name}</span>
                   </div>
@@ -359,7 +361,7 @@ export function ResourceDetailPage() {
                   </div>
                   <div>
                     <span className="block text-xs font-semibold text-slate-500 uppercase">
-                      Class Enrolled
+                      {t("Class Enrolled")}
                     </span>
                     <span className="text-sm font-bold text-slate-800">{resource.className}</span>
                   </div>
@@ -373,7 +375,7 @@ export function ResourceDetailPage() {
                   </div>
                   <div>
                     <span className="block text-xs font-semibold text-slate-500 uppercase">
-                      Linked Course
+                      {t("Linked Course")}
                     </span>
                     <span className="text-sm font-bold text-slate-800">
                       {resource.course.title}
@@ -389,7 +391,7 @@ export function ResourceDetailPage() {
                   </div>
                   <div>
                     <span className="block text-xs font-semibold text-slate-500 uppercase">
-                      Aligned Lesson
+                      {t("Aligned Lesson")}
                     </span>
                     <span className="text-sm font-bold text-slate-800">
                       {resource.lesson.title}
@@ -405,7 +407,7 @@ export function ResourceDetailPage() {
                   </div>
                   <div>
                     <span className="block text-xs font-semibold text-slate-500 uppercase">
-                      Topic Category
+                      {t("Topic Category")}
                     </span>
                     <span className="text-sm font-bold text-slate-800">{resource.topic}</span>
                   </div>
@@ -417,7 +419,8 @@ export function ResourceDetailPage() {
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
                 <Calendar size={14} />
                 <span>
-                  Uploaded: {new Intl.DateTimeFormat("en-GB").format(new Date(resource.createdAt))}
+                  {t("Uploaded:")}{" "}
+                  {new Intl.DateTimeFormat("en-GB").format(new Date(resource.createdAt))}
                 </span>
               </div>
               {resource.owner?.name && (
@@ -425,7 +428,9 @@ export function ResourceDetailPage() {
                   <div className="h-5 w-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold uppercase text-[10px]">
                     {resource.owner.name.slice(0, 2)}
                   </div>
-                  <span>By: {resource.owner.name}</span>
+                  <span>
+                    {t("By:")} {resource.owner.name}
+                  </span>
                 </div>
               )}
             </div>
@@ -435,7 +440,7 @@ export function ResourceDetailPage() {
           {resource.tags && resource.tags.length > 0 && (
             <StudentCard className="border border-slate-100 shadow-xl rounded-2xl bg-white p-5">
               <h2 className="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wide text-slate-500">
-                Resource Tags
+                {t("Resource Tags")}
               </h2>
               <div className="flex flex-wrap gap-1.5">
                 {resource.tags.map((t: string, i: number) => (

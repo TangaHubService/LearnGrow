@@ -1,4 +1,5 @@
 import { localDateKey } from "@/hooks/useTeacherDashboard";
+import { useT } from "@/i18n/I18nContext";
 
 export type AttendanceRangeKey = "today" | "7d" | "30d" | "90d" | "year" | "custom";
 export type DateRange = { from: string; to: string };
@@ -49,11 +50,12 @@ export function AttendanceRangeFilter({
   onSelect: (key: AttendanceRangeKey) => void;
   onCustomRangeChange: (range: DateRange) => void;
 }) {
+  const t = useT();
   const today = localDateKey();
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div role="group" aria-label="Attendance period" className="flex flex-wrap gap-1">
+      <div role="group" aria-label={t("Attendance period")} className="flex flex-wrap gap-1">
         {RANGE_OPTIONS.map((option) => (
           <button
             key={option.key}
@@ -73,7 +75,7 @@ export function AttendanceRangeFilter({
       {selected === "custom" ? (
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
           <label className="flex items-center gap-1">
-            From
+            {t("From")}
             <input
               type="date"
               value={customRange.from}
@@ -85,7 +87,7 @@ export function AttendanceRangeFilter({
             />
           </label>
           <label className="flex items-center gap-1">
-            To
+            {t("To")}
             <input
               type="date"
               value={customRange.to}

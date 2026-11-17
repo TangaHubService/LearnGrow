@@ -1,27 +1,34 @@
+import { Globe } from "lucide-react";
+import { LOCALE_NAMES, type Locale } from "./index";
 import { useI18n } from "./I18nContext";
 
-const localeNames: Record<string, string> = {
-  en: "English",
-  rw: "Kinyarwanda",
-  fr: "Français",
-};
-
-export function LocaleSwitcher() {
-  const { locale, setLocale, availableLocales } = useI18n();
+/** Compact language picker. Uses a native select so it works with keyboards and screen readers on every phone. */
+export function LocaleSwitcher({
+  className = "",
+  compact = false,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
+  const { locale, setLocale, availableLocales, t } = useI18n();
 
   return (
-    <div className="flex items-center gap-1">
-      {availableLocales.map((l) => (
-        <button
-          key={l}
-          onClick={() => setLocale(l)}
-          className={`rounded-md px-2 py-1 text-xs font-semibold transition-colors ${
-            locale === l ? "bg-indigo-100 text-indigo-700" : "text-slate-500 hover:bg-slate-100"
-          }`}
-        >
-          {localeNames[l] ?? l.toUpperCase()}
-        </button>
-      ))}
-    </div>
+    <label
+      className={`relative inline-flex h-9 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 hover:border-slate-300 ${className}`}
+    >
+      <Globe size={14} aria-hidden className="shrink-0 text-slate-500" />
+      <span className="sr-only">{t("Language")}</span>
+      <select
+        value={locale}
+        onChange={(e) => setLocale(e.target.value as Locale)}
+        className="cursor-pointer appearance-none bg-transparent pr-1 font-bold outline-none"
+      >
+        {availableLocales.map((code) => (
+          <option key={code} value={code}>
+            {compact ? code.toUpperCase() : LOCALE_NAMES[code]}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

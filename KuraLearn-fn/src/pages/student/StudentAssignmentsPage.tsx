@@ -15,10 +15,12 @@ import { Card } from "@/components/common/Card";
 import { Button } from "@/components/common/Button";
 import { AppDrawer, StatusBadge } from "@/components/ModernUi";
 import { RichTextEditor, RichTextViewer } from "@/components/editor/RichTextEditor";
+import { useT } from "@/i18n/I18nContext";
 
 // ─── Main Page ──────────────────────────────────────────────────
 
 export function StudentAssignmentsPage() {
+  const t = useT();
   const queryClient = useQueryClient();
   const [drawer, setDrawer] = useState<{ id: string; title: string; description: string } | null>(
     null,
@@ -54,9 +56,9 @@ export function StudentAssignmentsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">My Assignments</h1>
+        <h1 className="text-3xl font-bold text-slate-900">{t("My Assignments")}</h1>
         <p className="mt-1 font-bold text-slate-500">
-          Track and submit your projects and homework.
+          {t("Track and submit your projects and homework.")}
         </p>
       </div>
 
@@ -64,9 +66,9 @@ export function StudentAssignmentsPage() {
         {assignments.length === 0 ? (
           <Card className="py-16 text-center">
             <FileText size={48} className="mx-auto text-slate-500" />
-            <p className="mt-4 text-xl font-bold text-slate-600">No assignments yet</p>
+            <p className="mt-4 text-xl font-bold text-slate-600">{t("No assignments yet")}</p>
             <p className="mt-1 text-slate-500">
-              Your teachers haven't posted any assignments for your courses.
+              {t("Your teachers haven't posted any assignments for your courses.")}
             </p>
           </Card>
         ) : (
@@ -93,11 +95,12 @@ export function StudentAssignmentsPage() {
                     <div className="mt-2 flex flex-wrap gap-4 text-xs font-bold text-slate-500">
                       <span className="flex items-center gap-1.5">
                         <Calendar size={14} className="text-slate-500" />
-                        Due: {a.dueDate ? new Date(a.dueDate).toLocaleDateString() : "No deadline"}
+                        {t("Due:")}{" "}
+                        {a.dueDate ? new Date(a.dueDate).toLocaleDateString() : t("No deadline")}
                       </span>
                       <span className="flex items-center gap-1.5">
                         <CheckCircle2 size={14} className="text-slate-500" />
-                        {a.points} Points
+                        {a.points} {t("Points")}
                       </span>
                     </div>
                   </div>
@@ -108,7 +111,7 @@ export function StudentAssignmentsPage() {
                     <StatusBadge value={isSubmitted ? "SUBMITTED" : "PENDING"} />
                     {isSubmitted && (
                       <span className="text-[10px] font-bold text-slate-500">
-                        Submitted {new Date(submission.submittedAt).toLocaleDateString()}
+                        {t("Submitted")} {new Date(submission.submittedAt).toLocaleDateString()}
                       </span>
                     )}
                   </div>
@@ -118,7 +121,8 @@ export function StudentAssignmentsPage() {
                       setDrawer({ id: a.id, title: a.title, description: a.description })
                     }
                   >
-                    {isSubmitted ? "View / Edit" : "Start Assignment"} <ArrowRight size={16} />
+                    {isSubmitted ? t("View / Edit") : t("Start Assignment")}{" "}
+                    <ArrowRight size={16} />
                   </Button>
                 </div>
               </Card>
@@ -132,25 +136,25 @@ export function StudentAssignmentsPage() {
         <div className="space-y-6">
           <section>
             <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-              Instructions
+              {t("Instructions")}
             </h4>
             <RichTextViewer content={drawer?.description} />
           </section>
 
           <div className="border-t border-slate-100 pt-6">
             <h4 className="mb-4 text-xs font-bold uppercase tracking-wide text-slate-500">
-              Your Submission
+              {t("Your Submission")}
             </h4>
             <RichTextEditor
               value={submissionForm.content}
               onChange={(val) => setSubmissionForm({ content: val })}
-              placeholder="Write your answer or project content here..."
+              placeholder={t("Write your answer or project content here...")}
               minHeight="400px"
             />
 
             <div className="mt-6 flex justify-end gap-3">
               <Button variant="secondary" onClick={() => setDrawer(null)}>
-                Cancel
+                {t("Cancel")}
               </Button>
               <Button
                 disabled={submitMutation.isPending || !submissionForm.content}
@@ -159,7 +163,7 @@ export function StudentAssignmentsPage() {
                   submitMutation.mutate({ id: drawer.id, content: submissionForm.content })
                 }
               >
-                {submitMutation.isPending ? "Submitting..." : "Submit Assignment"}
+                {submitMutation.isPending ? t("Submitting...") : t("Submit Assignment")}
               </Button>
             </div>
           </div>

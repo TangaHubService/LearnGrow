@@ -31,6 +31,7 @@ import { PrimaryLink, SecondaryLink, StudentProgressBar } from "@/components/stu
 import { useAuth } from "@/contexts/AuthContext";
 import { useStudentDashboard } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
+import { useT } from "@/i18n/I18nContext";
 
 const CHART_COLORS = ["#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"];
 
@@ -76,13 +77,14 @@ function ActivityBarChart({ data }: { data: { day: string; minutes: number }[] }
 }
 
 function AttendancePie({ data }: { data: { day: string; present: number; absent: number }[] }) {
+  const t = useT();
   const totalPresent = data.reduce((s, d) => s + d.present, 0);
   const totalAbsent = data.reduce((s, d) => s + d.absent, 0);
   const totalRecords = totalPresent + totalAbsent;
   if (totalRecords === 0) {
     return (
       <div className="flex h-40 items-center justify-center text-sm text-slate-500">
-        No attendance records this week
+        {t("No attendance records this week")}
       </div>
     );
   }
@@ -117,16 +119,16 @@ function AttendancePie({ data }: { data: { day: string; present: number; absent:
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-sm font-bold">
           <span className="h-3 w-3 rounded-full bg-emerald-700" />
-          <span className="text-slate-700">Present</span>
+          <span className="text-slate-700">{t("Present")}</span>
           <span className="ml-auto text-slate-900">{totalPresent}</span>
         </div>
         <div className="flex items-center gap-2 text-sm font-bold">
           <span className="h-3 w-3 rounded-full bg-rose-500" />
-          <span className="text-slate-700">Absent</span>
+          <span className="text-slate-700">{t("Absent")}</span>
           <span className="ml-auto text-slate-900">{totalAbsent}</span>
         </div>
         <div className="pt-1 text-[11px] font-bold text-slate-500">
-          {totalRecords} total records
+          {t("{count} total records", { count: totalRecords })}
         </div>
       </div>
     </div>
@@ -155,12 +157,16 @@ const INSIGHT_STYLES = {
 };
 
 export function DashboardPage() {
+  const t = useT();
   const { user } = useAuth();
   const { data, isLoading, error, refetch } = useStudentDashboard();
 
   if (isLoading) {
     return (
-      <DashboardPageLayout title="Loading..." subtitle="Getting your learning progress ready">
+      <DashboardPageLayout
+        title={t("Loading...")}
+        subtitle={t("Getting your learning progress ready")}
+      >
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="h-28 w-full rounded-2xl" />
@@ -186,14 +192,14 @@ export function DashboardPage() {
   if (error) {
     return (
       <DashboardPageLayout
-        title="Oops!"
-        subtitle="Something went wrong while loading your dashboard"
+        title={t("Oops!")}
+        subtitle={t("Something went wrong while loading your dashboard")}
       >
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <div className="mb-4 rounded-full bg-red-50 p-4 text-red-600">
             <RefreshCw size={48} className="animate-spin" />
           </div>
-          <h3 className="text-xl font-bold text-slate-800">Failed to load dashboard</h3>
+          <h3 className="text-xl font-bold text-slate-800">{t("Failed to load dashboard")}</h3>
           <p className="mt-2 max-w-xs text-slate-500">
             {(error as any)?.message || "Please check your connection and try again."}
           </p>
@@ -202,7 +208,7 @@ export function DashboardPage() {
             className="mt-6 flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-2.5 font-bold text-white transition-all hover:bg-indigo-700 active:scale-95"
           >
             <RefreshCw size={18} />
-            Try again
+            {t("Try again")}
           </button>
         </div>
       </DashboardPageLayout>
@@ -227,7 +233,7 @@ export function DashboardPage() {
           <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-700 text-lg font-bold text-white shadow-sm">
             {student.name?.charAt(0) || "S"}
           </span>
-          <span>Hi, {student.name.split(" ")[0]}</span>
+          <span>{t("Hi, {name}", { name: student.name.split(" ")[0] })}</span>
         </span>
       }
       subtitle={
@@ -242,17 +248,19 @@ export function DashboardPage() {
             to={`/lessons/${continueLearning.lessonId}`}
             className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-md active:scale-[0.97]"
           >
-            Continue <ChevronRight size={16} />
+            {t("Continue")} <ChevronRight size={16} />
           </Link>
         ) : undefined
       }
     >
       {isLinkedToSchool ? null : (
         <div role="status" className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm">
-          <p className="font-bold text-slate-900">You haven't joined a school yet</p>
+          <p className="font-bold text-slate-900">{t("You haven't joined a school yet")}</p>
           <p className="mt-1 text-slate-700">
-            Give your teacher or school office your KuraLearn email, <strong>{user?.email}</strong>,
-            so they can add you to your class.
+            {t(
+              "Give your teacher or school office your KuraLearn email, {email}, so they can add you to your class.",
+              { email: user?.email ?? "" },
+            )}
           </p>
         </div>
       )}
@@ -264,7 +272,9 @@ export function DashboardPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{stats.stars || 0}</p>
-              <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Stars</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-amber-700">
+                {t("Stars")}
+              </p>
             </div>
           </div>
         </div>
@@ -275,7 +285,9 @@ export function DashboardPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{stats.badges || 0}</p>
-              <p className="text-xs font-bold uppercase tracking-wide text-blue-600">Badges</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-blue-600">
+                {t("Badges")}
+              </p>
             </div>
           </div>
         </div>
@@ -287,7 +299,7 @@ export function DashboardPage() {
             <div>
               <p className="text-2xl font-bold text-slate-900">{stats.completedLessons || 0}</p>
               <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">
-                Lessons done
+                {t("Lessons done")}
               </p>
             </div>
           </div>
@@ -299,7 +311,9 @@ export function DashboardPage() {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900">{stats.streakDays || 0}</p>
-              <p className="text-xs font-bold uppercase tracking-wide text-rose-700">Streak days</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-rose-700">
+                {t("Streak days")}
+              </p>
             </div>
           </div>
         </div>
@@ -315,9 +329,11 @@ export function DashboardPage() {
               <p className="text-2xl font-bold text-slate-900">
                 {stats.avgQuizScore != null ? `${stats.avgQuizScore}%` : "—"}
               </p>
-              <p className="text-xs font-bold uppercase tracking-wide text-violet-600">Quiz avg</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-violet-600">
+                {t("Quiz avg")}
+              </p>
               <p className="text-[10px] font-bold text-slate-500">
-                {stats.totalQuizzes || 0} quizzes taken
+                {t("{count} quizzes taken", { count: stats.totalQuizzes || 0 })}
               </p>
             </div>
           </div>
@@ -331,8 +347,10 @@ export function DashboardPage() {
               <p className="text-2xl font-bold text-slate-900">
                 {stats.attendanceRate != null ? `${stats.attendanceRate}%` : "—"}
               </p>
-              <p className="text-xs font-bold uppercase tracking-wide text-sky-600">Attendance</p>
-              <p className="text-[10px] font-bold text-slate-500">This week</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-sky-600">
+                {t("Attendance")}
+              </p>
+              <p className="text-[10px] font-bold text-slate-500">{t("This week")}</p>
             </div>
           </div>
         </div>
@@ -346,16 +364,16 @@ export function DashboardPage() {
                 {stats.totalTimeSpentMinutes != null ? `${stats.totalTimeSpentMinutes}m` : "—"}
               </p>
               <p className="text-xs font-bold uppercase tracking-wide text-orange-700">
-                Time spent
+                {t("Time spent")}
               </p>
-              <p className="text-[10px] font-bold text-slate-500">Total learning</p>
+              <p className="text-[10px] font-bold text-slate-500">{t("Total learning")}</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
-        <DashboardPanel title="Continue Learning">
+        <DashboardPanel title={t("Continue Learning")}>
           {continueLearning ? (
             <div>
               <h2 className="text-xl font-bold text-slate-900">{continueLearning.title}</h2>
@@ -374,10 +392,10 @@ export function DashboardPage() {
                     }`}
                   >
                     {continueLearning.progressStatus === "IN_PROGRESS"
-                      ? "In progress"
+                      ? t("In progress")
                       : continueLearning.progressStatus === "COMPLETED"
-                        ? "Completed"
-                        : "Not started"}
+                        ? t("Completed")
+                        : t("Not started")}
                   </span>
                   <span>{continueLearning.courseTitle}</span>
                 </div>
@@ -387,38 +405,38 @@ export function DashboardPage() {
                   to={`/lessons/${continueLearning.lessonId}`}
                   className="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-700 px-5 text-sm font-bold text-white transition-all hover:bg-emerald-800 active:scale-[0.97]"
                 >
-                  Open lesson <ChevronRight size={16} />
+                  {t("Open lesson")} <ChevronRight size={16} />
                 </Link>
                 <Link
                   to={`/courses/${continueLearning.courseId}/path`}
                   className="inline-flex h-10 items-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.97]"
                 >
-                  Learning path
+                  {t("Learning path")}
                 </Link>
                 <Link
                   to="/ai"
                   className="inline-flex h-10 items-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.97]"
                 >
-                  Ask AI Tutor
+                  {t("Ask AI Tutor")}
                 </Link>
               </div>
             </div>
           ) : (
             <div className="flex h-36 flex-col items-center justify-center text-center">
               <BookOpen size={36} className="mb-3 text-slate-500" />
-              <p className="text-sm font-bold text-slate-500">No active lessons</p>
-              <p className="text-xs text-slate-500">Start a new subject below!</p>
+              <p className="text-sm font-bold text-slate-500">{t("No active lessons")}</p>
+              <p className="text-xs text-slate-500">{t("Start a new subject below!")}</p>
               <Link
                 to="/subjects"
                 className="mt-3 text-sm font-bold text-indigo-600 hover:underline"
               >
-                Browse subjects
+                {t("Browse subjects")}
               </Link>
             </div>
           )}
         </DashboardPanel>
 
-        <DashboardPanel title="Today's Goals">
+        <DashboardPanel title={t("Today's Goals")}>
           <div className="space-y-4">
             {goals.length > 0 ? (
               goals.map((goal: any) => (
@@ -441,9 +459,9 @@ export function DashboardPage() {
               ))
             ) : (
               <div className="flex h-36 flex-col items-center justify-center text-center">
-                <p className="text-sm text-slate-500">No goals set yet.</p>
+                <p className="text-sm text-slate-500">{t("No goals set yet.")}</p>
                 <Link to="/goals" className="mt-2 text-xs font-bold text-indigo-600">
-                  Set a learning goal
+                  {t("Set a learning goal")}
                 </Link>
               </div>
             )}
@@ -456,7 +474,7 @@ export function DashboardPage() {
           title={
             <span className="flex items-center gap-2">
               <TrendingUp size={16} />
-              Weekly Activity
+              {t("Weekly Activity")}
             </span>
           }
           bodyClassName="p-4"
@@ -465,17 +483,17 @@ export function DashboardPage() {
             <ActivityBarChart data={weeklyActivity} />
           ) : (
             <div className="flex h-44 items-center justify-center text-sm text-slate-500">
-              No activity recorded this week. Start a lesson!
+              {t("No activity recorded this week. Start a lesson!")}
             </div>
           )}
           <div className="mt-2 flex items-center justify-between border-t border-slate-100 pt-3 text-[11px] font-bold text-slate-500">
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
-            <span>Sun</span>
+            <span>{t("Mon")}</span>
+            <span>{t("Tue")}</span>
+            <span>{t("Wed")}</span>
+            <span>{t("Thu")}</span>
+            <span>{t("Fri")}</span>
+            <span>{t("Sat")}</span>
+            <span>{t("Sun")}</span>
           </div>
         </DashboardPanel>
 
@@ -483,7 +501,7 @@ export function DashboardPage() {
           title={
             <span className="flex items-center gap-2">
               <CheckCircle2 size={16} />
-              Attendance
+              {t("Attendance")}
             </span>
           }
           bodyClassName="p-4"
@@ -496,7 +514,7 @@ export function DashboardPage() {
         <div className="mt-8 space-y-3">
           <h2 className="flex items-center gap-2 text-lg font-bold text-[#0b1f4d]">
             <Sparkles size={20} className="text-emerald-700" />
-            AI-Powered Insights
+            {t("AI-Powered Insights")}
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {insights.slice(0, 3).map((insight: any, i: number) => {
@@ -515,7 +533,7 @@ export function DashboardPage() {
                           to={insight.action}
                           className={`mt-2 inline-block text-xs font-bold underline underline-offset-2 ${style.text} opacity-70 hover:opacity-100`}
                         >
-                          {insight.actionLabel || "Take action"} &rarr;
+                          {insight.actionLabel || t("Take action")} &rarr;
                         </Link>
                       )}
                     </div>
@@ -529,7 +547,7 @@ export function DashboardPage() {
 
       {quizPerformance.length > 0 && (
         <div className="mt-8">
-          <DashboardPanel title="Recent Quiz Scores" bodyClassName="p-4">
+          <DashboardPanel title={t("Recent Quiz Scores")} bodyClassName="p-4">
             <div className="divide-y divide-slate-100">
               {quizPerformance.slice(0, 5).map((q: any, i: number) => (
                 <div
@@ -564,14 +582,14 @@ export function DashboardPage() {
           className="inline-flex h-11 items-center gap-2 rounded-xl bg-indigo-600 px-6 text-sm font-bold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-[0.97]"
         >
           <TrendingUp size={16} />
-          Full analytics
+          {t("Full analytics")}
         </Link>
         <Link
           to="/ai"
           className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 active:scale-[0.97]"
         >
           <Sparkles size={16} />
-          AI Tutor
+          {t("AI Tutor")}
         </Link>
       </div>
     </DashboardPageLayout>

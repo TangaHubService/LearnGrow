@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { RWANDA_NESA_GRADING_SCALE, RWANDA_PASS_MARK } from "../../config/grading.js";
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
 import { assertCanViewStudent, assertStaffCanViewClass, getActor, toReportStudent } from "../../middleware/access.js";
@@ -355,7 +356,7 @@ export async function getAiReportCardCommentController(req: Request, res: Respon
 export async function getGradingSettingsController(req: Request, res: Response) {
   const { schoolId } = await resolveLegacySchoolId(userId(req));
   const scales = await marksService.getGradingScales(schoolId);
-  res.json({ scales });
+  res.json({ scales, preset: RWANDA_NESA_GRADING_SCALE, passMark: RWANDA_PASS_MARK });
 }
 
 export async function saveGradingSettingsController(req: Request, res: Response) {

@@ -1,4 +1,5 @@
 import { syncManager } from "../offline/sync-manager";
+import { isLocale, translate } from "@/i18n";
 
 const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api/v1";
 const accessTokenKey = "kuralearn_token";
@@ -80,6 +81,83 @@ function storeSession(result: AuthResponse) {
   window.dispatchEvent(new CustomEvent("kuralearn-auth-refreshed", { detail: result.user }));
 }
 
+function currentUserId() {
+  try {
+    return (JSON.parse(localStorage.getItem(userKey) ?? "null") as ApiUser | null)?.id;
+  } catch {
+    return undefined;
+  }
+}
+
+function uiText(text: string) {
+  let locale: string | null = null;
+  try {
+    locale = localStorage.getItem("kuralearn_locale");
+  } catch {
+    // ignore
+  }
+  return translate(isLocale(locale) ? locale : "en", text);
+}
+
+/** Thrown when a change was saved on this device to be sent once the connection returns. */
+export class QueuedOfflineError extends Error {
+  readonly queued = true;
+  constructor() {
+    super(uiText("Saved on this device. It will be sent when you are back online."));
+    this.name = "QueuedOfflineError";
+  }
+}
+
+export function isQueuedOffline(error: unknown): error is QueuedOfflineError {
+  return error instanceof QueuedOfflineError;
+}
+
+/** Changes that are safe to keep and send later: plain JSON, not sign-in, AI or uploads. */
+function canQueue(path: string, options: RequestInit) {
+  const method = (options.method ?? "GET").toUpperCase();
+  if (method === "GET") return false;
+  if (/^\/(auth|ai)\b/.test(path) || path.includes("/ai/")) return false;
+  if (options.body !== undefined && typeof options.body !== "string") return false;
+  return true;
+}
+
+async function queueForLater(path: string, options: RequestInit) {
+  const method = (options.method ?? "POST").toUpperCase() as "POST" | "PUT" | "PATCH" | "DELETE";
+  let body: unknown;
+  if (typeof options.body === "string" && options.body) {
+    try {
+      body = JSON.parse(options.body);
+    } catch {
+      body = undefined;
+    }
+  }
+  await syncManager.enqueue({
+    action: `${method} ${path}`,
+    endpoint: `${apiUrl}${path}`,
+    method,
+    body,
+    userId: currentUserId(),
+  });
+  return new QueuedOfflineError();
+}
+
+syncManager.configure({
+  current: () => ({ token: token(), userId: currentUserId() }),
+  refresh: () => refreshSession(),
+});
+
+/** Remove everything one user left on this device, so the next person never sees it. */
+export async function clearDeviceData() {
+  try {
+    localStorage.removeItem("KURALearn_QUERY_CACHE");
+  } catch {
+    // ignore
+  }
+  if (typeof caches !== "undefined") {
+    await caches.delete("api-cache").catch(() => false);
+  }
+}
+
 function clearSession() {
   localStorage.removeItem(userKey);
   localStorage.removeItem(accessTokenKey);
@@ -139,21 +217,21 @@ async function sendRequest<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  if (!navigator.onLine && options.method && options.method !== "GET") {
-    const method = options.method as "POST" | "PUT" | "PATCH" | "DELETE";
-    await syncManager.enqueue({
-      action: `${method} ${path}`,
-      endpoint: `${apiUrl}${path}`,
-      method,
-      body: options.body ? JSON.parse(options.body as string) : undefined,
-    });
-    throw new Error("QUEUED_OFFLINE");
+  if (!navigator.onLine) {
+    if (canQueue(path, options)) throw await queueForLater(path, options);
+    if ((options.method ?? "GET").toUpperCase() !== "GET") {
+      throw new Error(uiText("This feature requires an internet connection."));
+    }
   }
 
-  const response = await fetch(`${apiUrl}${path}`, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${apiUrl}${path}`, { ...options, headers });
+  } catch (networkError) {
+    // The connection dropped even though the device reports being online.
+    if (canQueue(path, options)) throw await queueForLater(path, options);
+    throw networkError;
+  }
 
   if (
     response.status === 401 &&

@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card } from "@/components/common/Card";
 import { Skeleton } from "@/components/common/Skeleton";
 import { useStudentMarks, useStudentReportCards } from "@/hooks/useStudentPortal";
+import { useT } from "@/i18n/I18nContext";
 
 function GradeBadge({ grade }: { grade: string | null }) {
   if (!grade) return null;
@@ -25,6 +26,7 @@ function GradeBadge({ grade }: { grade: string | null }) {
 }
 
 function MarksContent() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useStudentMarks();
   const { data: reportCardsData, isLoading: rLoading } = useStudentReportCards();
   const [expandedYear, setExpandedYear] = useState<string | null>(null);
@@ -44,16 +46,18 @@ function MarksContent() {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <RefreshCw size={48} className="mb-4 text-red-400" />
-        <p className="text-lg font-bold text-slate-600">Failed to load marks</p>
+        <p className="text-lg font-bold text-slate-600">{t("Failed to load marks")}</p>
         <button onClick={() => refetch()} className="mt-4 text-indigo-600 font-bold">
-          Retry
+          {t("Retry")}
         </button>
       </div>
     );
   }
 
-  const marks = data?.marks || {};
-  const latestMarks = data?.latestMarks || [];
+  // The API wraps the result as { marks: { marks, latestMarks, totalEntries } }.
+  const payload = data?.marks?.marks ? data.marks : data;
+  const marks: Record<string, Record<string, any[]>> = payload?.marks || {};
+  const latestMarks = payload?.latestMarks || [];
   const years = Object.keys(marks);
 
   const reportCards = reportCardsData?.reportCards || [];
@@ -63,7 +67,7 @@ function MarksContent() {
       {latestMarks.length > 0 && (
         <Card className="p-5">
           <h2 className="mb-4 text-sm font-bold text-slate-700 uppercase tracking-wide">
-            Latest Marks
+            {t("Latest Marks")}
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {latestMarks.map((m: any) => (
@@ -90,7 +94,7 @@ function MarksContent() {
       {reportCards.length > 0 && (
         <Card className="p-5">
           <h2 className="mb-4 text-sm font-bold text-slate-700 uppercase tracking-wide">
-            Report Cards
+            {t("Report Cards")}
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {reportCards.map((rc: any) => (
@@ -104,9 +108,11 @@ function MarksContent() {
                     {rc.academicYear}
                   </span>
                 </div>
-                <p className="text-sm font-bold text-slate-700">Term {rc.term}</p>
+                <p className="text-sm font-bold text-slate-700">
+                  {t("Term")} {rc.term}
+                </p>
                 <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-                  <span className="text-xs font-bold text-slate-500">Average</span>
+                  <span className="text-xs font-bold text-slate-500">{t("Average")}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-base font-bold text-slate-900">
                       {rc.averagePercentage ?? "-"}%
@@ -121,7 +127,7 @@ function MarksContent() {
                     rel="noopener noreferrer"
                     className="mt-3 flex items-center justify-center gap-1.5 rounded-lg bg-indigo-50 py-2 text-xs font-bold text-indigo-600 hover:bg-indigo-100 transition-colors"
                   >
-                    Download PDF
+                    {t("Download PDF")}
                   </a>
                 )}
               </div>
@@ -133,7 +139,7 @@ function MarksContent() {
       {years.length > 0 ? (
         <Card className="p-5">
           <h2 className="mb-4 text-sm font-bold text-slate-700 uppercase tracking-wide">
-            All Marks
+            {t("All Marks")}
           </h2>
           <div className="space-y-4">
             {years.map((year) => (
@@ -202,9 +208,9 @@ function MarksContent() {
       ) : (
         <Card className="py-12 text-center">
           <Award size={48} className="mx-auto text-slate-500 mb-3" />
-          <p className="text-lg font-bold text-slate-600">No marks recorded yet</p>
+          <p className="text-lg font-bold text-slate-600">{t("No marks recorded yet")}</p>
           <p className="mt-1 text-sm text-slate-500">
-            Your grades will appear once teachers publish them.
+            {t("Your grades will appear once teachers publish them.")}
           </p>
         </Card>
       )}
@@ -213,12 +219,13 @@ function MarksContent() {
 }
 
 export function StudentMarksPage() {
+  const t = useT();
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
-        title="My Marks"
-        subtitle="View your grades, marks, and report cards per term and academic year."
+        brand={t("KuraLearn Learning")}
+        title={t("My Marks")}
+        subtitle={t("View your grades, marks, and report cards per term and academic year.")}
       />
       <MarksContent />
     </div>

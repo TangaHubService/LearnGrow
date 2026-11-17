@@ -21,6 +21,7 @@ import {
 } from "@/components/dashboard/DashboardLayout";
 import { DashboardStatCard } from "@/components/dashboard/DashboardStatCard";
 import { ProgressBar } from "@/components/common/ProgressBar";
+import { useT } from "@/i18n/I18nContext";
 
 type ParentChild = {
   id: string;
@@ -78,20 +79,22 @@ type ParentChild = {
 };
 
 function LoadingState() {
+  const t = useT();
   return (
-    <DashboardPageLayout title="Parent Portal" subtitle="Loading family learning summary">
+    <DashboardPageLayout title={t("Parent Portal")} subtitle={t("Loading family learning summary")}>
       <div className="h-64 rounded-lg border border-slate-200 bg-white" />
     </DashboardPageLayout>
   );
 }
 
 function EmptyChildren() {
+  const t = useT();
   return (
-    <DashboardPanel title="Children">
+    <DashboardPanel title={t("Children")}>
       <div className="py-10 text-center">
-        <p className="text-sm font-bold text-slate-800">No linked children yet</p>
+        <p className="text-sm font-bold text-slate-800">{t("No linked children yet")}</p>
         <p className="mt-1 text-sm font-semibold text-slate-500">
-          Ask the school admin to link your parent account.
+          {t("Ask the school admin to link your parent account.")}
         </p>
       </div>
     </DashboardPanel>
@@ -99,6 +102,7 @@ function EmptyChildren() {
 }
 
 function ChildRow({ child }: { child: ParentChild }) {
+  const t = useT();
   const tone =
     child.riskLevel === "HIGH"
       ? "text-rose-700 bg-rose-50"
@@ -131,14 +135,14 @@ function ChildRow({ child }: { child: ParentChild }) {
             to="/messages"
             className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-bold text-slate-700 hover:bg-slate-50"
           >
-            <MessageSquare size={16} /> Message
+            <MessageSquare size={16} /> {t("Message")}
           </Link>
           {child.latestReport?.pdfUrl ? (
             <a
               href={child.latestReport.pdfUrl}
               className="inline-flex h-9 items-center gap-2 rounded-lg bg-slate-900 px-3 text-sm font-bold text-white hover:bg-slate-800"
             >
-              <FileText size={16} /> Report
+              <FileText size={16} /> {t("Report")}
             </a>
           ) : null}
         </div>
@@ -146,7 +150,9 @@ function ChildRow({ child }: { child: ParentChild }) {
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr_1.2fr]">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Attendance</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {t("Attendance")}
+          </p>
           <div className="mt-2 flex items-center justify-between text-sm font-bold text-slate-700">
             <span>{child.attendance.rate}%</span>
             <span>{child.attendance.absent} absent</span>
@@ -154,7 +160,9 @@ function ChildRow({ child }: { child: ParentChild }) {
           <ProgressBar value={child.attendance.rate} />
         </div>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Latest average</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {t("Latest average")}
+          </p>
           <p className="mt-2 text-2xl font-bold text-slate-950">{child.average ?? "-"}%</p>
           <p className="text-xs font-semibold text-slate-500">
             {child.latestReport?.term ?? "No report yet"}{" "}
@@ -162,7 +170,9 @@ function ChildRow({ child }: { child: ParentChild }) {
           </p>
         </div>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Next action</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            {t("Next action")}
+          </p>
           <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">{child.nextAction}</p>
         </div>
       </div>
@@ -181,7 +191,7 @@ function ChildRow({ child }: { child: ParentChild }) {
       {child.aiRecommendations && child.aiRecommendations.length > 0 && (
         <div className="mt-4 space-y-2">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-            <Lightbulb size={14} /> AI Recommendations
+            <Lightbulb size={14} /> {t("AI Recommendations")}
           </div>
           {child.aiRecommendations.map((rec, i) => (
             <div
@@ -214,13 +224,13 @@ function ChildRow({ child }: { child: ParentChild }) {
       {child.fees && child.fees.status !== "no_data" && (
         <div className="mt-4 rounded-lg border border-slate-100 bg-white p-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-semibold text-slate-700">Fees</span>
+            <span className="font-semibold text-slate-700">{t("Fees")}</span>
             <span
               className={`font-bold ${child.fees.balance > 0 ? "text-rose-700" : "text-emerald-700"}`}
             >
               {child.fees.balance > 0
                 ? `${child.fees.balance.toLocaleString()} RWF due`
-                : "Paid in full"}
+                : t("Paid in full")}
             </span>
           </div>
           <ProgressBar
@@ -233,6 +243,7 @@ function ChildRow({ child }: { child: ParentChild }) {
 }
 
 export function ParentDashboardPage() {
+  const t = useT();
   const { user } = useAuth();
   const { data, isLoading, error } = useQuery({
     queryKey: ["parent-dashboard"],
@@ -243,8 +254,11 @@ export function ParentDashboardPage() {
 
   if (error) {
     return (
-      <DashboardPageLayout title="Parent Portal" subtitle="We could not load your family summary">
-        <DashboardPanel title="Status">
+      <DashboardPageLayout
+        title={t("Parent Portal")}
+        subtitle={t("We could not load your family summary")}
+      >
+        <DashboardPanel title={t("Status")}>
           <p className="text-sm font-semibold text-rose-700">{(error as Error).message}</p>
         </DashboardPanel>
       </DashboardPageLayout>
@@ -256,53 +270,55 @@ export function ParentDashboardPage() {
   return (
     <DashboardPageLayout
       title={`Muraho, ${data?.parent?.name?.split(" ")[0] ?? "Parent"}`}
-      subtitle="Family learning summary"
+      subtitle={t("Family learning summary")}
       action={
         <Link
           to="/messages"
           className="inline-flex h-10 items-center gap-2 rounded-lg bg-emerald-700 px-4 text-sm font-bold text-white hover:bg-emerald-700"
         >
-          <MessageSquare size={16} /> Messages
+          <MessageSquare size={16} /> {t("Messages")}
         </Link>
       }
     >
       {children.length === 0 ? (
         <div role="status" className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm">
-          <p className="font-bold text-slate-900">No children linked yet</p>
+          <p className="font-bold text-slate-900">{t("No children linked yet")}</p>
           <p className="mt-1 text-slate-700">
-            Give your child's school your KuraLearn email, <strong>{user?.email}</strong>, so they
-            can connect you to your child.
+            {t(
+              "Give your child's school your KuraLearn email, {email}, so they can connect you to your child.",
+              { email: user?.email ?? "" },
+            )}
           </p>
         </div>
       ) : null}
       <DashboardStatGrid columns="four">
         <DashboardStatCard
-          label="Children"
+          label={t("Children")}
           value={data?.stats?.children ?? 0}
           icon={Users}
           tone="blue"
         />
         <DashboardStatCard
-          label="Attendance"
+          label={t("Attendance")}
           value={`${data?.stats?.averageAttendance ?? 0}%`}
           icon={CalendarCheck}
           tone="emerald"
         />
         <DashboardStatCard
-          label="Alerts"
+          label={t("Alerts")}
           value={data?.stats?.childrenWithAlerts ?? 0}
           icon={AlertTriangle}
           tone="amber"
         />
         <DashboardStatCard
-          label="Unread"
+          label={t("Unread")}
           value={(data?.stats?.unreadMessages ?? 0) + (data?.stats?.unreadNotifications ?? 0)}
           icon={Bell}
           tone="purple"
         />
       </DashboardStatGrid>
 
-      <DashboardPanel title="Guardian Brief">
+      <DashboardPanel title={t("Guardian Brief")}>
         <div className="grid gap-3 lg:grid-cols-2">
           {(data?.guardianBrief ?? []).map((item: any) => (
             <div key={item.childId} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
@@ -323,10 +339,10 @@ export function ParentDashboardPage() {
       )}
 
       <DashboardPanel
-        title="Recent Notices"
+        title={t("Recent Notices")}
         action={
           <Link to="/notifications" className="text-sm font-bold text-emerald-700 hover:underline">
-            View all
+            {t("View all")}
           </Link>
         }
       >

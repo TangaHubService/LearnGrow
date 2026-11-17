@@ -21,6 +21,7 @@ export {
 
 import { Button } from "@/components/common/Button";
 import { Card } from "@/components/common/Card";
+import { useT } from "@/i18n/I18nContext";
 
 const purple = "#6d3eeb";
 const statusOptions = [
@@ -69,6 +70,7 @@ export function SearchToolbar({
   placeholder?: string;
   subjects?: Array<{ id: string; name: string }>;
 }) {
+  const t = useT();
   return (
     <div className="mb-4">
       <div
@@ -90,7 +92,7 @@ export function SearchToolbar({
               value: name,
               label: name,
             }))}
-            placeholder="All subjects"
+            placeholder={t("All subjects")}
             className="border-black bg-transparent min-h-10"
             onChange={(subjectName) => setParams({ ...params, subjectName, page: 1 })}
           />
@@ -98,14 +100,14 @@ export function SearchToolbar({
         <CustomDropdown
           value={params.status}
           options={statusOptions}
-          placeholder="All statuses"
+          placeholder={t("All statuses")}
           className="border-black bg-transparent min-h-10"
           onChange={(status) => setParams({ ...params, status, page: 1 })}
         />
         <CustomDropdown
           value={params.sortDir ?? "desc"}
           options={sortOptions}
-          placeholder="Sort"
+          placeholder={t("Sort")}
           clearable={false}
           className="border-black bg-transparent min-h-10"
           onChange={(sortDir) =>
@@ -117,7 +119,7 @@ export function SearchToolbar({
           className="h-10 border-black bg-transparent hover:bg-slate-50 text-slate-900"
           onClick={() => setParams({ page: 1, pageSize: 12, sortDir: "desc", sortBy: "updatedAt" })}
         >
-          <Filter size={15} /> Reset
+          <Filter size={15} /> {t("Reset")}
         </Button>
       </div>
     </div>

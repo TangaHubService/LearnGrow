@@ -16,8 +16,10 @@ import {
 } from "./teacherShared";
 import { TeacherGlobalUi } from "./TeacherGlobalUi";
 import { ModernTable, StatusBadge } from "@/components/ModernUi";
+import { useT } from "@/i18n/I18nContext";
 
 export function TeacherClassesPage() {
+  const t = useT();
   const [params, setParams] = useListParams();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -32,7 +34,7 @@ export function TeacherClassesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teacher-classes"] });
       invalidateTeacherDashboard(queryClient);
-      dispatch(pushToast({ tone: "success", message: "Class archived" }));
+      dispatch(pushToast({ tone: "success", message: t("Class archived") }));
       dispatch(closeModal());
     },
   });
@@ -60,22 +62,22 @@ export function TeacherClassesPage() {
   return (
     <div>
       <PageHeader
-        title="My Classes"
-        subtitle="Search, filter, sort and manage class assignments."
+        title={t("My Classes")}
+        subtitle={t("Search, filter, sort and manage class assignments.")}
         actions={
           <Button
             onClick={() =>
               dispatch(openDrawer({ kind: "class-form", mode: "create", title: "Create class" }))
             }
           >
-            <Plus size={16} /> Create class
+            <Plus size={16} /> {t("Create class")}
           </Button>
         }
       />
       <SearchToolbar
         params={params}
         setParams={setParams}
-        placeholder="Search classes or subjects"
+        placeholder={t("Search classes or subjects")}
       />
       {isLoading ? (
         <Skeleton />
@@ -86,7 +88,7 @@ export function TeacherClassesPage() {
           data={data.items}
           columns={[
             {
-              header: "Class",
+              header: t("Class"),
               accessor: (row: any) => (
                 <div>
                   <span className="block font-bold text-slate-950">{row.name}</span>
@@ -94,24 +96,24 @@ export function TeacherClassesPage() {
                 </div>
               ),
             },
-            { header: "Subject", accessor: "subjectName" },
-            { header: "Students", accessor: "students" },
+            { header: t("Subject"), accessor: "subjectName" },
+            { header: t("Students"), accessor: "students" },
             {
-              header: "Performance",
+              header: t("Performance"),
               className: "min-w-[180px]",
               accessor: (row: any) => <ProgressBar value={row.performance} />,
             },
             {
-              header: "Status",
+              header: t("Status"),
               accessor: (row: any) => <StatusBadge value={row.status} />,
             },
             {
-              header: "Actions",
+              header: t("Actions"),
               align: "right",
               accessor: (row: any) => (
                 <div className="flex justify-end gap-1.5">
                   <Button
-                    aria-label="View details"
+                    aria-label={t("View details")}
                     variant="secondary"
                     className="h-8 w-8 p-0"
                     onClick={() => openClassDetails(row)}
@@ -119,7 +121,7 @@ export function TeacherClassesPage() {
                     <Eye size={14} />
                   </Button>
                   <Button
-                    aria-label="Edit"
+                    aria-label={t("Edit")}
                     variant="secondary"
                     className="h-8 w-8 p-0"
                     onClick={() =>
@@ -136,7 +138,7 @@ export function TeacherClassesPage() {
                     <Edit3 size={14} />
                   </Button>
                   <Button
-                    aria-label="Archive"
+                    aria-label={t("Archive")}
                     variant="secondary"
                     className="h-8 w-8 p-0"
                     onClick={() =>
@@ -146,7 +148,7 @@ export function TeacherClassesPage() {
                           danger: true,
                           title: "Archive class?",
                           description: "This hides the class assignment from active operations.",
-                          confirmLabel: "Archive",
+                          confirmLabel: t("Archive"),
                           record: row,
                         }),
                       )
@@ -161,15 +163,15 @@ export function TeacherClassesPage() {
         />
       ) : (
         <EmptyState
-          title="No classes found"
-          message="Create a class to get started."
+          title={t("No classes found")}
+          message={t("Create a class to get started.")}
           action={
             <Button
               onClick={() =>
                 dispatch(openDrawer({ kind: "class-form", mode: "create", title: "Create class" }))
               }
             >
-              Create class
+              {t("Create class")}
             </Button>
           }
         />

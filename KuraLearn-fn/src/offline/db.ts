@@ -34,6 +34,8 @@ export interface OfflineAttendanceEntry {
 
 export interface SyncQueueItem {
   id?: number;
+  /** The user who made the change; only they can send it. */
+  userId?: string;
   action: string;
   endpoint: string;
   method: "POST" | "PUT" | "PATCH" | "DELETE";

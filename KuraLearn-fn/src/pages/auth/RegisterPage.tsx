@@ -2,8 +2,10 @@ import { type FormEvent, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { AuthCard, authButtonClass, AuthError, authInputClass } from "@/components/auth/AuthCard";
 import { useAuth } from "@/contexts/AuthContext";
+import { useT } from "@/i18n/I18nContext";
 
 export function RegisterPage() {
+  const t = useT();
   const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "STUDENT" });
@@ -31,19 +33,19 @@ export function RegisterPage() {
 
   return (
     <AuthCard
-      title="Create your account"
-      subtitle="For students and parents. Staff accounts are created by the school."
+      title={t("Create your account")}
+      subtitle={t("For students and parents. Staff accounts are created by the school.")}
       backTo="/welcome"
       backLabel="Back to home"
     >
       <form onSubmit={submit} className="space-y-4">
         <AuthError message={error} />
         <fieldset>
-          <legend className="text-sm font-semibold text-slate-700">I am a</legend>
+          <legend className="text-sm font-semibold text-slate-700">{t("I am a…")}</legend>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {[
-              { value: "STUDENT", label: "Student" },
-              { value: "PARENT", label: "Parent" },
+              { value: "STUDENT", label: t("Student") },
+              { value: "PARENT", label: t("Parent") },
             ].map((option) => (
               <label
                 key={option.value}
@@ -67,7 +69,7 @@ export function RegisterPage() {
           </div>
         </fieldset>
         <label className="block text-sm font-semibold text-slate-700">
-          Full name
+          {t("Full name")}
           <input
             required
             minLength={2}
@@ -78,7 +80,7 @@ export function RegisterPage() {
           />
         </label>
         <label className="block text-sm font-semibold text-slate-700">
-          Email
+          {t("Email")}
           <input
             type="email"
             required
@@ -89,7 +91,7 @@ export function RegisterPage() {
           />
         </label>
         <label className="block text-sm font-semibold text-slate-700">
-          Password
+          {t("Password")}
           <input
             type="password"
             required
@@ -104,17 +106,17 @@ export function RegisterPage() {
             id="register-password-hint"
             className="mt-1 block text-xs font-normal text-slate-600"
           >
-            At least 8 characters.
+            {t("At least 8 characters.")}
           </span>
         </label>
         <button type="submit" disabled={loading} className={authButtonClass}>
-          {loading ? "Creating account..." : "Create account"}
+          {loading ? t("Creating account...") : t("Create account")}
         </button>
       </form>
       <p className="mt-5 text-center text-sm text-slate-600">
-        Already have an account?{" "}
+        {t("Already have an account?")}{" "}
         <Link to="/login" className="font-bold text-[#5b2fd6] hover:underline">
-          Sign in
+          {t("Sign in")}
         </Link>
       </p>
     </AuthCard>

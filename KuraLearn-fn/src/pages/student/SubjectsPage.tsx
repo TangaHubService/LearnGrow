@@ -5,8 +5,10 @@ import { StudentIcon, StudentProgressBar, PrimaryLink } from "@/components/stude
 import { useStudentSubjects } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
 import { RefreshCw } from "lucide-react";
+import { useT } from "@/i18n/I18nContext";
 
 export function SubjectsPage() {
+  const t = useT();
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const { data, isLoading, error, refetch } = useStudentSubjects();
 
@@ -14,9 +16,9 @@ export function SubjectsPage() {
     return (
       <div>
         <PageHeader
-          brand="KuraLean Learning"
-          title="Subjects"
-          subtitle="Loading your subjects..."
+          brand={t("KuraLearn Learning")}
+          title={t("Subjects")}
+          subtitle={t("Loading your subjects...")}
         />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -30,12 +32,16 @@ export function SubjectsPage() {
   if (error) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Subjects" subtitle="Failed to load subjects" />
+        <PageHeader
+          brand={t("KuraLearn Learning")}
+          title={t("Subjects")}
+          subtitle={t("Failed to load subjects")}
+        />
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="mb-4 rounded-full bg-red-50 p-4 text-red-600">
             <RefreshCw size={48} className="animate-spin-slow" />
           </div>
-          <h3 className="text-xl font-bold text-slate-800">Failed to load subjects</h3>
+          <h3 className="text-xl font-bold text-slate-800">{t("Failed to load subjects")}</h3>
           <p className="mt-2 max-w-xs text-slate-500">
             {(error as any)?.message || "Please check your connection and try again."}
           </p>
@@ -44,7 +50,7 @@ export function SubjectsPage() {
             className="mt-6 flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-2.5 font-bold text-white transition-all hover:bg-indigo-700 active:scale-95"
           >
             <RefreshCw size={18} />
-            Try again
+            {t("Try again")}
           </button>
         </div>
       </div>
@@ -56,22 +62,24 @@ export function SubjectsPage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
-        title="Subjects"
-        subtitle="Subjects are matched to the learner level. Switch between card view and table view."
+        brand={t("KuraLearn Learning")}
+        title={t("Subjects")}
+        subtitle={t(
+          "Subjects are matched to the learner level. Switch between card view and table view.",
+        )}
         actions={
           <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1">
             <button
               onClick={() => setViewMode("cards")}
               className={`h-9 rounded-md px-3 text-sm font-bold ${viewMode === "cards" ? "bg-emerald-700 text-white" : "text-slate-600 hover:bg-slate-50"}`}
             >
-              Cards
+              {t("Cards")}
             </button>
             <button
               onClick={() => setViewMode("table")}
               className={`h-9 rounded-md px-3 text-sm font-bold ${viewMode === "table" ? "bg-emerald-700 text-white" : "text-slate-600 hover:bg-slate-50"}`}
             >
-              Table
+              {t("Table")}
             </button>
           </div>
         }
@@ -87,11 +95,11 @@ export function SubjectsPage() {
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="p-4">Subject</th>
-                <th>Description</th>
-                <th>Courses</th>
-                <th>Progress</th>
-                <th className="pr-4 text-right">Action</th>
+                <th className="p-4">{t("Subject")}</th>
+                <th>{t("Description")}</th>
+                <th>{t("Courses")}</th>
+                <th>{t("Progress")}</th>
+                <th className="pr-4 text-right">{t("Action")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -121,7 +129,7 @@ export function SubjectsPage() {
                     />
                   </td>
                   <td className="pr-4 text-right">
-                    <PrimaryLink to={`/subjects/${subject.id}`}>Open</PrimaryLink>
+                    <PrimaryLink to={`/subjects/${subject.id}`}>{t("Open")}</PrimaryLink>
                   </td>
                 </tr>
               ))}

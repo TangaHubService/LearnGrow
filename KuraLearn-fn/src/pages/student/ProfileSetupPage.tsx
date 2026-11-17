@@ -6,6 +6,7 @@ import { StudentCard } from "@/components/student/StudentShared";
 import { useLevels, useSaveStudentProfile, useStudentProfile } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
 import { RefreshCw } from "lucide-react";
+import { useT } from "@/i18n/I18nContext";
 
 const languageOptions = [
   { value: "en", label: "English" },
@@ -19,6 +20,7 @@ const avatarOptions = [
 ];
 
 export function ProfileSetupPage() {
+  const t = useT();
   const navigate = useNavigate();
   const { data: profileData, isLoading: profileLoading, error: profileError } = useStudentProfile();
   const levels = useLevels();
@@ -48,7 +50,11 @@ export function ProfileSetupPage() {
   if (profileLoading) {
     return (
       <div className="mx-auto max-w-3xl">
-        <PageHeader brand="KuraLearn" title="Student profile setup" subtitle="Loading profile..." />
+        <PageHeader
+          brand={t("KuraLearn")}
+          title={t("Student profile setup")}
+          subtitle={t("Loading profile...")}
+        />
         <Skeleton className="h-[600px] w-full rounded-2xl" />
       </div>
     );
@@ -57,15 +63,19 @@ export function ProfileSetupPage() {
   if (profileError && !isNewProfile) {
     return (
       <div className="mx-auto max-w-3xl">
-        <PageHeader brand="KuraLearn" title="Student profile setup" subtitle="Error" />
+        <PageHeader
+          brand={t("KuraLearn")}
+          title={t("Student profile setup")}
+          subtitle={t("Error")}
+        />
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <RefreshCw size={48} className="mb-4 text-red-600" />
-          <h3 className="text-xl font-bold">Failed to load profile</h3>
+          <h3 className="text-xl font-bold">{t("Failed to load profile")}</h3>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 text-indigo-600 font-bold"
           >
-            Retry
+            {t("Retry")}
           </button>
         </div>
       </div>
@@ -93,14 +103,16 @@ export function ProfileSetupPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
-        brand="KuraLearn"
-        title="Student profile setup"
-        subtitle="Choose the level, language, avatar and interests that shape the learner dashboard."
+        brand={t("KuraLearn")}
+        title={t("Student profile setup")}
+        subtitle={t(
+          "Choose the level, language, avatar and interests that shape the learner dashboard.",
+        )}
       />
       <StudentCard>
         <form className="grid gap-4" onSubmit={handleSubmit}>
           <label className="grid gap-2 font-bold">
-            Full name
+            {t("Full name")}
             <input
               className="h-12 rounded-lg border border-slate-200 px-4 font-bold outline-none focus:border-emerald-500"
               value={fullName}
@@ -110,7 +122,7 @@ export function ProfileSetupPage() {
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 font-bold">
-              Date of birth
+              {t("Date of birth")}
               <input
                 type="date"
                 className="h-12 rounded-lg border border-slate-200 px-4 font-bold outline-none focus:border-emerald-500"
@@ -119,7 +131,7 @@ export function ProfileSetupPage() {
               />
             </label>
             <CustomDropdown
-              label="Level"
+              label={t("Level")}
               value={levelId}
               options={(levels.data ?? []).map((level) => ({ value: level.id, label: level.name }))}
               loading={levels.isLoading}
@@ -128,24 +140,24 @@ export function ProfileSetupPage() {
             />
           </div>
           <label className="grid gap-2 font-bold">
-            Interests
+            {t("Interests")}
             <input
               className="h-12 rounded-lg border border-slate-200 px-4 font-bold outline-none focus:border-emerald-500"
-              placeholder="e.g. math games, stories, science"
+              placeholder={t("e.g. math games, stories, science")}
               value={interests}
               onChange={(event) => setInterests(event.target.value)}
             />
           </label>
           <div className="grid gap-4 sm:grid-cols-2">
             <CustomDropdown
-              label="Avatar"
+              label={t("Avatar")}
               value={avatar}
               options={avatarOptions}
               onChange={(value) => setAvatar(value ?? "star")}
               clearable={false}
             />
             <CustomDropdown
-              label="Language"
+              label={t("Language")}
               value={language}
               options={languageOptions}
               onChange={(value) => setLanguage(value ?? "en")}
@@ -164,7 +176,7 @@ export function ProfileSetupPage() {
             className="h-12 rounded-lg bg-emerald-700 font-bold text-white mt-4 hover:bg-emerald-800 transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
           >
             {saveMutation.isPending && <RefreshCw size={18} className="animate-spin" />}
-            {saveMutation.isPending ? "Saving..." : "Save and continue"}
+            {saveMutation.isPending ? t("Saving...") : t("Save and continue")}
           </button>
         </form>
       </StudentCard>

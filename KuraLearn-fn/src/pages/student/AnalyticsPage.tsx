@@ -23,6 +23,7 @@ import { useStudentAnalytics } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
 import { RefreshCw, TrendingUp, AlertTriangle, Sparkles, Brain, Clock, Award } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useT } from "@/i18n/I18nContext";
 
 const CHART_COLORS = ["#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"];
 const SEVERITY_ICONS: Record<string, any> = {
@@ -42,12 +43,17 @@ const SEVERITY_ICON_CLS: Record<string, string> = {
 };
 
 export function AnalyticsPage() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useStudentAnalytics();
 
   if (isLoading) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Progress analytics" subtitle="Loading..." />
+        <PageHeader
+          brand={t("KuraLearn Learning")}
+          title={t("Progress analytics")}
+          subtitle={t("Loading...")}
+        />
         <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
           <Skeleton className="h-64 w-full rounded-2xl" />
           <Skeleton className="h-64 w-full rounded-2xl" />
@@ -63,12 +69,16 @@ export function AnalyticsPage() {
   if (error) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Progress analytics" subtitle="Error" />
+        <PageHeader
+          brand={t("KuraLearn Learning")}
+          title={t("Progress analytics")}
+          subtitle={t("Error")}
+        />
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <RefreshCw size={48} className="mb-4 text-red-600" />
-          <h3 className="text-xl font-bold">Failed to load analytics</h3>
+          <h3 className="text-xl font-bold">{t("Failed to load analytics")}</h3>
           <button onClick={() => refetch()} className="mt-4 text-indigo-600 font-bold">
-            Retry
+            {t("Retry")}
           </button>
         </div>
       </div>
@@ -100,40 +110,42 @@ export function AnalyticsPage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
-        title="Progress analytics"
-        subtitle="Detailed learning analytics, performance trends, attendance, and AI-powered insights."
+        brand={t("KuraLearn Learning")}
+        title={t("Progress analytics")}
+        subtitle={t(
+          "Detailed learning analytics, performance trends, attendance, and AI-powered insights.",
+        )}
       />
 
       {/* Summary stats */}
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {[
           {
-            label: "Total time",
+            label: t("Total time"),
             value: `${summary.totalTimeMinutes || 0}m`,
             icon: Clock,
             color: "#f97316",
           },
           {
-            label: "Lessons done",
+            label: t("Lessons done"),
             value: summary.completedLessons || 0,
             icon: Award,
             color: "#059669",
           },
           {
-            label: "Overall progress",
+            label: t("Overall progress"),
             value: `${summary.overallProgress || 0}%`,
             icon: TrendingUp,
             color: "#2563eb",
           },
           {
-            label: "Avg quiz score",
+            label: t("Avg quiz score"),
             value: summary.avgQuizScore != null ? `${summary.avgQuizScore}%` : "—",
             icon: Brain,
             color: "#8b5cf6",
           },
           {
-            label: "Attendance",
+            label: t("Attendance"),
             value: summary.termAttendanceRate != null ? `${summary.termAttendanceRate}%` : "—",
             icon: Award,
             color: "#0ea5e9",
@@ -160,7 +172,7 @@ export function AnalyticsPage() {
       {/* Charts row */}
       <div className="grid gap-5 xl:grid-cols-[1.2fr_0.9fr]">
         <StudentCard>
-          <h2 className="text-lg font-bold">Weekly activity (minutes)</h2>
+          <h2 className="text-lg font-bold">{t("Weekly activity (minutes)")}</h2>
           <div className="mt-2 h-48">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weeklyActivity} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
@@ -198,7 +210,7 @@ export function AnalyticsPage() {
           </div>
         </StudentCard>
         <StudentCard>
-          <h2 className="text-lg font-bold">Monthly trend</h2>
+          <h2 className="text-lg font-bold">{t("Monthly trend")}</h2>
           <div className="mt-2 h-48">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
@@ -243,9 +255,11 @@ export function AnalyticsPage() {
             </ResponsiveContainer>
           </div>
           <div className="mt-3 flex items-center justify-between text-xs font-bold text-slate-500">
-            <span>Total: {summary.totalTimeMinutes || 0}m</span>
             <span>
-              Avg:{" "}
+              {t("Total:")} {summary.totalTimeMinutes || 0}m
+            </span>
+            <span>
+              {t("Avg:")}{" "}
               {monthlyTrend.minutes.length > 0
                 ? Math.round(
                     monthlyTrend.minutes.reduce((a: number, b: number) => a + b, 0) /
@@ -261,7 +275,7 @@ export function AnalyticsPage() {
       {/* Subject progress + competency radar */}
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <StudentCard>
-          <h2 className="font-bold">Subject progress & quiz scores</h2>
+          <h2 className="font-bold">{t("Subject progress & quiz scores")}</h2>
           <div className="mt-4 space-y-4">
             {topicPerformance.length > 0 ? (
               topicPerformance.map((topic: any) => (
@@ -269,7 +283,7 @@ export function AnalyticsPage() {
                   <div className="mb-1 flex items-center justify-between text-sm font-bold">
                     <span>{topic.subjectName}</span>
                     <span className="text-xs text-slate-500">
-                      Quiz:{" "}
+                      {t("Quiz:")}{" "}
                       <span
                         className={
                           topic.avgQuizScore >= 70
@@ -281,7 +295,8 @@ export function AnalyticsPage() {
                       >
                         {topic.avgQuizScore > 0 ? `${topic.avgQuizScore}%` : "—"}
                       </span>
-                      {" | "}Progress: {topic.progress}%
+                      {" | "}
+                      {t("Progress:")} {topic.progress}%
                     </span>
                   </div>
                   <div className="flex gap-2">
@@ -303,20 +318,21 @@ export function AnalyticsPage() {
                   </div>
                   {topic.competencyGap != null && topic.competencyGap > 30 && (
                     <p className="mt-1 text-[10px] font-bold text-amber-700">
-                      Gap: {topic.competencyGap}% between progress and quiz score — review material
+                      {t("Gap:")} {topic.competencyGap}
+                      {t("% between progress and quiz score — review material")}
                     </p>
                   )}
                 </div>
               ))
             ) : (
-              <p className="py-8 text-center text-slate-500">No subject progress data.</p>
+              <p className="py-8 text-center text-slate-500">{t("No subject progress data.")}</p>
             )}
           </div>
         </StudentCard>
 
         {/* Competency radar */}
         <StudentCard>
-          <h2 className="font-bold">Competency overview</h2>
+          <h2 className="font-bold">{t("Competency overview")}</h2>
           {radarData.length >= 3 ? (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -361,7 +377,7 @@ export function AnalyticsPage() {
             </div>
           ) : (
             <div className="flex h-48 items-center justify-center text-sm text-slate-500">
-              Complete lessons in 3+ subjects to see competency overview
+              {t("Complete lessons in 3+ subjects to see competency overview")}
             </div>
           )}
         </StudentCard>
@@ -370,14 +386,22 @@ export function AnalyticsPage() {
       {/* Attendance trend */}
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <StudentCard>
-          <h2 className="font-bold">Attendance trend</h2>
+          <h2 className="font-bold">{t("Attendance trend")}</h2>
           {attendanceTrend.length > 0 ? (
             <div className="mt-4">
               <div className="mb-3 flex flex-wrap gap-4 text-xs font-bold">
-                <span className="text-emerald-700">Present: {attendance.termPresent || 0}</span>
-                <span className="text-amber-700">Late: {attendance.termLate || 0}</span>
-                <span className="text-rose-700">Absent: {attendance.termAbsent || 0}</span>
-                <span className="text-slate-500">Total: {attendance.termTotal || 0}</span>
+                <span className="text-emerald-700">
+                  {t("Present:")} {attendance.termPresent || 0}
+                </span>
+                <span className="text-amber-700">
+                  {t("Late:")} {attendance.termLate || 0}
+                </span>
+                <span className="text-rose-700">
+                  {t("Absent:")} {attendance.termAbsent || 0}
+                </span>
+                <span className="text-slate-500">
+                  {t("Total:")} {attendance.termTotal || 0}
+                </span>
               </div>
               <div className="h-40">
                 <ResponsiveContainer width="100%" height="100%">
@@ -415,12 +439,14 @@ export function AnalyticsPage() {
               </div>
             </div>
           ) : (
-            <p className="py-8 text-center text-slate-500">No attendance data for this term.</p>
+            <p className="py-8 text-center text-slate-500">
+              {t("No attendance data for this term.")}
+            </p>
           )}
         </StudentCard>
 
         <StudentCard>
-          <h2 className="font-bold">Recommended next study</h2>
+          <h2 className="font-bold">{t("Recommended next study")}</h2>
           {recommendedNextStudy ? (
             <div className="mt-4">
               <p className="text-lg font-bold text-emerald-700">{recommendedNextStudy.subject}</p>
@@ -435,7 +461,7 @@ export function AnalyticsPage() {
             </div>
           ) : (
             <p className="py-8 text-center text-slate-500">
-              Start learning to get personalized recommendations.
+              {t("Start learning to get personalized recommendations.")}
             </p>
           )}
         </StudentCard>
@@ -445,7 +471,7 @@ export function AnalyticsPage() {
       {quizTrend.length > 0 && (
         <div className="mt-5">
           <StudentCard>
-            <h2 className="font-bold">Quiz score trend</h2>
+            <h2 className="font-bold">{t("Quiz score trend")}</h2>
             <div className="mt-2 h-40">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={quizTrend} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
@@ -500,14 +526,16 @@ export function AnalyticsPage() {
           <StudentCard>
             <h2 className="font-bold flex items-center gap-2">
               <AlertTriangle size={16} className="text-amber-700" />
-              Areas needing improvement
+              {t("Areas needing improvement")}
             </h2>
             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {weakTopics.map((w: any) => (
                 <div key={w.subject} className="rounded-lg border border-amber-200 bg-amber-50 p-3">
                   <p className="font-bold text-amber-800">{w.subject}</p>
                   <p className="text-xs font-bold text-amber-700">
-                    {w.lowScoreCount} low quiz score{w.lowScoreCount !== 1 ? "s" : ""}
+                    {w.lowScoreCount === 1
+                      ? t("1 low quiz score")
+                      : t("{count} low quiz scores", { count: w.lowScoreCount })}
                   </p>
                 </div>
               ))}
@@ -521,7 +549,7 @@ export function AnalyticsPage() {
         <div className="mt-5 space-y-3">
           <h2 className="text-lg font-bold text-[#0b1f4d] flex items-center gap-2">
             <Sparkles size={20} className="text-emerald-700" />
-            AI Insights & Recommendations
+            {t("AI Insights & Recommendations")}
           </h2>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {insights.map((insight: any, i: number) => {
@@ -546,13 +574,13 @@ export function AnalyticsPage() {
       )}
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <PrimaryLink to="/student/marks">View marks</PrimaryLink>
-        <PrimaryLink to="/student/attendance">Attendance details</PrimaryLink>
+        <PrimaryLink to="/student/marks">{t("View marks")}</PrimaryLink>
+        <PrimaryLink to="/student/attendance">{t("Attendance details")}</PrimaryLink>
         <Link
           to="/ai"
           className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors"
         >
-          Ask AI Tutor
+          {t("Ask AI Tutor")}
         </Link>
       </div>
     </div>

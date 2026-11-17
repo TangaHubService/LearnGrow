@@ -31,8 +31,10 @@ import { ClassesOverviewPanel } from "./components/dashboard/ClassesOverviewPane
 import { LearnerSupportPanel } from "./components/dashboard/LearnerSupportPanel";
 import { AiQuickActions } from "./components/dashboard/AiQuickActions";
 import { RecentAiOutputsPanel } from "./components/dashboard/RecentAiOutputsPanel";
+import { useT } from "@/i18n/I18nContext";
 
 export function TeacherDashboardPage() {
+  const t = useT();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const today = useMemo(() => localDateKey(), []);
@@ -72,7 +74,7 @@ export function TeacherDashboardPage() {
     onSuccess: () => {
       invalidateTeacherDashboard(queryClient);
       queryClient.invalidateQueries({ queryKey: ["teacher-lessons"] });
-      dispatch(pushToast({ tone: "success", message: "Lesson marked as taught" }));
+      dispatch(pushToast({ tone: "success", message: t("Lesson marked as taught") }));
     },
     onError: (e) =>
       dispatch(pushToast({ tone: "error", message: e instanceof Error ? e.message : "Error" })),
@@ -99,35 +101,35 @@ export function TeacherDashboardPage() {
   const statCards = stats.data
     ? [
         {
-          label: "Today's Lessons",
+          label: t("Today's Lessons"),
           value: stats.data.todaysLessons,
           caption: `${stats.data.completedLessons} completed`,
           icon: CalendarDays,
           tone: "#6d3eeb",
         },
         {
-          label: "My Classes",
+          label: t("My Classes"),
           value: stats.data.myClasses,
           caption: "All assigned",
           icon: stats.data.Users || CalendarDays,
           tone: "#2563eb",
         },
         {
-          label: "My Subjects",
+          label: t("My Subjects"),
           value: stats.data.mySubjects,
           caption: "All assigned",
           icon: stats.data.BookOpen || CalendarDays,
           tone: "#16a34a",
         },
         {
-          label: "Pending Plans",
+          label: t("Pending Plans"),
           value: stats.data.pendingLessonPlans,
           caption: "To be prepared",
           icon: stats.data.FileText || CalendarDays,
           tone: "#f59e0b",
         },
         {
-          label: "Pending Grading",
+          label: t("Pending Grading"),
           value: stats.data.pendingAssessments,
           caption: "To be marked",
           icon: stats.data.ClipboardCheck || CalendarDays,
@@ -139,7 +141,7 @@ export function TeacherDashboardPage() {
   return (
     <DashboardPageLayout
       title={`Welcome back, ${teacher.data?.name ?? "Teacher"}`}
-      subtitle="Here's what's happening in your classes today."
+      subtitle={t("Here's what's happening in your classes today.")}
       action={
         <div className="flex gap-2">
           <DashboardHeaderPill>
@@ -162,7 +164,7 @@ export function TeacherDashboardPage() {
             className="inline-flex h-11 items-center gap-2 rounded-lg border bg-white px-4 text-sm font-bold text-slate-600 shadow-sm hover:bg-slate-50"
           >
             <RefreshCw size={17} className={isRefreshing ? "animate-spin" : ""} />
-            Refresh
+            {t("Refresh")}
           </button>
         </div>
       }

@@ -5,15 +5,21 @@ import { CourseCard } from "@/components/student/CourseCard";
 import { useSubjectCourses } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
 import { RefreshCw } from "lucide-react";
+import { useT } from "@/i18n/I18nContext";
 
 export function CoursesPage() {
+  const t = useT();
   const { subjectId } = useParams<{ subjectId: string }>();
   const { data, isLoading, error, refetch } = useSubjectCourses(subjectId || "");
 
   if (isLoading) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Courses" subtitle="Loading..." />
+        <PageHeader
+          brand={t("KuraLearn Learning")}
+          title={t("Courses")}
+          subtitle={t("Loading...")}
+        />
         <div className="grid gap-4 lg:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="h-48 w-full rounded-2xl" />
@@ -26,14 +32,14 @@ export function CoursesPage() {
   if (error || !data) {
     return (
       <StudentEmptyState
-        title="Subject not found"
-        message="Go back to subjects and choose another card."
+        title={t("Subject not found")}
+        message={t("Go back to subjects and choose another card.")}
         action={
           <button
             onClick={() => refetch()}
             className="mt-4 text-indigo-600 font-bold flex items-center gap-2"
           >
-            <RefreshCw size={16} /> Retry
+            <RefreshCw size={16} /> {t("Retry")}
           </button>
         }
       />
@@ -47,10 +53,10 @@ export function CoursesPage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
+        brand={t("KuraLearn Learning")}
         title={subjectName}
         subtitle={data.description || "Explore courses in this subject."}
-        actions={<SecondaryLink to="/subjects">All subjects</SecondaryLink>}
+        actions={<SecondaryLink to="/subjects">{t("All subjects")}</SecondaryLink>}
       />
       <div className="grid gap-4 lg:grid-cols-2">
         {courses.length > 0 ? (
@@ -58,8 +64,8 @@ export function CoursesPage() {
         ) : (
           <div className="col-span-full">
             <StudentEmptyState
-              title="No courses yet"
-              message="There are no courses assigned to this subject yet."
+              title={t("No courses yet")}
+              message={t("There are no courses assigned to this subject yet.")}
             />
           </div>
         )}

@@ -1,9 +1,11 @@
+import { useT } from "@/i18n/I18nContext";
 interface RetryErrorProps {
   message?: string;
   onRetry: () => void;
 }
 
 export function RetryError({ message = "Something went wrong", onRetry }: RetryErrorProps) {
+  const t = useT();
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center" role="alert">
       <div className="mb-3 rounded-full bg-red-100 p-3">
@@ -21,13 +23,13 @@ export function RetryError({ message = "Something went wrong", onRetry }: RetryE
           />
         </svg>
       </div>
-      <h3 className="text-base font-semibold text-slate-800">Error</h3>
+      <h3 className="text-base font-semibold text-slate-800">{t("Error")}</h3>
       <p className="mt-1 text-sm text-slate-500">{message}</p>
       <button
         onClick={onRetry}
         className="mt-4 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
       >
-        Try Again
+        {t("Try Again")}
       </button>
     </div>
   );

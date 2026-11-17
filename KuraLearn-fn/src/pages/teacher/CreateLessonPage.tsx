@@ -13,11 +13,13 @@ import { useLessonAi } from "./hooks/useLessonAi";
 // --- Sub-components ---
 import { LessonFormBody } from "./components/lesson/LessonFormBody";
 import { LessonPreviewModal } from "./components/lesson/LessonPreviewModal";
+import { useT } from "@/i18n/I18nContext";
 
 interface LessonFormData {
   title: string;
   classId: string;
   subjectId: string;
+  syllabusUnitId?: string | null;
   topic?: string;
   learningObjectives?: string;
   genericCompetencies?: string[];
@@ -45,6 +47,7 @@ function isEmptyHtml(html: string): boolean {
 }
 
 export function CreateLessonPage() {
+  const t = useT();
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -116,17 +119,19 @@ export function CreateLessonPage() {
           title: lesson.title || "",
           classId: lesson.classId || "",
           subjectId: lesson.subjectId || lesson.subjectName || "",
+          syllabusUnitId: lesson.syllabusUnitId ?? null,
           topic: lesson.topic || "",
           learningObjectives: lesson.learningObjectives || "",
           genericCompetencies: lesson.genericCompetencies || [],
           crossCuttingIssues: lesson.crossCuttingIssues || [],
           teacherActivities: lesson.teacherActivities || "",
           learnerActivities: lesson.learnerActivities || "",
+          assessmentCriteria: lesson.assessmentCriteria || "",
           lessonContentHtml: lesson.lessonContentHtml || lesson.content || lesson.body || "",
           status: lesson.status === "PUBLISHED" ? "published" : "draft",
         });
     } catch (e) {
-      dispatch(pushToast({ tone: "error", message: "Could not load lesson plan" }));
+      dispatch(pushToast({ tone: "error", message: t("Could not load lesson plan") }));
     } finally {
       setIsLoading(false);
     }
@@ -206,24 +211,24 @@ export function CreateLessonPage() {
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
         >
-          <ArrowLeft size={18} /> Back
+          <ArrowLeft size={18} /> {t("Back")}
         </button>
         <button
           onClick={() => setShowPreview(true)}
           className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
         >
-          <Eye size={18} /> Preview
+          <Eye size={18} /> {t("Preview")}
         </button>
       </div>
 
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">
-          {isEditMode ? "Edit Lesson" : "Create Lesson"}
+          {isEditMode ? t("Edit Lesson") : t("Create Lesson")}
         </h1>
         <p className="mt-1 text-sm font-medium text-slate-500">
           {isEditMode
-            ? "Update your lesson plan below"
-            : "Fill in the details for your new lesson plan"}
+            ? t("Update your lesson plan below")
+            : t("Fill in the details for your new lesson plan")}
         </p>
       </div>
 
@@ -235,11 +240,11 @@ export function CreateLessonPage() {
         classOptions={classOptions}
         subjectOptions={subjectOptions}
         handleClassChange={(v) => {
-          setFormData((p) => ({ ...p, classId: v || "", subjectId: "" }));
+          setFormData((p) => ({ ...p, classId: v || "", subjectId: "", syllabusUnitId: null }));
           setErrors((p) => ({ ...p, classId: undefined }));
         }}
         handleSubjectChange={(v) => {
-          setFormData((p) => ({ ...p, subjectId: v || "" }));
+          setFormData((p) => ({ ...p, subjectId: v || "", syllabusUnitId: null }));
           setErrors((p) => ({ ...p, subjectId: undefined }));
         }}
         handleContentChange={(h) => {
@@ -255,7 +260,7 @@ export function CreateLessonPage() {
           onClick={() => navigate("/teacher/lessons")}
           className="flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
         >
-          <X size={18} /> Cancel
+          <X size={18} /> {t("Cancel")}
         </button>
         <div className="flex flex-wrap gap-3">
           <button
@@ -263,14 +268,14 @@ export function CreateLessonPage() {
             disabled={isSaving}
             className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
           >
-            <Save size={18} /> Save Draft
+            <Save size={18} /> {t("Save Draft")}
           </button>
           <button
             onClick={() => handleAction(true)}
             disabled={isSaving}
             className="flex items-center gap-2 rounded-lg bg-[#6d3eeb] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#5b31cb]"
           >
-            <Send size={18} /> Publish Lesson
+            <Send size={18} /> {t("Publish Lesson")}
           </button>
         </div>
       </div>
@@ -294,6 +299,7 @@ export function LessonForm({
   mode?: "create" | "edit";
   onClose?: () => void;
 }) {
+  const t = useT();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const reference = useTeacherReferenceData();
@@ -303,6 +309,7 @@ export function LessonForm({
     title: record?.title || "",
     classId: record?.classId || "",
     subjectId: record?.subjectId || record?.subjectName || "",
+    syllabusUnitId: record?.syllabusUnitId ?? null,
     topic: record?.topic || "",
     learningObjectives: record?.learningObjectives || "",
     genericCompetencies: record?.genericCompetencies || [],
@@ -402,11 +409,11 @@ export function LessonForm({
         classOptions={classOptions}
         subjectOptions={subjectOptions}
         handleClassChange={(v) => {
-          setFormData((p) => ({ ...p, classId: v || "", subjectId: "" }));
+          setFormData((p) => ({ ...p, classId: v || "", subjectId: "", syllabusUnitId: null }));
           setErrors((p) => ({ ...p, classId: undefined }));
         }}
         handleSubjectChange={(v) => {
-          setFormData((p) => ({ ...p, subjectId: v || "" }));
+          setFormData((p) => ({ ...p, subjectId: v || "", syllabusUnitId: null }));
           setErrors((p) => ({ ...p, subjectId: undefined }));
         }}
         handleContentChange={(h) => {
@@ -418,14 +425,15 @@ export function LessonForm({
       />
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="secondary" onClick={onClose}>
-          Cancel
+          {t("Cancel")}
         </Button>
         <Button variant="secondary" onClick={() => handleSave(false)} disabled={isSaving}>
-          {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save
-          Draft
+          {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}{" "}
+          {t("Save Draft")}
         </Button>
         <Button onClick={() => handleSave(true)} disabled={isSaving}>
-          {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} Publish
+          {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}{" "}
+          {t("Publish")}
         </Button>
       </div>
     </div>

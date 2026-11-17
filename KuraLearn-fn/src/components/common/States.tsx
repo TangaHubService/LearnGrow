@@ -1,11 +1,13 @@
 import { ReactNode } from "react";
 import { RefreshCw } from "lucide-react";
 import { Card } from "./Card";
+import { useT } from "@/i18n/I18nContext";
 
 export function ErrorState({ message }: { message: string }) {
+  const t = useT();
   return (
     <Card className="border-rose-100 bg-rose-50 text-rose-700">
-      <p className="text-sm font-bold">Something needs attention</p>
+      <p className="text-sm font-bold">{t("Something needs attention")}</p>
       <p className="mt-0.5 text-sm font-medium">{message}</p>
     </Card>
   );
@@ -41,15 +43,16 @@ export function InlineEmptyState({ message, action }: { message: string; action?
 }
 
 export function InlineErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const t = useT();
   return (
     <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-      <p className="font-bold">Could not load this section.</p>
+      <p className="font-bold">{t("Could not load this section.")}</p>
       <p className="mt-1 text-sm font-bold">{message}</p>
       <button
         onClick={onRetry}
         className="mt-3 inline-flex h-9 items-center gap-2 rounded-lg bg-red-600 px-3 text-sm font-bold text-white"
       >
-        <RefreshCw size={15} /> Retry
+        <RefreshCw size={15} /> {t("Retry")}
       </button>
     </div>
   );

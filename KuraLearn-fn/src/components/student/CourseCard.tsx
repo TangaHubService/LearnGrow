@@ -1,6 +1,8 @@
 import { StudentCard, StudentProgressBar, PrimaryLink, SecondaryLink } from "./StudentShared";
+import { useT } from "@/i18n/I18nContext";
 
 export function CourseCard({ course }: { course: any }) {
+  const t = useT();
   if (!course) return null;
   const firstLessonId = course.lessons?.[0]?.id || course.firstLessonId;
   const quizId = course.quiz?.id || course.quizId;
@@ -15,18 +17,18 @@ export function CourseCard({ course }: { course: any }) {
         <span
           className={`rounded-lg px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${course.locked ? "bg-slate-100 text-slate-500" : "bg-emerald-50 text-emerald-700"}`}
         >
-          {course.locked ? "Locked" : "Open"}
+          {course.locked ? t("Locked") : t("Open")}
         </span>
       </div>
       <div className="mt-4">
         <StudentProgressBar value={course.progress || 0} />
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        <PrimaryLink to={`/courses/${course.id}/path`}>Learning path</PrimaryLink>
+        <PrimaryLink to={`/courses/${course.id}/path`}>{t("Learning path")}</PrimaryLink>
         {firstLessonId && (
-          <SecondaryLink to={`/lessons/${firstLessonId}`}>Start lesson</SecondaryLink>
+          <SecondaryLink to={`/lessons/${firstLessonId}`}>{t("Start lesson")}</SecondaryLink>
         )}
-        {quizId && <SecondaryLink to={`/quizzes/${quizId}`}>Quiz</SecondaryLink>}
+        {quizId && <SecondaryLink to={`/quizzes/${quizId}`}>{t("Quiz")}</SecondaryLink>}
       </div>
     </StudentCard>
   );

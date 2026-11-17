@@ -1,5 +1,6 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { ClassAttendance } from "@/services/teacherApi";
+import { useT } from "@/i18n/I18nContext";
 
 const BAR_COLOR = "#6d3eeb";
 const PERCENT_TICKS = [0, 25, 50, 75, 100];
@@ -17,6 +18,7 @@ function AttendanceTooltip({
   active?: boolean;
   payload?: Array<{ payload: ClassAttendance }>;
 }) {
+  const t = useT();
   const row = payload?.[0]?.payload;
   if (!active || !row) return null;
 
@@ -24,15 +26,17 @@ function AttendanceTooltip({
     <div className="rounded-xl bg-white px-3 py-2 text-xs text-slate-600 shadow-lg ring-1 ring-slate-100">
       <p className="font-bold text-slate-900">{row.className}</p>
       {row.rate === null ? (
-        <p className="mt-1">No attendance marked in this period</p>
+        <p className="mt-1">{t("No attendance marked in this period")}</p>
       ) : (
         <>
-          <p className="mt-1 font-bold text-slate-900">{row.rate}% attended</p>
+          <p className="mt-1 font-bold text-slate-900">
+            {t("{rate}% attended", { rate: row.rate })}
+          </p>
           <p className="mt-1">
-            {row.present} present, {row.late} late
+            {t("{present} present, {late} late", { present: row.present, late: row.late })}
           </p>
           <p>
-            {row.absent} absent, {row.excused} excused
+            {t("{absent} absent, {excused} excused", { absent: row.absent, excused: row.excused })}
           </p>
         </>
       )}

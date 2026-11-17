@@ -15,6 +15,7 @@ import { MarksEntryGrid } from "@/components/marks/MarksEntryGrid";
 import { MissingMarksPanel } from "@/components/marks/MissingMarksPanel";
 import { AnalyticsMetricCard } from "@/components/marks/AnalyticsMetricCard";
 import { marksWorkflowApi, type MarkSubmissionDetail } from "@/services/marksWorkflowApi";
+import { useT } from "@/i18n/I18nContext";
 
 type DraftRow = {
   studentId: string;
@@ -33,6 +34,7 @@ const defaultSelector: MarksSelectorValue = {
 };
 
 export function TeacherMarksPage() {
+  const t = useT();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -252,7 +254,7 @@ export function TeacherMarksPage() {
       return marksWorkflowApi.submit(id);
     },
     onSuccess: () => {
-      dispatch(pushToast({ tone: "success", message: "Marks submitted for approval" }));
+      dispatch(pushToast({ tone: "success", message: t("Marks submitted for approval") }));
       setDirty(false);
       queryClient.invalidateQueries({ queryKey: ["mark-submissions"] });
       queryClient.invalidateQueries({ queryKey: ["mark-submission-detail"] });
@@ -294,7 +296,7 @@ export function TeacherMarksPage() {
       dispatch(
         pushToast({
           tone: "error",
-          message: "Select year, term, class, subject, and assessment first",
+          message: t("Select year, term, class, subject, and assessment first"),
         }),
       );
       return;
@@ -304,7 +306,9 @@ export function TeacherMarksPage() {
 
   const handleSubmit = () => {
     if (missingRows.length) {
-      dispatch(pushToast({ tone: "error", message: "Fill all missing marks before submitting" }));
+      dispatch(
+        pushToast({ tone: "error", message: t("Fill all missing marks before submitting") }),
+      );
       return;
     }
     submitMutation.mutate();
@@ -354,7 +358,7 @@ export function TeacherMarksPage() {
       }),
     );
     setDirty(true);
-    dispatch(pushToast({ tone: "success", message: "Excel marks imported into the draft" }));
+    dispatch(pushToast({ tone: "success", message: t("Excel marks imported into the draft") }));
   };
 
   const submission = detailQuery.data?.submission || submissionsQuery.data?.items?.[0];
@@ -363,8 +367,10 @@ export function TeacherMarksPage() {
     <>
       <div className="space-y-5">
         <PageHeader
-          title="Marks Entry"
-          subtitle="Record draft marks, autosave progress, and submit a locked batch for school review."
+          title={t("Marks Entry")}
+          subtitle={t(
+            "Record draft marks, autosave progress, and submit a locked batch for school review.",
+          )}
           actions={
             <div className="flex flex-wrap gap-2">
               <input
@@ -379,23 +385,23 @@ export function TeacherMarksPage() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={locked}
               >
-                <FileSpreadsheet size={16} /> Import
+                <FileSpreadsheet size={16} /> {t("Import")}
               </Button>
               <Button variant="secondary" onClick={handleExport} disabled={!rows.length}>
-                <Download size={16} /> Export
+                <Download size={16} /> {t("Export")}
               </Button>
               <Button
                 variant="secondary"
                 onClick={handleSave}
                 disabled={locked || saveMutation.isPending || !rows.length}
               >
-                <Save size={16} /> Save Draft
+                <Save size={16} /> {t("Save Draft")}
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={locked || submitMutation.isPending || (!submissionId && !rows.length)}
               >
-                <Send size={16} /> Submit
+                <Send size={16} /> {t("Submit")}
               </Button>
             </div>
           }
@@ -410,25 +416,25 @@ export function TeacherMarksPage() {
 
         <div className="grid gap-3 md:grid-cols-4">
           <AnalyticsMetricCard
-            label="Recorded"
+            label={t("Recorded")}
             value={`${validRows.length}/${rows.length}`}
             helper="Valid learner scores"
             tone="emerald"
           />
           <AnalyticsMetricCard
-            label="Missing"
+            label={t("Missing")}
             value={missingRows.length}
             helper="Must be completed before submission"
             tone={missingRows.length ? "amber" : "slate"}
           />
           <AnalyticsMetricCard
-            label="Class Average"
+            label={t("Class Average")}
             value={`${average}%`}
             helper="Draft average from visible records"
             tone="blue"
           />
           <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-[11px] font-bold uppercase text-slate-500">Workflow</p>
+            <p className="text-[11px] font-bold uppercase text-slate-500">{t("Workflow")}</p>
             <div className="mt-3">
               <ApprovalStatusBadge
                 status={submission?.status || "DRAFT"}
@@ -438,16 +444,16 @@ export function TeacherMarksPage() {
             <p className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-slate-500">
               {autoSaveState === "offline" ? <WifiOff size={14} /> : <ShieldCheck size={14} />}
               {autoSaveState === "saving"
-                ? "Autosaving..."
+                ? t("Autosaving...")
                 : autoSaveState === "saved"
-                  ? "Draft saved"
+                  ? t("Draft saved")
                   : autoSaveState === "error"
-                    ? "Saved locally after an error"
+                    ? t("Saved locally after an error")
                     : autoSaveState === "offline"
-                      ? "Recovered local draft"
+                      ? t("Recovered local draft")
                       : dirty
-                        ? "Unsaved local changes"
-                        : "Ready"}
+                        ? t("Unsaved local changes")
+                        : t("Ready")}
             </p>
           </article>
         </div>

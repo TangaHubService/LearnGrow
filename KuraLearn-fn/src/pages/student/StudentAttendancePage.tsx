@@ -5,6 +5,7 @@ import { Card } from "@/components/common/Card";
 import { DashboardStatGrid } from "@/components/dashboard/DashboardLayout";
 import { Skeleton } from "@/components/common/Skeleton";
 import { useStudentAttendanceSummary } from "@/hooks/useStudentPortal";
+import { useT } from "@/i18n/I18nContext";
 
 const STATUS_ICON: Record<string, typeof CheckCircle2> = {
   PRESENT: CheckCircle2,
@@ -21,6 +22,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 function AttendanceContent() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useStudentAttendanceSummary();
 
   if (isLoading) {
@@ -40,9 +42,9 @@ function AttendanceContent() {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <RefreshCw size={48} className="mb-4 text-red-400" />
-        <p className="text-lg font-bold text-slate-600">Failed to load attendance</p>
+        <p className="text-lg font-bold text-slate-600">{t("Failed to load attendance")}</p>
         <button onClick={() => refetch()} className="mt-4 text-indigo-600 font-bold">
-          Retry
+          {t("Retry")}
         </button>
       </div>
     );
@@ -53,8 +55,10 @@ function AttendanceContent() {
     return (
       <Card className="py-12 text-center">
         <Calendar size={48} className="mx-auto text-slate-500 mb-3" />
-        <p className="text-lg font-bold text-slate-500">No attendance records</p>
-        <p className="mt-1 text-sm text-slate-500">Your attendance hasn't been recorded yet.</p>
+        <p className="text-lg font-bold text-slate-500">{t("No attendance records")}</p>
+        <p className="mt-1 text-sm text-slate-500">
+          {t("Your attendance hasn't been recorded yet.")}
+        </p>
       </Card>
     );
   }
@@ -67,20 +71,26 @@ function AttendanceContent() {
     <div className="space-y-6">
       <DashboardStatGrid columns="four">
         <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-          <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wide">Present</p>
+          <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wide">
+            {t("Present")}
+          </p>
           <p className="mt-2 text-3xl font-bold text-slate-900">{summary.present ?? 0}</p>
         </div>
         <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-          <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wide">Late</p>
+          <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wide">
+            {t("Late")}
+          </p>
           <p className="mt-2 text-3xl font-bold text-slate-900">{summary.late ?? 0}</p>
         </div>
         <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-          <p className="text-[11px] font-bold text-red-600 uppercase tracking-wide">Absent</p>
+          <p className="text-[11px] font-bold text-red-600 uppercase tracking-wide">
+            {t("Absent")}
+          </p>
           <p className="mt-2 text-3xl font-bold text-slate-900">{summary.absent ?? 0}</p>
         </div>
         <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <p className="text-[11px] font-bold text-indigo-600 uppercase tracking-wide">
-            Attendance Rate
+            {t("Attendance Rate")}
           </p>
           <p className="mt-2 text-3xl font-bold text-slate-900">{summary.rate ?? 0}%</p>
         </div>
@@ -89,7 +99,7 @@ function AttendanceContent() {
       {monthlyTrend.length > 0 && (
         <Card className="p-5">
           <h2 className="mb-4 text-sm font-bold text-slate-700 uppercase tracking-wide">
-            Monthly Trend
+            {t("Monthly Trend")}
           </h2>
           <div className="space-y-3">
             {monthlyTrend.map((m: any) => (
@@ -128,7 +138,7 @@ function AttendanceContent() {
       {recentRecords.length > 0 && (
         <Card className="p-5">
           <h2 className="mb-4 text-sm font-bold text-slate-700 uppercase tracking-wide">
-            Recent Records
+            {t("Recent Records")}
           </h2>
           <div className="divide-y divide-slate-50">
             {recentRecords.map((r: any) => {
@@ -168,12 +178,13 @@ function AttendanceContent() {
 }
 
 export function StudentAttendancePage() {
+  const t = useT();
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
-        title="My Attendance"
-        subtitle="Track your attendance record, monthly trends, and recent history."
+        brand={t("KuraLearn Learning")}
+        title={t("My Attendance")}
+        subtitle={t("Track your attendance record, monthly trends, and recent history.")}
       />
       <AttendanceContent />
     </div>

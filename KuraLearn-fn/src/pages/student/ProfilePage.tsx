@@ -4,8 +4,10 @@ import { StudentCard, SecondaryLink } from "@/components/student/StudentShared";
 import { BadgeTile } from "@/components/student/BadgeTile";
 import { useStudentProfile, useStudentDashboard } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
+import { useT } from "@/i18n/I18nContext";
 
 export function ProfilePage() {
+  const t = useT();
   const {
     data: profileData,
     isLoading: profileLoading,
@@ -17,7 +19,11 @@ export function ProfilePage() {
   if (profileLoading || dashboardLoading) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Student profile" subtitle="Loading..." />
+        <PageHeader
+          brand={t("KuraLearn Learning")}
+          title={t("Student profile")}
+          subtitle={t("Loading...")}
+        />
         <div className="grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
           <Skeleton className="h-64 w-full rounded-2xl" />
           <Skeleton className="h-64 w-full rounded-2xl" />
@@ -29,12 +35,16 @@ export function ProfilePage() {
   if (profileError) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Student profile" subtitle="Error" />
+        <PageHeader
+          brand={t("KuraLearn Learning")}
+          title={t("Student profile")}
+          subtitle={t("Error")}
+        />
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <RefreshCw size={48} className="mb-4 text-red-600" />
-          <h3 className="text-xl font-bold">Failed to load profile</h3>
+          <h3 className="text-xl font-bold">{t("Failed to load profile")}</h3>
           <button onClick={() => refetchProfile()} className="mt-4 text-indigo-600 font-bold">
-            Retry
+            {t("Retry")}
           </button>
         </div>
       </div>
@@ -47,10 +57,10 @@ export function ProfilePage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
-        title="Student profile"
-        subtitle="Certificates, achievements, activity history and profile settings."
-        actions={<SecondaryLink to="/profile-setup">Edit profile</SecondaryLink>}
+        brand={t("KuraLearn Learning")}
+        title={t("Student profile")}
+        subtitle={t("Certificates, achievements, activity history and profile settings.")}
+        actions={<SecondaryLink to="/profile-setup">{t("Edit profile")}</SecondaryLink>}
       />
       <div className="grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
         <StudentCard>
@@ -69,12 +79,14 @@ export function ProfilePage() {
           </div>
         </StudentCard>
         <StudentCard>
-          <h2 className="font-bold">Achievements</h2>
+          <h2 className="font-bold">{t("Achievements")}</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {badges.length > 0 ? (
               badges.map((badge: any) => <BadgeTile key={badge.id} badge={badge} />)
             ) : (
-              <p className="col-span-2 py-8 text-center text-slate-500">No achievements yet.</p>
+              <p className="col-span-2 py-8 text-center text-slate-500">
+                {t("No achievements yet.")}
+              </p>
             )}
           </div>
         </StudentCard>

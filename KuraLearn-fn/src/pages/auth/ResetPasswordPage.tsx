@@ -2,8 +2,10 @@ import { type FormEvent, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AuthCard, authButtonClass, AuthError, authInputClass } from "@/components/auth/AuthCard";
 import { authApi } from "@/lib/api";
+import { useT } from "@/i18n/I18nContext";
 
 export function ResetPasswordPage() {
+  const t = useT();
   const [params] = useSearchParams();
   const token = params.get("token") ?? "";
   const [password, setPassword] = useState("");
@@ -32,13 +34,12 @@ export function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <AuthCard title="This link is not complete">
+      <AuthCard title={t("This link is not complete")}>
         <p className="text-sm text-slate-700">
-          Open the full link from your email, or{" "}
+          {t("Open the full link from your email.")}{" "}
           <Link to="/forgot-password" className="font-bold text-[#5b2fd6] underline">
-            ask for a new one
+            {t("Ask for a new link")}
           </Link>
-          .
         </p>
       </AuthCard>
     );
@@ -46,28 +47,28 @@ export function ResetPasswordPage() {
 
   if (done) {
     return (
-      <AuthCard title="Password changed">
+      <AuthCard title={t("Password changed")}>
         <p role="status" className="mb-5 text-sm text-slate-700">
-          You can now sign in with your new password.
+          {t("You can now sign in with your new password.")}
         </p>
         <Link to="/login" className={authButtonClass}>
-          Go to sign in
+          {t("Go to sign in")}
         </Link>
       </AuthCard>
     );
   }
 
   return (
-    <AuthCard title="Choose a new password" subtitle="Use at least 8 characters.">
+    <AuthCard title={t("Choose a new password")} subtitle={t("Use at least 8 characters.")}>
       <form onSubmit={submit} className="space-y-4">
         <AuthError message={error} />
         {error?.includes("expired") ? (
           <Link to="/forgot-password" className="block text-sm font-bold text-[#5b2fd6] underline">
-            Ask for a new link
+            {t("Ask for a new link")}
           </Link>
         ) : null}
         <label className="block text-sm font-semibold text-slate-700">
-          New password
+          {t("New password")}
           <input
             type="password"
             required
@@ -79,7 +80,7 @@ export function ResetPasswordPage() {
           />
         </label>
         <label className="block text-sm font-semibold text-slate-700">
-          Confirm new password
+          {t("Confirm new password")}
           <input
             type="password"
             required
@@ -91,7 +92,7 @@ export function ResetPasswordPage() {
           />
         </label>
         <button type="submit" disabled={loading} className={authButtonClass}>
-          {loading ? "Saving..." : "Save new password"}
+          {loading ? t("Saving...") : t("Save new password")}
         </button>
       </form>
     </AuthCard>

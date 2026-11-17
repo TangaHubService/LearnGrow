@@ -12,10 +12,13 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useT } from "@/i18n/I18nContext";
+import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import educationIllustration from "@/assets/education_illustration.png";
 
 export function LoginPage() {
+  const t = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +40,9 @@ export function LoginPage() {
       navigate("/", { replace: true });
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Login failed. Check your details and try again.",
+        err instanceof Error
+          ? t(err.message)
+          : t("Login failed. Check your details and try again."),
       );
     } finally {
       setLoading(false);
@@ -49,28 +54,33 @@ export function LoginPage() {
       {/* Left Side: Login Form */}
       <section className="flex w-full flex-col justify-center p-8 sm:p-12 lg:w-[500px] xl:w-[600px]">
         <div className="mx-auto w-full max-w-md">
-          <Link
-            to="/welcome"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-[#5b2fd6]"
-          >
-            <ArrowLeft size={16} aria-hidden="true" />
-            Back to home
-          </Link>
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <Link
+              to="/welcome"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-[#5b2fd6]"
+            >
+              <ArrowLeft size={16} aria-hidden="true" />
+              {t("Back to home")}
+            </Link>
+            <LocaleSwitcher />
+          </div>
           {/* Branding */}
           <Link to="/welcome" className="mb-10 flex items-center gap-3">
             <BrandLogo />
             <div>
               <p className="text-xl font-bold tracking-tight text-slate-900">KuraLearn</p>
               <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                Inclusive Digital Education
+                {t("Inclusive digital education")}
               </p>
             </div>
           </Link>
 
           {/* Welcome Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-extrabold text-slate-900">Welcome back</h1>
-            <p className="mt-2 text-slate-500">Sign in with your school email and password.</p>
+            <h1 className="text-3xl font-extrabold text-slate-900">{t("Welcome back")}</h1>
+            <p className="mt-2 text-slate-500">
+              {t("Sign in with your school email and password.")}
+            </p>
           </div>
 
           {/* Error Message */}
@@ -85,14 +95,14 @@ export function LoginPage() {
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700" htmlFor="email">
-                Email or Username
+                {t("Email or username")}
               </label>
               <input
                 id="email"
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder={t("Enter your email")}
                 className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 font-medium outline-none transition-all focus:border-[#6d3eeb] focus:bg-white focus:ring-4 focus:ring-purple-100"
                 required
               />
@@ -101,14 +111,14 @@ export function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-bold text-slate-700" htmlFor="password">
-                  Password
+                  {t("Password")}
                 </label>
                 <Link
                   to="/forgot-password"
-                  title="Forgot password"
+                  title={t("Forgot password?")}
                   className="text-xs font-bold text-[#6d3eeb] hover:underline"
                 >
-                  Forgot password?
+                  {t("Forgot password?")}
                 </Link>
               </div>
               <div className="relative group">
@@ -125,7 +135,7 @@ export function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-600 transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t("Hide password") : t("Show password")}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -147,7 +157,7 @@ export function LoginPage() {
                   />
                 </div>
                 <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-900 transition-colors">
-                  Remember me
+                  {t("Remember me")}
                 </span>
               </label>
             </div>
@@ -159,27 +169,27 @@ export function LoginPage() {
               {loading ? (
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  <span>Signing in...</span>
+                  <span>{t("Signing in…")}</span>
                 </div>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>{t("Sign in")}</span>
                   <LogIn size={18} />
                 </>
               )}
             </button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-600">
-            New to KuraLearn?{" "}
+            {t("New to KuraLearn?")}{" "}
             <Link to="/register" className="font-bold text-[#5b2fd6] hover:underline">
-              Create an account
+              {t("Create an account")}
             </Link>
           </p>
         </div>
 
         {/* Footer info */}
         <div className="mt-auto pt-8 text-center text-[11px] font-bold uppercase tracking-wide text-slate-500">
-          © 2024 KuraLearn • Inclusive Digital Education
+          © {new Date().getFullYear()} KuraLearn • {t("Inclusive digital education")}
         </div>
       </section>
 
@@ -189,7 +199,7 @@ export function LoginPage() {
         <div className="absolute inset-0">
           <img
             src={educationIllustration}
-            alt="Education Illustration"
+            alt=""
             className="h-full w-full object-cover opacity-90"
           />
         </div>
@@ -199,50 +209,40 @@ export function LoginPage() {
           <div className="grid grid-cols-2 gap-4">
             <FeatureCard
               icon={<Zap className="text-yellow-500" />}
-              title="Lesson planning"
-              desc="Prepare lessons and share them with your classes."
+              title={t("Lesson planning")}
+              desc={t("Prepare lessons and share them with your classes.")}
             />
             <FeatureCard
               icon={<CheckCircle2 className="text-emerald-700" />}
-              title="Attendance tracking"
-              desc="Mark attendance and keep parents informed."
+              title={t("Attendance tracking")}
+              desc={t("Mark attendance and keep parents informed.")}
             />
             <FeatureCard
               icon={<Users className="text-blue-600" />}
-              title="Parent monitoring"
-              desc="Stay updated on your child's daily progress."
+              title={t("Parent monitoring")}
+              desc={t("Stay updated on your child's daily progress.")}
             />
             <FeatureCard
               icon={<GraduationCap className="text-purple-700" />}
-              title="Workload reduction"
-              desc="Less paperwork, more time for teaching."
+              title={t("Workload reduction")}
+              desc={t("Less paperwork, more time for teaching.")}
             />
           </div>
 
           <div className="rounded-2xl bg-white/95 p-8 border border-white/50 shadow-lg">
             <h3 className="text-2xl font-bold text-slate-900 leading-tight">
-              Your school, <br /> all in one place.
+              {t("Your school, all in one place.")}
             </h3>
             <p className="mt-3 text-slate-700 font-medium leading-relaxed">
-              Students, teachers and parents can follow lessons, attendance and marks from one
-              account.
+              {t(
+                "Students, teachers and parents can follow lessons, attendance and marks from one account.",
+              )}
             </p>
-            <div className="mt-6 flex gap-4">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="h-10 w-10 rounded-full border-2 border-white bg-slate-200"
-                  />
-                ))}
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-[#6d3eeb] text-[10px] font-bold text-white">
-                  +2k
-                </div>
-              </div>
-              <p className="text-xs font-bold self-center text-slate-500">
-                Trusted by 2,000+ schools nationwide
-              </p>
-            </div>
+            <p className="mt-6 text-xs font-bold text-slate-500">
+              {t(
+                "Built for Rwanda's competence-based curriculum, in Kinyarwanda, English and French.",
+              )}
+            </p>
           </div>
         </div>
 

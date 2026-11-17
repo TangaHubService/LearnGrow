@@ -16,8 +16,10 @@ import {
   type DateRange,
 } from "./AttendanceRangeFilter";
 import { ClassAttendanceChart } from "./ClassAttendanceChart";
+import { useT } from "@/i18n/I18nContext";
 
 export function ClassesOverviewPanel({ classes }: { classes: any }) {
+  const t = useT();
   const [rangeKey, setRangeKey] = useState<AttendanceRangeKey>("30d");
   const [customRange, setCustomRange] = useState<DateRange>(() => presetRange("30d"));
 
@@ -33,10 +35,10 @@ export function ClassesOverviewPanel({ classes }: { classes: any }) {
 
   return (
     <DashboardPanel
-      title="My Classes Overview"
+      title={t("My Classes Overview")}
       action={
         <Link to="/teacher/classes" className="text-sm font-bold text-[#6d3eeb]">
-          View all
+          {t("View all")}
         </Link>
       }
     >
@@ -57,14 +59,14 @@ export function ClassesOverviewPanel({ classes }: { classes: any }) {
               onCustomRangeChange={setCustomRange}
             />
             <div>
-              <p className="text-sm font-bold text-slate-900">Attendance by class</p>
+              <p className="text-sm font-bold text-slate-900">{t("Attendance by class")}</p>
               <p className="text-xs text-slate-500">
-                Share of learners marked present or late in the selected period
+                {t("Share of learners marked present or late in the selected period")}
               </p>
             </div>
             {!rangeIsValid ? (
               <p className="text-sm font-semibold text-rose-700">
-                Choose a start date that is on or before the end date.
+                {t("Choose a start date that is on or before the end date.")}
               </p>
             ) : attendance.isLoading ? (
               <DashboardSkeleton />
@@ -78,17 +80,19 @@ export function ClassesOverviewPanel({ classes }: { classes: any }) {
                 <ClassAttendanceChart items={attendance.data ?? []} />
               </div>
             ) : (
-              <InlineEmptyState message="No attendance marked in this period. Try a longer period." />
+              <InlineEmptyState
+                message={t("No attendance marked in this period. Try a longer period.")}
+              />
             )}
           </div>
           <ModernTable
             data={classes.data}
             columns={[
-              { header: "Class", accessor: "className" },
-              { header: "Subject", accessor: "subjectName" },
-              { header: "Learners", accessor: "learnerCount" },
+              { header: t("Class"), accessor: "className" },
+              { header: t("Subject"), accessor: "subjectName" },
+              { header: t("Learners"), accessor: "learnerCount" },
               {
-                header: "Next Lesson",
+                header: t("Next Lesson"),
                 accessor: (row: any) => (
                   <div>
                     <span className="block font-semibold">
@@ -103,7 +107,7 @@ export function ClassesOverviewPanel({ classes }: { classes: any }) {
                 ),
               },
               {
-                header: "Attendance",
+                header: t("Attendance"),
                 accessor: (row: any) => {
                   const record = attendanceByClass.get(row.classId);
                   if (!record) return "–";
@@ -119,7 +123,7 @@ export function ClassesOverviewPanel({ classes }: { classes: any }) {
           />
         </div>
       ) : (
-        <InlineEmptyState message="No classes assigned to you yet." />
+        <InlineEmptyState message={t("No classes assigned to you yet.")} />
       )}
     </DashboardPanel>
   );

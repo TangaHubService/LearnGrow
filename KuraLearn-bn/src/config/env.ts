@@ -48,7 +48,14 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().default("KuraLearn <noreply@kuralearn.com>"),
-  SMTP_SECURE: z.string().transform((v) => v === "true").default("false")
+  SMTP_SECURE: z.string().transform((v) => v === "true").default("false"),
+  // SMS (optional — texts are logged to the console unless a provider is configured)
+  SMS_PROVIDER: z.enum(["console", "africastalking"]).default("console"),
+  AFRICASTALKING_USERNAME: z.string().optional(),
+  AFRICASTALKING_API_KEY: z.string().optional(),
+  AFRICASTALKING_SENDER_ID: z.string().optional(),
+  /** Language of texts sent to parents: Kinyarwanda by default. */
+  SMS_LANGUAGE: z.enum(["rw", "en", "fr"]).default("rw")
 });
 
 const parsed = envSchema.parse(process.env);

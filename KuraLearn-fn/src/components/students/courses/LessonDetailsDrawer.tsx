@@ -2,6 +2,7 @@ import { Eye, Clock, Play, ChevronRight } from "lucide-react";
 import { CourseLesson } from "@/services/courseApi";
 import { AppDrawer } from "@/components/ModernUi";
 import { Card } from "@/components/common/Card";
+import { useT } from "@/i18n/I18nContext";
 
 function parseMarkdownToHtml(text: string): string {
   if (!text) return "";
@@ -60,10 +61,11 @@ export function LessonDetailsDrawer({
   onClose,
   onStartLearning,
 }: LessonDetailsDrawerProps) {
+  const t = useT();
   if (!lesson) return null;
 
   return (
-    <AppDrawer open={open} onClose={onClose} title="Lesson Details" size="xl">
+    <AppDrawer open={open} onClose={onClose} title={t("Lesson Details")} size="xl">
       <div className="space-y-6 pb-20">
         {/* Header Section */}
         <div className="rounded-xl bg-emerald-700 p-6 text-white shadow-md">
@@ -73,14 +75,14 @@ export function LessonDetailsDrawer({
             </span>
             {lesson.topic && (
               <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wide backdrop-blur-md">
-                Topic: {lesson.topic}
+                {t("Topic:")} {lesson.topic}
               </span>
             )}
           </div>
           <h2 className="text-2xl font-bold sm:text-3xl">{lesson.title}</h2>
           <div className="mt-4 flex items-center gap-4 text-xs font-bold text-emerald-100">
             <span className="flex items-center gap-1.5">
-              <Clock size={16} /> {lesson.estimatedMinutes ?? 10} min read
+              <Clock size={16} /> {t("{count} min read", { count: lesson.estimatedMinutes ?? 10 })}
             </span>
           </div>
         </div>
@@ -91,7 +93,7 @@ export function LessonDetailsDrawer({
             {lesson.learningObjectives && (
               <Card className="border-l-4 border-emerald-500 bg-white">
                 <h3 className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                  Instructional Objectives
+                  {t("Instructional Objectives")}
                 </h3>
                 <p className="text-sm font-medium text-slate-600 italic">
                   {lesson.learningObjectives}
@@ -101,7 +103,7 @@ export function LessonDetailsDrawer({
             {(lesson.genericCompetencies?.length > 0 || lesson.crossCuttingIssues?.length > 0) && (
               <Card className="bg-slate-50/50 border-slate-100">
                 <h3 className="mb-3 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                  Competencies
+                  {t("Competencies")}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {lesson.genericCompetencies?.map((c: string, i: number) => (
@@ -131,10 +133,10 @@ export function LessonDetailsDrawer({
           <Card className="bg-white">
             <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
-                Lesson Development
+                {t("Lesson Development")}
               </h3>
               <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-                <Eye size={12} /> Content Preview
+                <Eye size={12} /> {t("Content Preview")}
               </span>
             </div>
             <div
@@ -149,13 +151,15 @@ export function LessonDetailsDrawer({
         {/* Video Attachment */}
         {lesson.videoUrl || lesson.mediaUrl ? (
           <Card>
-            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Media</h3>
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">
+              {t("Media")}
+            </h3>
             <div className="flex items-center gap-3 rounded-lg border border-slate-100 p-3 bg-slate-50">
               <div className="grid h-10 w-10 place-items-center rounded bg-indigo-100 text-indigo-600">
                 <Play size={20} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-slate-700 truncate">Lesson Video</p>
+                <p className="text-sm font-bold text-slate-700 truncate">{t("Lesson Video")}</p>
                 <p className="text-xs text-slate-500 truncate">
                   {lesson.videoUrl ?? lesson.mediaUrl}
                 </p>
@@ -168,7 +172,7 @@ export function LessonDetailsDrawer({
         {lesson.homework ? (
           <Card className="border-l-4 border-l-amber-400 bg-white">
             <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-amber-700">
-              Homework & Assessments
+              {t("Homework & Assessments")}
             </h3>
             <div
               className="text-sm text-slate-700 prose prose-slate prose-sm max-w-none"
@@ -183,7 +187,7 @@ export function LessonDetailsDrawer({
             onClick={onStartLearning}
             className="w-full flex justify-center items-center gap-2 rounded-xl bg-emerald-700 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-800 active:bg-emerald-800"
           >
-            Start Learning <ChevronRight size={18} />
+            {t("Start Learning")} <ChevronRight size={18} />
           </button>
         </div>
       </div>

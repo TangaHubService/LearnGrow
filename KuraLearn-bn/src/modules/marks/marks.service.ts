@@ -10,6 +10,7 @@ import {
   UserRole
 } from "@prisma/client";
 import { assertCanViewStudent } from "../../middleware/access.js";
+import { RWANDA_NESA_GRADING_SCALE, gradeForPercentage } from "../../config/grading.js";
 import { prisma } from "../../prisma/client.js";
 import { AppError } from "../../http/errors.js";
 import { callRequiredOpenAIJson } from "../ai/ai.service.js";
@@ -46,14 +47,7 @@ type SubmissionFilters = {
   pageSize?: number;
 };
 
-const DEFAULT_GRADING_SCALE = [
-  { minPercentage: 80, maxPercentage: 100, grade: "A", description: "Excellent", points: 1, remarks: "Outstanding performance" },
-  { minPercentage: 70, maxPercentage: 79.99, grade: "B", description: "Very Good", points: 2, remarks: "Very strong understanding" },
-  { minPercentage: 60, maxPercentage: 69.99, grade: "C", description: "Good", points: 3, remarks: "Good conceptual grasp" },
-  { minPercentage: 50, maxPercentage: 59.99, grade: "D", description: "Satisfactory", points: 4, remarks: "Meets basic requirements" },
-  { minPercentage: 40, maxPercentage: 49.99, grade: "E", description: "Adequate", points: 5, remarks: "Requires improvement" },
-  { minPercentage: 0, maxPercentage: 39.99, grade: "F", description: "Fail", points: 6, remarks: "Significant support needed" }
-];
+const DEFAULT_GRADING_SCALE = RWANDA_NESA_GRADING_SCALE;
 
 const REVIEWER_ROLES = new Set<UserRole>([
   UserRole.ADMIN,
@@ -87,7 +81,7 @@ function clampPageSize(value?: number) {
 
 function getGradeFromPercentage(percentage: number, scales: Array<{ minPercentage: number; maxPercentage: number; grade: string; remarks?: string | null }>) {
   const activeScales = scales.length ? scales : DEFAULT_GRADING_SCALE;
-  const match = activeScales.find((scale) => percentage >= scale.minPercentage && percentage <= scale.maxPercentage);
+  const match = gradeForPercentage(percentage, activeScales) as (typeof activeScales)[number] | undefined;
   return match
     ? { grade: match.grade, remarks: match.remarks || match.grade }
     : { grade: "F", remarks: "Significant support needed" };

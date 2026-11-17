@@ -1,6 +1,7 @@
 import React from "react";
 import { Calendar, ChevronLeft, ChevronRight, Download, RotateCcw } from "lucide-react";
 import { CustomDropdown } from "@/components/ModernUi";
+import { useT } from "@/i18n/I18nContext";
 
 type ViewMode = "daily" | "weekly" | "monthly" | "yearly";
 type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
@@ -39,19 +40,20 @@ export const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
   onResetFilters,
   onExport,
 }) => {
+  const t = useT();
   return (
     <div className="rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm print:hidden">
       <div className="grid gap-3.5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-[1.1fr_0.9fr_1.2fr_1.2fr_auto] xl:items-end">
         {/* Class Filter */}
         <div>
           <label className="mb-1.5 block px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-            Select Class
+            {t("Select Class")}
           </label>
           <CustomDropdown
             value={selectedClassId}
             options={classes.map((c) => ({ value: c.id, label: c.name }))}
             onChange={onClassChange}
-            placeholder="Select Class"
+            placeholder={t("Select Class")}
             clearable={false}
           />
         </div>
@@ -59,13 +61,13 @@ export const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
         {/* Status Filter */}
         <div>
           <label className="mb-1.5 block px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-            Attendance Status
+            {t("Attendance Status")}
           </label>
           <CustomDropdown
             value={selectedStatus}
             options={statusOptions}
             onChange={(value) => onStatusChange(value as AttendanceStatus | undefined)}
-            placeholder="All statuses"
+            placeholder={t("All statuses")}
             clearable
           />
         </div>
@@ -74,18 +76,18 @@ export const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
         <div>
           <label className="mb-1.5 block px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
             {viewBy === "daily"
-              ? "Date Period"
+              ? t("Date Period")
               : viewBy === "weekly"
-                ? "Week Period"
+                ? t("Week Period")
                 : viewBy === "monthly"
-                  ? "Month Period"
-                  : "Year Period"}
+                  ? t("Month Period")
+                  : t("Year Period")}
           </label>
           <div className="flex h-11 items-center justify-between rounded-xl border border-slate-200/80 bg-white px-2 shadow-sm transition-all focus-within:border-violet-400">
             <button
               onClick={() => onChangeDate(-1)}
               className="grid h-8 w-8 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-              title="Previous"
+              title={t("Previous")}
               type="button"
             >
               <ChevronLeft size={16} strokeWidth={2.5} />
@@ -97,7 +99,7 @@ export const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
             <button
               onClick={() => onChangeDate(1)}
               className="grid h-8 w-8 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-              title="Next"
+              title={t("Next")}
               type="button"
             >
               <ChevronRight size={16} strokeWidth={2.5} />
@@ -108,7 +110,7 @@ export const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
         {/* View Mode Selector */}
         <div>
           <label className="mb-1.5 block px-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-            Analytics View
+            {t("Analytics View")}
           </label>
           <div className="grid h-11 grid-cols-4 rounded-xl border border-slate-200/70 bg-slate-50 p-1 shadow-sm">
             {["daily", "weekly", "monthly", "yearly"].map((v) => (
@@ -123,12 +125,12 @@ export const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
                 }`}
               >
                 {v === "daily"
-                  ? "Daily"
+                  ? t("Daily")
                   : v === "weekly"
-                    ? "Weekly"
+                    ? t("Weekly")
                     : v === "monthly"
-                      ? "Monthly"
-                      : "Yearly"}
+                      ? t("Monthly")
+                      : t("Yearly")}
               </button>
             ))}
           </div>
@@ -141,14 +143,14 @@ export const AttendanceFilters: React.FC<AttendanceFiltersProps> = ({
             type="button"
             className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-extrabold text-slate-700 shadow-sm transition hover:bg-slate-50 xl:flex-none"
           >
-            <RotateCcw size={14} strokeWidth={2.5} /> Reset
+            <RotateCcw size={14} strokeWidth={2.5} /> {t("Reset")}
           </button>
           <button
             onClick={() => onExport("excel")}
             type="button"
             className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-700 px-5 text-xs font-extrabold text-white shadow-sm transition-all duration-150 hover:bg-emerald-800 hover:-translate-y-0.5 xl:flex-none"
           >
-            <Download size={14} strokeWidth={2.5} /> Export
+            <Download size={14} strokeWidth={2.5} /> {t("Export")}
           </button>
         </div>
       </div>

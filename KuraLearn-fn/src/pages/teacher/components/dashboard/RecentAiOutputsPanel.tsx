@@ -8,6 +8,7 @@ import {
   displayDate,
   Button,
 } from "../../teacherShared";
+import { useT } from "@/i18n/I18nContext";
 
 export function RecentAiOutputsPanel({
   aiOutputs,
@@ -18,12 +19,13 @@ export function RecentAiOutputsPanel({
   onOpenOutput: (item: any) => void;
   onPrepareLesson: () => void;
 }) {
+  const t = useT();
   return (
     <DashboardPanel
-      title="Recent AI Outputs"
+      title={t("Recent AI Outputs")}
       action={
         <Link to="/teacher/ai" className="text-sm font-bold text-[#6d3eeb]">
-          View all
+          {t("View all")}
         </Link>
       }
     >
@@ -55,10 +57,10 @@ export function RecentAiOutputsPanel({
         </div>
       ) : (
         <InlineEmptyState
-          message="No AI outputs created yet."
+          message={t("No AI outputs created yet.")}
           action={
             <Button variant="secondary" onClick={onPrepareLesson}>
-              Generate your first lesson plan
+              {t("Generate your first lesson plan")}
             </Button>
           }
         />

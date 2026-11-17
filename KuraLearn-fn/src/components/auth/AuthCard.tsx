@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { BrandLogo } from "@/components/common/BrandLogo";
+import { useT } from "@/i18n/I18nContext";
 
 /** Centered card used by the account pages that sit around sign-in. */
 export function AuthCard({
@@ -17,12 +18,13 @@ export function AuthCard({
   backTo?: string;
   backLabel?: string;
 }) {
+  const t = useT();
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f0f4ff] p-4">
       <div className="w-full max-w-md">
         <Link to="/welcome" className="mb-8 flex items-center justify-center gap-3">
           <BrandLogo />
-          <span className="text-xl font-bold text-slate-900">KuraLearn</span>
+          <span className="text-xl font-bold text-slate-900">{t("KuraLearn")}</span>
         </Link>
         <div className="rounded-2xl bg-white p-8 shadow-lg">
           <h1 className="text-2xl font-bold text-slate-900">{title}</h1>

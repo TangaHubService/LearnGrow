@@ -2,6 +2,7 @@ import React from "react";
 import { CheckCircle, Clock, FileText, Search, XCircle } from "lucide-react";
 import { DetailCard } from "@/components/ModernUi";
 import { Pagination } from "@/components/common/Pagination";
+import { useT } from "@/i18n/I18nContext";
 
 type ViewMode = "daily" | "weekly" | "monthly" | "yearly";
 type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
@@ -75,6 +76,7 @@ export const AttendanceGrid: React.FC<AttendanceGridProps> = ({
   onPageChange,
   onItemsPerPageChange,
 }) => {
+  const t = useT();
   const toLocalYYYYMMDD = (d: Date): string => {
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -99,14 +101,14 @@ export const AttendanceGrid: React.FC<AttendanceGridProps> = ({
         {viewBy === "daily" && (
           <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-4 py-3 print:hidden">
             <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
-              Daily Attendance Log
+              {t("Daily Attendance Log")}
             </div>
             <button
               onClick={onMarkAllPresent}
               disabled={markingAll || loading || students.length === 0}
               className="h-8 rounded-lg bg-emerald-50 border border-emerald-200/60 px-4 text-xs font-extrabold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm"
             >
-              {markingAll ? "Marking..." : "Mark All Present"}
+              {markingAll ? t("Marking...") : t("Mark All Present")}
             </button>
           </div>
         )}
@@ -117,10 +119,10 @@ export const AttendanceGrid: React.FC<AttendanceGridProps> = ({
                 #
               </th>
               <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500 w-28">
-                Code
+                {t("Code")}
               </th>
               <th className="px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
-                Student Name
+                {t("Student Name")}
               </th>
               {viewBy === "weekly" &&
                 weekDays.map((date, i) => (
@@ -135,33 +137,33 @@ export const AttendanceGrid: React.FC<AttendanceGridProps> = ({
                 ))}
               {viewBy === "daily" && (
                 <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500 w-44">
-                  Status
+                  {t("Status")}
                 </th>
               )}
               {(viewBy === "monthly" || viewBy === "yearly") && (
                 <>
                   <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500 w-20">
-                    Present
+                    {t("Present")}
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500 w-20">
-                    Absent
+                    {t("Absent")}
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500 w-20">
-                    Late
+                    {t("Late")}
                   </th>
                   <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500 w-20">
-                    Excused
+                    {t("Excused")}
                   </th>
                 </>
               )}
               {viewBy === "weekly" && (
                 <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500 w-24">
-                  Present
+                  {t("Present")}
                 </th>
               )}
               {viewBy !== "daily" && (
                 <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500 w-20">
-                  Rate
+                  {t("Rate")}
                 </th>
               )}
             </tr>
@@ -183,10 +185,10 @@ export const AttendanceGrid: React.FC<AttendanceGridProps> = ({
                       <Search size={24} className="text-slate-500" />
                     </div>
                     <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-                      No students found
+                      {t("No students found")}
                     </h3>
                     <p className="text-xs font-medium text-slate-500 mt-1">
-                      Try adjusting your filters or search query.
+                      {t("Try adjusting your filters or search query.")}
                     </p>
                   </div>
                 </td>

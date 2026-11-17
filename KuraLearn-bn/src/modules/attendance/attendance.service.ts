@@ -1,7 +1,7 @@
 import { prisma } from "../../prisma/client.js";
 import { AppError } from "../../http/errors.js";
 import { AttendanceStatus, Gender, LearnerRiskLevel, NotificationType, UserRole } from "@prisma/client";
-import { addNotification } from "../platform/platform.service.js";
+import { notifyParentsOfAttendance } from "../../services/notifications/notification.service.js";
 import { runTeacherAi, TEACHER_AI_SYSTEM_PROMPT, callOpenAIJson } from "../ai/ai.service.js";
 
 const ATTENDANCE_AI_PROMPT = `
@@ -99,9 +99,9 @@ export async function markAttendance(userId: string, data: {
         });
       }
 
-      // Trigger notification for Absent/Late
-      if (record.status === "ABSENT" || record.status === "LATE") {
-        await triggerParentNotification(record.studentId, record.status, attendanceDate);
+      // Tell parents when a learner is newly marked absent or late (not when the same status is saved again).
+      if ((record.status === "ABSENT" || record.status === "LATE") && existing?.status !== record.status) {
+        void notifyParentsOfAttendance(record.studentId, record.status, attendanceDate, upserted.schoolId);
       }
 
       return upserted;
@@ -115,26 +115,6 @@ export async function markAttendance(userId: string, data: {
   await updateAttendanceAnalytics(data.schoolId, data.classId, attendanceDate);
 
   return results;
-}
-
-async function triggerParentNotification(studentId: string, status: string, date: Date) {
-  const student = await prisma.student.findUnique({
-    where: { id: studentId },
-    include: { user: true, parents: { include: { parent: { include: { user: true } } } } }
-  });
-
-  if (!student) return;
-
-  const dateStr = date.toLocaleDateString();
-  const message = `Your child ${student.user.name} was marked ${status.toLowerCase()} today (${dateStr}). Please contact the school if this is incorrect.`;
-
-  for (const sp of student.parents) {
-    if (sp.parent.user) {
-      await addNotification(sp.parent.user.id, `Attendance Alert: ${status}`, message, NotificationType.ATTENDANCE);
-      // In a real app, send SMS here using a provider
-      console.log(`[SMS] Sending to ${sp.parent.phone}: ${message}`);
-    }
-  }
 }
 
 export async function updateAttendanceAnalytics(schoolId: string, classId: string, date: Date) {

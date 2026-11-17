@@ -1,6 +1,7 @@
 import { ReactNode, useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown, Check, Search } from "lucide-react";
 import { Pagination } from "./Pagination";
+import { useT } from "@/i18n/I18nContext";
 
 export type DataTableColumn<T> = {
   id: string;
@@ -52,6 +53,7 @@ export function DataTable<T>({
   rowActions?: (row: T) => ReactNode;
   mobileRender?: (row: T) => ReactNode;
 }) {
+  const t = useT();
   const [sort, setSort] = useState<{ id: string; dir: "asc" | "desc" } | null>(null);
   const items = data ?? [];
   const selected = new Set(selectedIds ?? []);
@@ -133,7 +135,7 @@ export function DataTable<T>({
       <div
         tabIndex={0}
         role="region"
-        aria-label="Table, scroll to see more"
+        aria-label={t("Table, scroll to see more")}
         className="hidden overflow-x-auto lg:block"
       >
         <table className="w-full border-collapse text-left text-sm">
@@ -149,7 +151,7 @@ export function DataTable<T>({
                         ? "border-[#6d3eeb] bg-[#6d3eeb] text-white"
                         : "border-slate-300 bg-white text-transparent"
                     }`}
-                    aria-label="Select all rows"
+                    aria-label={t("Select all rows")}
                   >
                     <Check size={13} />
                   </button>
@@ -165,7 +167,7 @@ export function DataTable<T>({
               ))}
               {rowActions ? (
                 <th className="w-1 px-4 py-3 text-right text-xs font-bold uppercase text-slate-500">
-                  Actions
+                  {t("Actions")}
                 </th>
               ) : null}
             </tr>
@@ -225,7 +227,7 @@ export function DataTable<T>({
                               ? "border-[#6d3eeb] bg-[#6d3eeb] text-white"
                               : "border-slate-300 bg-white text-transparent"
                           }`}
-                          aria-label="Select row"
+                          aria-label={t("Select row")}
                         >
                           <Check size={13} />
                         </button>

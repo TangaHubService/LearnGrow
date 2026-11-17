@@ -7,7 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { hasAnyRole, ROLE_GROUPS } from "@/lib/roles";
 import { SkipToContent } from "@/components/common/SkipToContent";
 import GlobalHeader from "./GlobalHeader";
-import { workspaceFor } from "./navigation";
+import { useT } from "@/i18n/I18nContext";
+import { ROLE_LABELS, workspaceFor } from "./navigation";
 
 function CollapsedTooltip({ children }: { children: ReactNode }) {
   return (
@@ -25,6 +26,7 @@ const EXACT_MATCH_PATHS = new Set(["/", "/teacher", "/school-admin", "/super-adm
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
+  const t = useT();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -89,7 +91,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <p className="text-base font-bold whitespace-nowrap">{brandName}</p>
               <p className="text-[10px] font-semibold tracking-wide uppercase text-slate-400 whitespace-nowrap">
-                {brandLine}
+                {t(brandLine)}
               </p>
             </div>
           </Link>
@@ -98,7 +100,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button
             onClick={toggleSidebarCollapse}
             className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 z-50 h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm hover:bg-slate-50 hover:text-slate-900 hover:scale-110 active:scale-95 transition-all duration-200"
-            title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            title={sidebarCollapsed ? t("Expand sidebar") : t("Collapse sidebar")}
+            aria-label={sidebarCollapsed ? t("Expand sidebar") : t("Collapse sidebar")}
           >
             {sidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
@@ -111,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               return (
                 <div key={`section-${idx}`} className={`pt-4 pb-1 px-3 ${idx === 0 ? "pt-1" : ""}`}>
                   <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                    {item.section}
+                    {t(item.section)}
                   </p>
                 </div>
               );
@@ -151,7 +154,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <span
                         className={`transition-all duration-300 whitespace-nowrap ${sidebarCollapsed ? "lg:opacity-0 lg:w-0 lg:pointer-events-none lg:absolute" : "opacity-100 w-auto"}`}
                       >
-                        {item.label}
+                        {t(item.label)}
                       </span>
                     </div>
 
@@ -161,7 +164,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                       </span>
                     )}
 
-                    {sidebarCollapsed && <CollapsedTooltip>{item.label}</CollapsedTooltip>}
+                    {sidebarCollapsed && <CollapsedTooltip>{t(item.label)}</CollapsedTooltip>}
                   </button>
                 ) : (
                   <Link
@@ -179,10 +182,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                     <span
                       className={`transition-all duration-300 whitespace-nowrap ${sidebarCollapsed ? "lg:opacity-0 lg:w-0 lg:pointer-events-none lg:absolute" : "opacity-100 w-auto"}`}
                     >
-                      {item.label}
+                      {t(item.label)}
                     </span>
 
-                    {sidebarCollapsed && <CollapsedTooltip>{item.label}</CollapsedTooltip>}
+                    {sidebarCollapsed && <CollapsedTooltip>{t(item.label)}</CollapsedTooltip>}
                   </Link>
                 )}
 
@@ -202,7 +205,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                               : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
                           }`}
                         >
-                          {child.label}
+                          {t(child.label)}
                         </Link>
                       );
                     })}
@@ -238,10 +241,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                       {user?.name ?? `${user?.firstName ?? ""} ${user?.lastName ?? ""}`}
                     </p>
                     <p className="text-[10px] text-slate-400 font-medium">
-                      {isAdminWorkspace ? "School Administrator" : user?.email}
+                      {isAdminWorkspace ? t("School administrator") : user?.email}
                     </p>
                     <p className="text-[10px] text-slate-300 font-extrabold uppercase mt-0.5 tracking-wide">
-                      {user?.role}
+                      {user?.role ? t(ROLE_LABELS[user.role] ?? user.role) : null}
                     </p>
                   </div>
                 </div>
@@ -255,12 +258,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {user?.name ?? `${user?.firstName ?? ""} ${user?.lastName ?? ""}`}
               </p>
               <p className="truncate text-xs font-medium text-slate-500">
-                {isAdminWorkspace ? "School Administrator" : user?.email}
+                {isAdminWorkspace ? t("School administrator") : user?.email}
               </p>
               <p
                 className={`mt-1 text-[10px] font-bold uppercase tracking-wide ${isAdminWorkspace ? "text-blue-700" : isTeacherWorkspace ? "text-[#6d3eeb]" : "text-emerald-700"}`}
               >
-                {user?.role}
+                {user?.role ? t(ROLE_LABELS[user.role] ?? user.role) : null}
               </p>
             </div>
           </div>
@@ -273,10 +276,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span
               className={`transition-all duration-300 whitespace-nowrap ${sidebarCollapsed ? "lg:opacity-0 lg:w-0 lg:pointer-events-none lg:absolute" : "opacity-100 w-auto"}`}
             >
-              Log Out
+              {t("Log out")}
             </span>
 
-            {sidebarCollapsed && <CollapsedTooltip>Log Out</CollapsedTooltip>}
+            {sidebarCollapsed && <CollapsedTooltip>{t("Log out")}</CollapsedTooltip>}
           </button>
         </div>
       </aside>
@@ -285,7 +288,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <button
           className="fixed inset-0 z-30 bg-slate-950/40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
-          aria-label="Close navigation"
+          aria-label={t("Close navigation")}
         />
       ) : null}
 
@@ -308,9 +311,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <ConfirmModal
         open={logoutOpen}
-        title="Log out?"
-        message="Your current session will close on this device."
-        confirmLabel="Log out"
+        title={t("Log out?")}
+        message={t("Your current session will close on this device.")}
+        confirmLabel={t("Log out")}
         danger
         onCancel={() => setLogoutOpen(false)}
         onConfirm={handleLogout}

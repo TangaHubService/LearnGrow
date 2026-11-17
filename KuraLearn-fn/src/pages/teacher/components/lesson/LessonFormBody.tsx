@@ -1,6 +1,8 @@
 import { Loader2, Sparkles } from "lucide-react";
 import { CustomDropdown } from "@/components/ModernUi";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { CbcFields } from "./CbcFields";
+import { useT } from "@/i18n/I18nContext";
 
 export function LessonFormBody({
   formData,
@@ -29,28 +31,31 @@ export function LessonFormBody({
   isAiGenerating: boolean;
   editorMinHeight?: string;
 }) {
+  const t = useT();
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className="mb-2 block text-sm font-medium text-slate-700">Lesson Title *</label>
+          <label className="mb-2 block text-sm font-medium text-slate-700">
+            {t("Lesson Title *")}
+          </label>
           <input
             type="text"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="e.g. Introduction to photosynthesis"
+            placeholder={t("e.g. Introduction to photosynthesis")}
             className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-900 outline-none transition focus:border-[#6d3eeb] focus:ring-4 focus:ring-purple-100"
           />
         </div>
 
         <div>
           <CustomDropdown
-            label="Class"
+            label={t("Class")}
             value={formData.classId}
             options={classOptions}
             loading={reference.isLoading}
-            placeholder="Select a class"
-            emptyMessage="No classes available"
+            placeholder={t("Select a class")}
+            emptyMessage={t("No classes available")}
             onChange={handleClassChange}
             error={errors.classId}
           />
@@ -58,22 +63,24 @@ export function LessonFormBody({
 
         <div>
           <CustomDropdown
-            label="Subject"
+            label={t("Subject")}
             value={formData.subjectId}
             options={subjectOptions}
             disabled={!formData.classId}
-            placeholder={formData.classId ? "Select a subject" : "Select a class first"}
-            emptyMessage="No subjects found for this class"
+            placeholder={formData.classId ? t("Select a subject") : t("Select a class first")}
+            emptyMessage={t("No subjects found for this class")}
             onChange={handleSubjectChange}
             error={errors.subjectId}
           />
         </div>
+
+        <CbcFields formData={formData} setFormData={setFormData} />
       </div>
 
       <div>
         <div className="mb-3 flex items-center justify-between">
           <label className="block text-sm font-bold uppercase tracking-wide text-slate-500">
-            Lesson Content <span className="text-red-600">*</span>
+            {t("Lesson Content")} <span className="text-red-600">*</span>
           </label>
           <button
             type="button"
@@ -86,7 +93,7 @@ export function LessonFormBody({
             ) : (
               <Sparkles size={14} className="transition-transform group-hover:scale-125" />
             )}
-            {isAiGenerating ? "Generating..." : "Generate with AI"}
+            {isAiGenerating ? t("Generating...") : t("Generate with AI")}
           </button>
         </div>
 

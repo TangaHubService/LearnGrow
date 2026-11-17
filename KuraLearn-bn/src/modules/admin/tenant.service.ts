@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../../prisma/client.js";
 import { AppError } from "../../http/errors.js";
+import { RWANDA_NESA_GRADING_SCALE } from "../../config/grading.js";
 
 interface CreateSchoolInput {
   name: string;
@@ -65,13 +66,7 @@ export async function provisionSchool(input: CreateSchoolInput) {
     }
 
     await tx.gradingScale.createMany({
-      data: [
-        { schoolId: school.id, minPercentage: 80, maxPercentage: 100, grade: "A", description: "Outstanding" },
-        { schoolId: school.id, minPercentage: 70, maxPercentage: 79, grade: "B", description: "Very Good" },
-        { schoolId: school.id, minPercentage: 60, maxPercentage: 69, grade: "C", description: "Good" },
-        { schoolId: school.id, minPercentage: 50, maxPercentage: 59, grade: "D", description: "Pass" },
-        { schoolId: school.id, minPercentage: 0, maxPercentage: 49, grade: "E", description: "Fail" },
-      ],
+      data: RWANDA_NESA_GRADING_SCALE.map((band) => ({ ...band, schoolId: school.id })),
     });
 
     return { school, admin };

@@ -199,7 +199,8 @@ export const teacherApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  getGradingSettings: () => apiRequest<{ scales: any[] }>("/grading-settings"),
+  getGradingSettings: () =>
+    apiRequest<{ scales: any[]; preset?: any[]; passMark?: number }>("/grading-settings"),
   saveGradingSettings: (payload: { scales: any[] }) =>
     apiRequest<any>("/grading-settings", { method: "POST", body: JSON.stringify(payload) }),
   importMarks: (payload: {

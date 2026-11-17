@@ -7,6 +7,7 @@ import {
   InlineEmptyState,
   relativeTime,
 } from "../../teacherShared";
+import { useT } from "@/i18n/I18nContext";
 
 export function NotificationsPanel({
   notifications,
@@ -15,12 +16,13 @@ export function NotificationsPanel({
   notifications: any;
   onOpenDetails: (item: any) => void;
 }) {
+  const t = useT();
   return (
     <DashboardPanel
-      title="Notifications"
+      title={t("Notifications")}
       action={
         <Link to="/teacher/notifications" className="text-sm font-bold text-[#6d3eeb]">
-          View all
+          {t("View all")}
         </Link>
       }
     >
@@ -53,7 +55,7 @@ export function NotificationsPanel({
           ))}
         </div>
       ) : (
-        <InlineEmptyState message="No notifications right now." />
+        <InlineEmptyState message={t("No notifications right now.")} />
       )}
     </DashboardPanel>
   );

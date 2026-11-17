@@ -13,6 +13,7 @@ import {
 import { assessmentApi, Assessment, AssessmentSubmission } from "@/services/assessmentApi";
 import { Card } from "@/components/common/Card";
 import { StudentAssessmentPlayer } from "./StudentAssessmentPlayer";
+import { useT } from "@/i18n/I18nContext";
 
 // ─── Types ────────────────────────────────────────────────────────────
 
@@ -46,6 +47,7 @@ function AssessmentSession({
   submission: AssessmentSubmission | null;
   onBack: () => void;
 }) {
+  const t = useT();
   const isStarted =
     submission?.status === "IN_PROGRESS" ||
     submission?.status === "SUBMITTED" ||
@@ -89,7 +91,7 @@ function AssessmentSession({
           onClick={onBack}
           className="mb-6 flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors"
         >
-          <ArrowLeft size={16} /> Back to Assessments
+          <ArrowLeft size={16} /> {t("Back to Assessments")}
         </button>
         <Card className="p-8">
           <div className="mb-2">
@@ -104,13 +106,13 @@ function AssessmentSession({
 
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="rounded-xl border border-slate-100 p-4">
-              <p className="text-xs font-bold text-slate-500 uppercase mb-1">Time Limit</p>
+              <p className="text-xs font-bold text-slate-500 uppercase mb-1">{t("Time Limit")}</p>
               <p className="text-lg font-bold text-slate-700">
-                {assessment.durationMinutes ? `${assessment.durationMinutes} mins` : "Untimed"}
+                {assessment.durationMinutes ? `${assessment.durationMinutes} mins` : t("Untimed")}
               </p>
             </div>
             <div className="rounded-xl border border-slate-100 p-4">
-              <p className="text-xs font-bold text-slate-500 uppercase mb-1">Total Marks</p>
+              <p className="text-xs font-bold text-slate-500 uppercase mb-1">{t("Total Marks")}</p>
               <p className="text-lg font-bold text-slate-700">{assessment.totalMarks}</p>
             </div>
           </div>
@@ -118,7 +120,7 @@ function AssessmentSession({
           {assessment.instructions && (
             <div className="mb-8 rounded-xl bg-slate-50 p-5">
               <p className="text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-                <FileText size={16} className="text-slate-500" /> Instructions
+                <FileText size={16} className="text-slate-500" /> {t("Instructions")}
               </p>
               <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
                 {assessment.instructions}
@@ -149,7 +151,7 @@ function AssessmentSession({
           onClick={onBack}
           className="mb-6 flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors"
         >
-          <ArrowLeft size={16} /> Back to My Assessments
+          <ArrowLeft size={16} /> {t("Back to My Assessments")}
         </button>
 
         <div className="space-y-6">
@@ -157,24 +159,24 @@ function AssessmentSession({
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 mb-4">
               <CheckCircle2 size={32} />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-1">Assessment Submitted</h1>
+            <h1 className="text-2xl font-bold text-slate-900 mb-1">{t("Assessment Submitted")}</h1>
             <p className="text-slate-500 mb-6">
-              Your work has been securely transmitted for grading.
+              {t("Your work has been securely transmitted for grading.")}
             </p>
 
             <div className="inline-flex flex-col items-center justify-center rounded-2xl bg-slate-50 px-10 py-6">
-              <p className="text-xs font-bold text-slate-500 uppercase mb-2">Your Score</p>
+              <p className="text-xs font-bold text-slate-500 uppercase mb-2">{t("Your Score")}</p>
               {submission?.score !== null ? (
                 <>
                   <p className="text-4xl font-bold text-violet-700 leading-none">
                     {submission?.score}
                   </p>
                   <p className="mt-1 text-sm font-bold text-slate-500">
-                    out of {assessment.totalMarks}
+                    {t("out of {total}", { total: assessment.totalMarks })}
                   </p>
                 </>
               ) : (
-                <p className="text-lg font-bold text-slate-600 italic">Awaiting marking</p>
+                <p className="text-lg font-bold text-slate-600 italic">{t("Awaiting marking")}</p>
               )}
             </div>
           </div>
@@ -182,7 +184,7 @@ function AssessmentSession({
           {submission?.feedback && (
             <Card className="p-6">
               <p className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-                <Send size={16} className="text-violet-700" /> Teacher's Feedback
+                <Send size={16} className="text-violet-700" /> {t("Teacher's Feedback")}
               </p>
               <p className="text-sm text-slate-600 leading-relaxed italic border-l-4 border-violet-200 pl-4 py-1">
                 "{submission.feedback}"
@@ -197,7 +199,7 @@ function AssessmentSession({
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 py-4 text-sm font-bold text-violet-700 hover:bg-violet-100 transition-all disabled:opacity-50"
             >
               {aiLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-              Understand My Performance with AI (CBC-Aligned)
+              {t("Understand My Performance with AI (CBC-Aligned)")}
             </button>
           </div>
 
@@ -205,7 +207,7 @@ function AssessmentSession({
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <Card className="p-6 space-y-5 border-amber-200 bg-amber-50/30">
                 <div className="flex items-center gap-2 text-amber-700 font-bold text-sm uppercase tracking-wide">
-                  <Sparkles size={18} /> Pedagogical Insights
+                  <Sparkles size={18} /> {t("Pedagogical Insights")}
                 </div>
 
                 <div className="prose prose-sm max-w-none text-slate-700 leading-relaxed">
@@ -216,7 +218,7 @@ function AssessmentSession({
                   {aiExplanation.keyPoints?.length > 0 && (
                     <div className="rounded-xl bg-white p-4 border border-slate-100">
                       <p className="text-xs font-bold text-slate-500 uppercase mb-3">
-                        Key Concepts Mastered
+                        {t("Key Concepts Mastered")}
                       </p>
                       <ul className="space-y-2">
                         {aiExplanation.keyPoints.map((p: string, i: number) => (
@@ -234,7 +236,7 @@ function AssessmentSession({
                   {aiExplanation.studyTips?.length > 0 && (
                     <div className="rounded-xl bg-white p-4 border border-slate-100">
                       <p className="text-xs font-bold text-slate-500 uppercase mb-3">
-                        Recommended Learning
+                        {t("Recommended Learning")}
                       </p>
                       <ul className="space-y-2">
                         {aiExplanation.studyTips.map((p: string, i: number) => (
@@ -270,6 +272,7 @@ function AssessmentSession({
 // ─── Student Assessments List ─────────────────────────────────────────
 
 export function StudentAssessmentsPage() {
+  const t = useT();
   const [active, setActive] = useState<
     (Assessment & { mySubmission: AssessmentSubmission | null }) | null
   >(null);
@@ -304,20 +307,22 @@ export function StudentAssessmentsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-slate-900">My Assessments</h1>
-        <p className="mt-1 text-sm text-slate-500">View and complete your assigned assessments.</p>
+        <h1 className="text-xl font-bold text-slate-900">{t("My Assessments")}</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          {t("View and complete your assigned assessments.")}
+        </p>
       </div>
 
       {myQ.isLoading ? (
         <div className="flex items-center justify-center gap-2 py-20 text-slate-500">
-          <Loader2 size={20} className="animate-spin" /> Loading...
+          <Loader2 size={20} className="animate-spin" /> {t("Loading...")}
         </div>
       ) : assessments.length === 0 ? (
         <Card className="py-16 text-center">
           <FileText size={40} className="mx-auto text-slate-500" />
-          <p className="mt-3 text-base font-bold text-slate-600">No assessments assigned</p>
+          <p className="mt-3 text-base font-bold text-slate-600">{t("No assessments assigned")}</p>
           <p className="mt-1 text-sm text-slate-500">
-            Your teacher hasn't published any assessments yet.
+            {t("Your teacher hasn't published any assessments yet.")}
           </p>
         </Card>
       ) : (
@@ -325,7 +330,7 @@ export function StudentAssessmentsPage() {
           {upcoming.length > 0 && (
             <section>
               <h2 className="mb-3 text-sm font-bold text-slate-600 uppercase tracking-wide">
-                To Do ({upcoming.length})
+                {t("To do ({count})", { count: upcoming.length })}
               </h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {upcoming.map((a) => (
@@ -350,12 +355,12 @@ export function StudentAssessmentsPage() {
                       {a.dueDate && (
                         <span className="flex items-center gap-1">
                           <Clock size={11} />
-                          Due {new Date(a.dueDate).toLocaleDateString()}
+                          {t("Due")} {new Date(a.dueDate).toLocaleDateString()}
                         </span>
                       )}
                     </div>
                     <button className="mt-3 w-full rounded-lg bg-violet-600 py-1.5 text-xs font-bold text-white hover:bg-violet-700 transition-colors">
-                      {a.mySubmission?.status === "IN_PROGRESS" ? "Continue" : "Start"}
+                      {a.mySubmission?.status === "IN_PROGRESS" ? t("Continue") : t("Start")}
                     </button>
                   </div>
                 ))}
@@ -366,7 +371,7 @@ export function StudentAssessmentsPage() {
           {submitted.length > 0 && (
             <section>
               <h2 className="mb-3 text-sm font-bold text-slate-600 uppercase tracking-wide">
-                Submitted ({submitted.length})
+                {t("Submitted ({count})", { count: submitted.length })}
               </h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {submitted.map((a) => (
@@ -391,7 +396,7 @@ export function StudentAssessmentsPage() {
                     {(a.mySubmission?.status === "MARKED" ||
                       a.mySubmission?.status === "RETURNED") && (
                       <button className="mt-3 w-full rounded-lg border border-violet-200 bg-violet-50 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-100 transition-colors">
-                        View Feedback & AI Explanation
+                        {t("View Feedback & AI Explanation")}
                       </button>
                     )}
                   </div>

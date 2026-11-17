@@ -4,17 +4,19 @@ import { Card } from "@/components/common/Card";
 import { Skeleton } from "@/components/common/Skeleton";
 import { TimetableGrid, type TimetableEntry } from "@/components/timetable/TimetableGrid";
 import { useStudentTimetable } from "@/hooks/useStudentPortal";
+import { useT } from "@/i18n/I18nContext";
 
 export function StudentTimetablePage() {
+  const t = useT();
   const { data, isLoading, error, refetch } = useStudentTimetable();
 
   if (isLoading) {
     return (
       <div>
         <PageHeader
-          brand="KuraLearn"
-          title="My Timetable"
-          subtitle="Your weekly class schedule at a glance."
+          brand={t("KuraLearn")}
+          title={t("My Timetable")}
+          subtitle={t("Your weekly class schedule at a glance.")}
         />
         <div className="space-y-3">
           <Skeleton className="h-20 w-full rounded-2xl" />
@@ -30,15 +32,15 @@ export function StudentTimetablePage() {
     return (
       <div>
         <PageHeader
-          brand="KuraLearn"
-          title="My Timetable"
-          subtitle="Your weekly class schedule at a glance."
+          brand={t("KuraLearn")}
+          title={t("My Timetable")}
+          subtitle={t("Your weekly class schedule at a glance.")}
         />
         <div className="flex flex-col items-center justify-center py-16">
           <RefreshCw size={48} className="mb-4 text-red-400" />
-          <p className="text-lg font-bold text-slate-600">Failed to load timetable</p>
+          <p className="text-lg font-bold text-slate-600">{t("Failed to load timetable")}</p>
           <button onClick={() => refetch()} className="mt-4 text-indigo-600 font-bold">
-            Retry
+            {t("Retry")}
           </button>
         </div>
       </div>
@@ -50,13 +52,15 @@ export function StudentTimetablePage() {
     return (
       <div>
         <PageHeader
-          brand="KuraLearn"
-          title="My Timetable"
-          subtitle="Your weekly class schedule at a glance."
+          brand={t("KuraLearn")}
+          title={t("My Timetable")}
+          subtitle={t("Your weekly class schedule at a glance.")}
         />
         <Card className="py-12 text-center">
-          <p className="text-lg font-bold text-slate-500">Timetable not available</p>
-          <p className="mt-1 text-sm text-slate-500">You need to be assigned to a class first.</p>
+          <p className="text-lg font-bold text-slate-500">{t("Timetable not available")}</p>
+          <p className="mt-1 text-sm text-slate-500">
+            {t("You need to be assigned to a class first.")}
+          </p>
         </Card>
       </div>
     );
@@ -85,9 +89,9 @@ export function StudentTimetablePage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLearn"
-        title="My Timetable"
-        subtitle="Your weekly class schedule at a glance."
+        brand={t("KuraLearn")}
+        title={t("My Timetable")}
+        subtitle={t("Your weekly class schedule at a glance.")}
       />
 
       <div className="mb-6 rounded-2xl bg-indigo-600 p-5 text-white shadow-lg">
@@ -109,7 +113,7 @@ export function StudentTimetablePage() {
         days={days}
         timeSlots={timeSlots}
         grid={grid}
-        emptyMessage="Your timetable hasn't been configured yet."
+        emptyMessage={t("Your timetable hasn't been configured yet.")}
       />
     </div>
   );

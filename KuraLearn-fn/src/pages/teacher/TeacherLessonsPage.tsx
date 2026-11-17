@@ -18,8 +18,10 @@ import {
 } from "./teacherShared";
 import { TeacherGlobalUi } from "./TeacherGlobalUi";
 import { StatusBadge } from "@/components/ModernUi";
+import { useT } from "@/i18n/I18nContext";
 
 export function TeacherLessonsPage() {
+  const t = useT();
   const [params, setParams] = useListParams();
   const [viewMode, setViewMode] = useState<"card" | "table">("card");
   const dispatch = useAppDispatch();
@@ -41,7 +43,7 @@ export function TeacherLessonsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teacher-lesson-plans"] });
       invalidateTeacherDashboard(queryClient);
-      dispatch(pushToast({ tone: "success", message: "Lesson plan published" }));
+      dispatch(pushToast({ tone: "success", message: t("Lesson plan published") }));
       dispatch(closeModal());
     },
   });
@@ -51,7 +53,7 @@ export function TeacherLessonsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teacher-lesson-plans"] });
       invalidateTeacherDashboard(queryClient);
-      dispatch(pushToast({ tone: "success", message: "Lesson plan duplicated" }));
+      dispatch(pushToast({ tone: "success", message: t("Lesson plan duplicated") }));
     },
   });
 
@@ -60,7 +62,7 @@ export function TeacherLessonsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["teacher-lesson-plans"] });
       invalidateTeacherDashboard(queryClient);
-      dispatch(pushToast({ tone: "success", message: "Lesson plan archived" }));
+      dispatch(pushToast({ tone: "success", message: t("Lesson plan archived") }));
       dispatch(closeModal());
     },
   });
@@ -68,8 +70,10 @@ export function TeacherLessonsPage() {
   return (
     <div>
       <PageHeader
-        title="Lesson Planning"
-        subtitle="Create, draft, publish, duplicate, deliver and improve lessons with AI approval."
+        title={t("Lesson Planning")}
+        subtitle={t(
+          "Create, draft, publish, duplicate, deliver and improve lessons with AI approval.",
+        )}
         actions={
           <>
             <Button
@@ -78,7 +82,7 @@ export function TeacherLessonsPage() {
                 dispatch(openDrawer({ kind: "ai-lesson", mode: "ai", title: "AI lesson plan" }))
               }
             >
-              <Bot size={16} /> AI plan
+              <Bot size={16} /> {t("AI plan")}
             </Button>
             <Button
               onClick={() =>
@@ -87,7 +91,7 @@ export function TeacherLessonsPage() {
                 )
               }
             >
-              <Plus size={16} /> Create lesson
+              <Plus size={16} /> {t("Create lesson")}
             </Button>
           </>
         }
@@ -96,7 +100,7 @@ export function TeacherLessonsPage() {
         params={params}
         setParams={setParams}
         subjects={subjects}
-        placeholder="Search lessons or topics"
+        placeholder={t("Search lessons or topics")}
       />
       {isLoading ? (
         <Skeleton />
@@ -106,7 +110,7 @@ export function TeacherLessonsPage() {
         <>
           <div className="mb-4 flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-              {data?.items?.length ?? 0} Lesson Plans
+              {data?.items?.length ?? 0} {t("Lesson Plans")}
             </span>
             <div className="flex items-center gap-1 rounded-lg border border-black p-0.5 bg-transparent">
               <button
@@ -117,7 +121,7 @@ export function TeacherLessonsPage() {
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                <LayoutGrid size={13} /> Grid
+                <LayoutGrid size={13} /> {t("Grid")}
               </button>
               <button
                 onClick={() => setViewMode("table")}
@@ -127,7 +131,7 @@ export function TeacherLessonsPage() {
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                <List size={13} /> Table
+                <List size={13} /> {t("Table")}
               </button>
             </div>
           </div>
@@ -143,15 +147,17 @@ export function TeacherLessonsPage() {
                         {lesson.subjectName} · {lesson.topic}
                       </p>
                       <p className="mt-1 text-[11px] font-semibold text-slate-500">
-                        {lesson.durationMinutes} min · {lesson.resourcesLinked?.length ?? 0}{" "}
-                        resources
+                        {t("{minutes} min · {count} resources", {
+                          minutes: lesson.durationMinutes ?? lesson.duration ?? 40,
+                          count: lesson.resourcesLinked?.length ?? 0,
+                        })}
                       </p>
                     </div>
                     <StatusBadge value={lesson.status} />
                   </div>
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     <button
-                      aria-label="View details"
+                      aria-label={t("View details")}
                       className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-purple-100"
                       onClick={() =>
                         dispatch(
@@ -167,7 +173,7 @@ export function TeacherLessonsPage() {
                       <Eye size={14} />
                     </button>
                     <button
-                      aria-label="Edit"
+                      aria-label={t("Edit")}
                       className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-purple-100"
                       onClick={() =>
                         dispatch(
@@ -192,24 +198,24 @@ export function TeacherLessonsPage() {
                               kind: "publish-lesson",
                               title: "Publish lesson?",
                               description: "Published lessons become available for delivery.",
-                              confirmLabel: "Publish",
+                              confirmLabel: t("Publish"),
                               record: lesson,
                             }),
                           )
                         }
                       >
-                        <CheckCircle2 size={13} /> Publish
+                        <CheckCircle2 size={13} /> {t("Publish")}
                       </Button>
                     )}
                     <button
-                      aria-label="Duplicate"
+                      aria-label={t("Duplicate")}
                       className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-purple-100"
                       onClick={() => duplicate.mutate(lesson.id)}
                     >
                       <Copy size={14} />
                     </button>
                     <button
-                      aria-label="Archive"
+                      aria-label={t("Archive")}
                       className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-purple-100"
                       onClick={() =>
                         dispatch(
@@ -219,7 +225,7 @@ export function TeacherLessonsPage() {
                             title: "Archive lesson?",
                             description:
                               "Archived lessons are hidden from active planning and delivery lists.",
-                            confirmLabel: "Archive",
+                            confirmLabel: t("Archive"),
                             record: lesson,
                           }),
                         )
@@ -231,7 +237,7 @@ export function TeacherLessonsPage() {
                       className="inline-flex h-8 items-center rounded-lg bg-[#6d3eeb] px-3 text-[11px] font-bold text-white hover:bg-[#5b31cb] transition-colors"
                       to={`/teacher/delivery/${lesson.id}`}
                     >
-                      Teach
+                      {t("Teach")}
                     </Link>
                   </div>
                 </Card>
@@ -245,12 +251,12 @@ export function TeacherLessonsPage() {
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b border-black bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-slate-500">
-                    <th className="p-4">Lesson Details</th>
-                    <th className="p-4">Subject</th>
-                    <th className="p-4">Duration</th>
-                    <th className="p-4">Resources</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Actions</th>
+                    <th className="p-4">{t("Lesson Details")}</th>
+                    <th className="p-4">{t("Subject")}</th>
+                    <th className="p-4">{t("Duration")}</th>
+                    <th className="p-4">{t("Resources")}</th>
+                    <th className="p-4">{t("Status")}</th>
+                    <th className="p-4 text-right">{t("Actions")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/10">
@@ -275,7 +281,7 @@ export function TeacherLessonsPage() {
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
-                            aria-label="View details"
+                            aria-label={t("View details")}
                             className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-purple-100"
                             onClick={() =>
                               dispatch(
@@ -291,7 +297,7 @@ export function TeacherLessonsPage() {
                             <Eye size={14} />
                           </button>
                           <button
-                            aria-label="Edit"
+                            aria-label={t("Edit")}
                             className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-purple-100"
                             onClick={() =>
                               dispatch(
@@ -316,24 +322,24 @@ export function TeacherLessonsPage() {
                                     kind: "publish-lesson",
                                     title: "Publish lesson?",
                                     description: "Published lessons become available for delivery.",
-                                    confirmLabel: "Publish",
+                                    confirmLabel: t("Publish"),
                                     record: lesson,
                                   }),
                                 )
                               }
                             >
-                              <CheckCircle2 size={13} /> Publish
+                              <CheckCircle2 size={13} /> {t("Publish")}
                             </Button>
                           )}
                           <button
-                            aria-label="Duplicate"
+                            aria-label={t("Duplicate")}
                             className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-purple-100"
                             onClick={() => duplicate.mutate(lesson.id)}
                           >
                             <Copy size={14} />
                           </button>
                           <button
-                            aria-label="Archive"
+                            aria-label={t("Archive")}
                             className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-purple-100"
                             onClick={() =>
                               dispatch(
@@ -343,7 +349,7 @@ export function TeacherLessonsPage() {
                                   title: "Archive lesson?",
                                   description:
                                     "Archived lessons are hidden from active planning and delivery lists.",
-                                  confirmLabel: "Archive",
+                                  confirmLabel: t("Archive"),
                                   record: lesson,
                                 }),
                               )
@@ -355,7 +361,7 @@ export function TeacherLessonsPage() {
                             className="inline-flex h-8 items-center rounded-lg bg-[#6d3eeb] px-3 text-[11px] font-bold text-white hover:bg-[#5b31cb] transition-colors"
                             to={`/teacher/delivery/${lesson.id}`}
                           >
-                            Teach
+                            {t("Teach")}
                           </Link>
                         </div>
                       </td>
@@ -368,8 +374,8 @@ export function TeacherLessonsPage() {
         </>
       ) : (
         <EmptyState
-          title="No lessons found"
-          message="Create a lesson or ask AI to prepare a draft."
+          title={t("No lessons found")}
+          message={t("Create a lesson or ask AI to prepare a draft.")}
           action={
             <Button
               onClick={() =>
@@ -378,7 +384,7 @@ export function TeacherLessonsPage() {
                 )
               }
             >
-              Create lesson
+              {t("Create lesson")}
             </Button>
           }
         />

@@ -1,6 +1,8 @@
 import { useOffline } from "./use-offline";
+import { useT } from "@/i18n/I18nContext";
 
 export function OfflineIndicator() {
+  const t = useT();
   const { isOffline, isOnline } = useOffline();
 
   if (isOnline) return null;
@@ -20,7 +22,7 @@ export function OfflineIndicator() {
           d="M18.364 5.636a9 9 0 010 12.728m-2.829-2.829a5 5 0 000-7.07m-4.243 4.243a1 1 0 010-1.414"
         />
       </svg>
-      You are offline
+      {t("You are offline")}
     </div>
   );
 }

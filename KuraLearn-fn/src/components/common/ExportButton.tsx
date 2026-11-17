@@ -1,4 +1,5 @@
 import { useExport } from "../../hooks/useExport";
+import { useT } from "@/i18n/I18nContext";
 
 interface ExportButtonProps {
   endpoint: string;
@@ -17,6 +18,7 @@ export function ExportButton({
   format = "csv",
   className = "",
 }: ExportButtonProps) {
+  const t = useT();
   const { isExporting, export: doExport } = useExport();
 
   return (
@@ -42,7 +44,7 @@ export function ExportButton({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          Exporting...
+          {t("Exporting...")}
         </>
       ) : (
         <>

@@ -1,26 +1,28 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { hasAnyRole, ROLE_GROUPS } from "@/lib/roles";
-import { AcademicYearSelector } from "./AcademicYearSelector";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Search,
-  Wifi,
-  WifiOff,
-  RefreshCw,
-  CheckCircle2,
   AlertTriangle,
   Bell,
-  User,
-  LogOut,
-  Settings,
-  Menu,
-  X,
-  History,
-  CornerDownLeft,
+  CheckCircle2,
   ChevronDown,
-  Sparkles,
+  CornerDownLeft,
+  LogOut,
+  Menu,
+  RefreshCw,
+  Search,
+  Settings,
+  User,
+  X,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useI18n } from "@/i18n/I18nContext";
+import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
+import { apiRequest } from "@/lib/api";
+import { hasAnyRole, ROLE_GROUPS } from "@/lib/roles";
+import { useOffline, usePendingSyncCount } from "@/offline/use-offline";
+import { AcademicYearSelector } from "./AcademicYearSelector";
+import { ROLE_LABELS, workspaceFor, type NavLink } from "./navigation";
 
 interface GlobalHeaderProps {
   sidebarOpen: boolean;
@@ -29,37 +31,46 @@ interface GlobalHeaderProps {
   setSidebarCollapsed: (collapsed: boolean) => void;
 }
 
-interface MockNotification {
-  id: number;
-  category: "sync" | "alert";
-  text: string;
-  time: string;
-  read: boolean;
-}
-
-interface SearchItem {
-  category: "Students" | "Classes" | "Pages" | "Reports";
-  label: string;
-  path: string;
-}
-
-const mockSearchDatabase: SearchItem[] = [
-  { category: "Students", label: "Kwizera Jean (P6 Blue)", path: "/teacher/learners" },
-  { category: "Students", label: "Uwase Alice (S3 Physics)", path: "/teacher/learners" },
-  { category: "Students", label: "Mugisha Eric (S1)", path: "/teacher/learners" },
-  { category: "Classes", label: "P6 Blue - Mathematics", path: "/teacher/classes" },
-  { category: "Classes", label: "S3 Physics - Science", path: "/teacher/classes" },
-  { category: "Pages", label: "Remedial Settings", path: "/teacher/settings" },
-  { category: "Pages", label: "Attendance Dashboard", path: "/teacher/attendance" },
-  { category: "Pages", label: "Marks Sheet Entry", path: "/teacher/marks" },
-  { category: "Reports", label: "Term 2 Syllabus Coverage", path: "/teacher/reports" },
-  { category: "Reports", label: "REB Competency Analytics", path: "/teacher/reports" },
-];
+type AppNotification = {
+  id: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  readAt: string | null;
+};
+type SearchEntry = { label: string; section?: string; path: string };
 
 function isTyping(element: Element | null) {
   return (
     element instanceof HTMLElement && element.matches("input, textarea, select, [contenteditable]")
   );
+}
+
+/** Every page in the signed-in user's own menu, so search only offers places they can open. */
+function searchablePages(items: ReturnType<typeof workspaceFor>["items"]) {
+  const entries: Array<{ label: string; section?: string; path: string }> = [];
+  let section: string | undefined;
+  for (const item of items) {
+    if ("section" in item) {
+      section = item.section;
+      continue;
+    }
+    const link = item as NavLink;
+    entries.push({ label: link.label, section, path: link.path });
+    for (const child of link.children ?? [])
+      entries.push({ label: child.label, section: link.label, path: child.path });
+  }
+  return entries;
+}
+
+function useClickOutside(ref: React.RefObject<HTMLElement>, onOutside: () => void) {
+  useEffect(() => {
+    const handle = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) onOutside();
+    };
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [ref, onOutside]);
 }
 
 export default function GlobalHeader({
@@ -69,206 +80,95 @@ export default function GlobalHeader({
   setSidebarCollapsed,
 }: GlobalHeaderProps) {
   const { user, logout } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const isSuperAdmin = hasAnyRole(user, ROLE_GROUPS.superAdmin);
+  // The school-year picker uses staff data; learners and parents do not need it.
+  const isStaff = !isSuperAdmin && hasAnyRole(user, ROLE_GROUPS.staff);
+  const { isOnline } = useOffline();
+  const pendingSync = usePendingSyncCount();
 
-  // 1. Online / Offline Status
-  const [isOnline, setIsOnline] = useState(() =>
-    typeof navigator !== "undefined" ? navigator.onLine : true,
-  );
-
-  // 2. Synchronization Status (Synced, Syncing..., Pending Changes)
-  const [syncStatus, setSyncStatus] = useState<"Synced" | "Syncing..." | "Pending Changes">(
-    isOnline ? "Synced" : "Pending Changes",
-  );
-
-  useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true);
-      setSyncStatus("Syncing...");
-      const timer = setTimeout(() => {
-        setSyncStatus("Synced");
-      }, 2000);
-      return () => clearTimeout(timer);
-    };
-
-    const handleOffline = () => {
-      setIsOnline(false);
-      setSyncStatus("Pending Changes");
-    };
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
-  // 3. Search State
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem("kuralearn_recent_searches");
-      return saved ? JSON.parse(saved) : ["Kwizera Jean", "S3 Physics Marks", "P6 Attendance"];
-    } catch {
-      return ["Kwizera Jean", "S3 Physics Marks", "P6 Attendance"];
-    }
-  });
-
-  const [searchResults, setSearchResults] = useState<SearchItem[]>([]);
+  // ---------- Search over the user's own pages ----------
+  const pages = useMemo(() => searchablePages(workspaceFor(user).items), [user]);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchDropdownRef = useRef<HTMLDivElement>(null);
-  const searchButtonRef = useRef<HTMLButtonElement>(null);
+  useClickOutside(searchRef, () => setSearchOpen(false));
 
-  // Keyboard focus shortcut (⌘K or /)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchFocused(true);
-        searchInputRef.current?.focus();
-      } else if (e.key === "/" && !isTyping(document.activeElement)) {
-        e.preventDefault();
-        setSearchFocused(true);
-        searchInputRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  // Search logic
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-    const filtered = mockSearchDatabase.filter(
-      (item) =>
-        item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase()),
+  const results: SearchEntry[] = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return pages.filter((page) =>
+      [page.label, t(page.label), page.section ?? "", page.section ? t(page.section) : ""].some(
+        (text) => text.toLowerCase().includes(q),
+      ),
     );
-    setSearchResults(filtered);
-  }, [searchQuery]);
+  }, [pages, query, t]);
+  const quickLinks = pages.slice(0, 6);
 
-  // Click outside listener for search & dropdowns
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const onKey = (e: KeyboardEvent) => {
       if (
-        searchDropdownRef.current &&
-        !searchDropdownRef.current.contains(event.target as Node) &&
-        !searchInputRef.current?.contains(event.target as Node)
+        ((e.metaKey || e.ctrlKey) && e.key === "k") ||
+        (e.key === "/" && !isTyping(document.activeElement))
       ) {
-        setSearchFocused(false);
+        e.preventDefault();
+        setSearchOpen(true);
+        searchInputRef.current?.focus();
+      } else if (e.key === "Escape") {
+        setSearchOpen(false);
+        setMobileSearchOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const handleSearchSubmit = (queryText: string, path?: string) => {
-    if (!queryText.trim()) return;
-
-    const updated = [queryText, ...recentSearches.filter((q) => q !== queryText)].slice(0, 5);
-    setRecentSearches(updated);
-    try {
-      localStorage.setItem("kuralearn_recent_searches", JSON.stringify(updated));
-    } catch (e) {
-      console.error(e);
-    }
-
-    setSearchQuery("");
-    setSearchFocused(false);
+  const goTo = (path: string) => {
+    setQuery("");
+    setSearchOpen(false);
     setMobileSearchOpen(false);
-
-    if (path) {
-      navigate(path);
-    } else {
-      navigate(`/teacher/learners?search=${encodeURIComponent(queryText)}`);
-    }
+    navigate(path);
   };
 
-  // 4. Notifications Bell State
+  // ---------- Notifications ----------
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [activeNotificationTab, setActiveNotificationTab] = useState<"all" | "sync" | "alert">(
-    "all",
-  );
-  const [notifications, setNotifications] = useState<MockNotification[]>([
-    {
-      id: 1,
-      category: "sync",
-      text: "Sync Complete: P5 Mathematics Term 2 marks uploaded successfully",
-      time: "2 mins ago",
-      read: false,
-    },
-    {
-      id: 2,
-      category: "alert",
-      text: "Remedial action plan needed: 4 learners in S3 Physics require catch-up worksheets",
-      time: "10 mins ago",
-      read: false,
-    },
-    {
-      id: 3,
-      category: "sync",
-      text: "Offline Saved: Attendance sheet for P6 Blue saved locally (awaiting connection)",
-      time: "1 hour ago",
-      read: true,
-    },
-    {
-      id: 4,
-      category: "alert",
-      text: "REB Competency standard updated for Secondary Level STEM courses",
-      time: "4 hours ago",
-      read: false,
-    },
-  ]);
   const notificationRef = useRef<HTMLDivElement>(null);
+  useClickOutside(notificationRef, () => setNotificationsOpen(false));
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
-        setNotificationsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-  const filteredNotifications = notifications.filter((n) => {
-    if (activeNotificationTab === "all") return true;
-    return n.category === activeNotificationTab;
+  const notificationsQuery = useQuery({
+    queryKey: ["header-notifications"],
+    queryFn: () => apiRequest<{ notifications: AppNotification[] }>("/notifications"),
+    enabled: Boolean(user),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
   });
+  const notifications = notificationsQuery.data?.notifications ?? [];
+  const unreadCount = notifications.filter((n) => !n.readAt).length;
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, read: true })));
+  const markRead = useMutation({
+    mutationFn: (id: string) => apiRequest(`/notifications/${id}/read`, { method: "PUT" }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["header-notifications"] }),
+  });
+  const markAllRead = () =>
+    notifications.filter((n) => !n.readAt).forEach((n) => markRead.mutate(n.id));
+
+  const timeAgo = (iso: string) => {
+    const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
+    if (minutes < 1) return t("Just now");
+    if (minutes < 60) return t("{count} min ago", { count: minutes });
+    const hours = Math.round(minutes / 60);
+    if (hours < 24) return t("{count} h ago", { count: hours });
+    return t("{count} d ago", { count: Math.round(hours / 24) });
   };
 
-  const toggleNotificationRead = (id: number) => {
-    setNotifications(notifications.map((n) => (n.id === id ? { ...n, read: !n.read } : n)));
-  };
-
-  const removeNotification = (id: number) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
-  };
-
-  // 5. User Profile Dropdown State
+  // ---------- Profile menu ----------
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-        setProfileOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(profileRef, () => setProfileOpen(false));
 
   const handleLogout = () => {
     logout();
@@ -276,518 +176,363 @@ export default function GlobalHeader({
     navigate("/login");
   };
 
-  const initials = (user?.name || user?.firstName || user?.email || "U")
+  const displayName =
+    user?.name || [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.email || "";
+  const initials = (displayName || "U")
     .split(" ")
-    .map((word) => word[0])
+    .map((word: string) => word[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const roleLabel = user?.role ? t(ROLE_LABELS[user.role] ?? user.role) : "";
 
-  const userRole = user?.role || "Staff";
+  const searchPanel = (mobile: boolean) => (
+    <div className={mobile ? "flex-1 overflow-y-auto" : ""}>
+      {query.trim() === "" ? (
+        <div>
+          <p className="mb-1.5 px-2.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+            {t("Quick links")}
+          </p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {quickLinks.map((item) => (
+              <button
+                key={item.path}
+                type="button"
+                onClick={() => goTo(item.path)}
+                className="flex items-center gap-2 rounded-lg border border-slate-100 px-3 py-2 text-left text-xs font-bold text-slate-600 transition hover:border-indigo-100 hover:bg-indigo-50 hover:text-indigo-700"
+              >
+                <CornerDownLeft size={12} className="shrink-0 text-slate-500" aria-hidden />
+                <span>{t(item.label)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : results.length > 0 ? (
+        <div className="space-y-1">
+          <p className="px-2.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+            {t("Matching pages ({count})", { count: results.length })}
+          </p>
+          {results.map((item) => (
+            <button
+              key={`${item.path}-${item.label}`}
+              type="button"
+              onClick={() => goTo(item.path)}
+              className="group flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-indigo-50"
+            >
+              <span className="flex flex-col">
+                <span className="text-xs font-bold text-slate-800 group-hover:text-indigo-800">
+                  {t(item.label)}
+                </span>
+                {item.section && (
+                  <span className="text-[10px] font-semibold uppercase text-slate-500">
+                    {t(item.section)}
+                  </span>
+                )}
+              </span>
+              <CornerDownLeft
+                size={13}
+                className="text-indigo-700 opacity-0 group-hover:opacity-100"
+                aria-hidden
+              />
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="py-6 text-center text-slate-500">
+          <Search size={24} className="mx-auto mb-2" aria-hidden />
+          <p className="text-xs font-medium">{t("No pages match “{query}”", { query })}</p>
+        </div>
+      )}
+    </div>
+  );
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 shadow-sm">
-      {/* LEFT SECTION */}
-      <div className="flex items-center gap-4 flex-1 max-w-xl lg:max-w-2xl">
-        {/* Sidebar toggler (drawer on mobile / collapse toggle on desktop) */}
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 shadow-sm sm:px-6">
+      {/* LEFT */}
+      <div className="flex min-w-0 max-w-xl flex-1 items-center gap-2 sm:gap-4 lg:max-w-2xl">
         <button
-          onClick={() => {
-            if (window.innerWidth < 1024) {
-              setSidebarOpen(!sidebarOpen);
-            } else {
-              setSidebarCollapsed(!sidebarCollapsed);
-            }
-          }}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200"
-          aria-label="Toggle Navigation Sidebar"
+          type="button"
+          onClick={() =>
+            window.innerWidth < 1024
+              ? setSidebarOpen(!sidebarOpen)
+              : setSidebarCollapsed(!sidebarCollapsed)
+          }
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          aria-label={t("Toggle navigation")}
         >
           {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
 
-        {/* Global Search Bar (Focus Area) */}
-        <div className={`relative flex-1 ${isSuperAdmin ? "hidden" : "hidden md:block"}`}>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-500">
-              <Search size={16} />
-            </span>
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search anything (students, reports, attendance)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
-              className="w-full h-10 rounded-full border border-slate-200 pl-11 pr-14 text-sm bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-150"
-            />
-            {/* Keyboard shortcut badges */}
-            <div className="absolute inset-y-0 right-3 flex items-center gap-1 pointer-events-none text-[10px] font-bold text-slate-500">
-              <kbd className="h-5 px-1.5 grid place-items-center rounded bg-slate-200/70 border border-slate-300">
-                ⌘
-              </kbd>
-              <kbd className="h-5 px-1.5 grid place-items-center rounded bg-slate-200/70 border border-slate-300">
-                K
-              </kbd>
-            </div>
-          </div>
-
-          {/* Autocomplete Suggestions Panel */}
-          {searchFocused && (
-            <div
-              ref={searchDropdownRef}
-              className="absolute left-0 top-12 z-50 w-full rounded-xl border border-slate-200 bg-white p-3 shadow-xl max-h-[380px] overflow-y-auto"
-            >
-              {searchQuery.trim() === "" ? (
-                <div>
-                  {/* Recent Searches */}
-                  {recentSearches.length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 px-2.5 mb-1.5">
-                        Recent Searches
-                      </p>
-                      <div className="space-y-0.5">
-                        {recentSearches.map((term, index) => (
-                          <button
-                            key={index}
-                            onClick={() => {
-                              setSearchQuery(term);
-                              handleSearchSubmit(term);
-                            }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 text-left transition-colors"
-                          >
-                            <History size={13} className="text-slate-500 shrink-0" />
-                            <span>{term}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Quick System Links */}
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 px-2.5 mb-1.5">
-                      Quick Links
-                    </p>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {[
-                        { label: "Marks Entry", path: "/teacher/marks" },
-                        { label: "Attendance Sheet", path: "/teacher/attendance" },
-                        { label: "REB Reports", path: "/teacher/reports" },
-                        { label: "Remedial Center", path: "/teacher/settings" },
-                      ].map((item, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setSearchFocused(false);
-                            navigate(item.path);
-                          }}
-                          className="flex items-center gap-2 px-3 py-2 border border-slate-100 rounded-lg text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-100 text-left transition-all duration-150"
-                        >
-                          <CornerDownLeft size={12} className="shrink-0 text-slate-500" />
-                          <span>{item.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  {searchResults.length > 0 ? (
-                    <div className="space-y-2">
-                      <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 px-2.5">
-                        Matching Results ({searchResults.length})
-                      </p>
-                      <div className="space-y-0.5">
-                        {searchResults.map((item, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleSearchSubmit(item.label, item.path)}
-                            className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-indigo-50 text-left transition-colors group"
-                          >
-                            <div className="flex flex-col">
-                              <span className="text-xs font-bold text-slate-800 group-hover:text-indigo-800">
-                                {item.label}
-                              </span>
-                              <span className="text-[10px] text-slate-500 font-semibold uppercase">
-                                {item.category}
-                              </span>
-                            </div>
-                            <CornerDownLeft
-                              size={13}
-                              className="opacity-0 group-hover:opacity-100 text-indigo-700 transition-opacity"
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-6 text-center text-slate-500">
-                      <Search size={24} className="mx-auto mb-2 text-slate-500" />
-                      <p className="text-xs font-medium">No results found for "{searchQuery}"</p>
-                      <p className="text-[10px] mt-0.5 text-slate-500">
-                        Try searching classes, students or pages
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
+        <div ref={searchRef} className="relative hidden flex-1 md:block">
+          <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-slate-500">
+            <Search size={16} aria-hidden />
+          </span>
+          <input
+            ref={searchInputRef}
+            type="search"
+            aria-label={t("Search pages")}
+            placeholder={t("Search pages…")}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setSearchOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && results[0]) goTo(results[0].path);
+            }}
+            className="h-10 w-full rounded-full border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          />
+          {searchOpen && (
+            <div className="absolute left-0 top-12 z-50 max-h-[380px] w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
+              {searchPanel(false)}
             </div>
           )}
         </div>
 
-        {isSuperAdmin ? null : <AcademicYearSelector />}
+        {isStaff ? <AcademicYearSelector /> : null}
 
-        {/* Mobile Search Button (visible only on mobile) */}
         <button
-          ref={searchButtonRef}
+          type="button"
           onClick={() => setMobileSearchOpen(true)}
-          className={`${isSuperAdmin ? "hidden" : "md:hidden flex"} h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 focus:outline-none`}
-          aria-label="Search"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 md:hidden"
+          aria-label={t("Search pages")}
         >
           <Search size={18} />
         </button>
       </div>
 
-      {/* Mobile Search Overlay */}
       {mobileSearchOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-white p-4">
-          <div className="flex items-center gap-3 mb-4">
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-white p-4"
+          role="dialog"
+          aria-label={t("Search pages")}
+        >
+          <div className="mb-4 flex items-center gap-3">
             <button
+              type="button"
               onClick={() => setMobileSearchOpen(false)}
               className="p-2 text-slate-500 hover:text-slate-800"
+              aria-label={t("Close search")}
             >
               <X size={20} />
             </button>
-            <div className="relative flex-1">
-              <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-500">
-                <Search size={16} />
-              </span>
-              <input
-                type="text"
-                placeholder="Search anything..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                className="w-full h-10 rounded-full border border-slate-200 pl-10 pr-4 text-sm bg-slate-50 focus:border-indigo-500 focus:bg-white focus:outline-none"
-              />
-            </div>
+            <input
+              type="search"
+              aria-label={t("Search pages")}
+              placeholder={t("Search pages…")}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && results[0]) goTo(results[0].path);
+              }}
+              autoFocus
+              className="h-10 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm focus:border-indigo-500 focus:bg-white focus:outline-none"
+            />
           </div>
-
-          <div className="flex-1 overflow-y-auto">
-            {searchQuery.trim() === "" ? (
-              <div className="space-y-4">
-                {recentSearches.length > 0 && (
-                  <div>
-                    <p className="text-[10px] font-bold uppercase text-slate-500 mb-2">
-                      Recent Searches
-                    </p>
-                    {recentSearches.map((term, i) => (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          setSearchQuery(term);
-                          handleSearchSubmit(term);
-                        }}
-                        className="w-full flex items-center gap-2.5 py-2.5 border-b border-slate-50 text-xs font-semibold text-slate-700"
-                      >
-                        <History size={14} className="text-slate-500" />
-                        {term}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <div>
-                  <p className="text-[10px] font-bold uppercase text-slate-500 mb-2">
-                    Quick Navigation
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { label: "Marks Entry", path: "/teacher/marks" },
-                      { label: "Attendance", path: "/teacher/attendance" },
-                      { label: "Reports", path: "/teacher/reports" },
-                      { label: "Remedial", path: "/teacher/settings" },
-                    ].map((item, i) => (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          setMobileSearchOpen(false);
-                          navigate(item.path);
-                        }}
-                        className="p-3 border border-slate-100 rounded-lg text-center text-xs font-bold text-slate-700 hover:bg-indigo-50"
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                {searchResults.length > 0 ? (
-                  <div className="space-y-1">
-                    {searchResults.map((item, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleSearchSubmit(item.label, item.path)}
-                        className="w-full flex flex-col py-2.5 border-b border-slate-50 text-left"
-                      >
-                        <span className="text-sm font-bold text-slate-800">{item.label}</span>
-                        <span className="text-[10px] text-slate-500 font-extrabold uppercase">
-                          {item.category}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-8 text-center text-slate-500">
-                    <p className="text-sm">No matching results.</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          {searchPanel(true)}
         </div>
       )}
 
-      {/* RIGHT SECTION */}
-      <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-        {/* 1. Online / Offline Indicator */}
+      {/* RIGHT */}
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <LocaleSwitcher compact className="hidden sm:inline-flex" />
+
         <div
-          className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition-all duration-200 border ${
+          role="status"
+          className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold ${
             isOnline
-              ? "bg-emerald-50/60 border-emerald-100 text-emerald-700"
-              : "bg-red-50/60 border-red-100 text-red-700 animate-pulse"
+              ? "border-emerald-100 bg-emerald-50/60 text-emerald-700"
+              : "border-red-100 bg-red-50/60 text-red-700"
           }`}
           title={
-            isOnline
-              ? "You are connected to KuraLearn Cloud Servers"
-              : "You are working offline. Edits are saved on this device."
+            isOnline ? t("Connected") : t("You are offline. Changes are saved on this device.")
           }
         >
           <span
-            className={`h-1.5 w-1.5 rounded-full ${isOnline ? "bg-emerald-500" : "bg-red-500 animate-ping"}`}
+            className={`h-1.5 w-1.5 rounded-full ${isOnline ? "bg-emerald-500" : "bg-red-500"}`}
+            aria-hidden
           />
-          <span className="hidden sm:inline">{isOnline ? "Online" : "Offline"}</span>
+          <span className="hidden sm:inline">{isOnline ? t("Online") : t("Offline")}</span>
+          <span className="sr-only sm:hidden">{isOnline ? t("Online") : t("Offline")}</span>
         </div>
 
-        {/* 2. Synchronization Status Indicator */}
-        <div
-          className={`${isSuperAdmin ? "hidden" : "hidden md:flex"} items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium border ${
-            syncStatus === "Synced"
-              ? "bg-slate-50 border-slate-200 text-slate-600"
-              : syncStatus === "Syncing..."
-                ? "bg-blue-50 border-blue-100 text-blue-700"
-                : "bg-amber-50 border-amber-100 text-amber-700"
-          }`}
-        >
-          {syncStatus === "Synced" && (
-            <>
-              <CheckCircle2 size={13} className="text-emerald-700" />
-              <span>Synced</span>
-            </>
-          )}
-          {syncStatus === "Syncing..." && (
-            <>
-              <RefreshCw size={13} className="animate-spin text-blue-600" />
-              <span>Syncing...</span>
-            </>
-          )}
-          {syncStatus === "Pending Changes" && (
-            <>
-              <AlertTriangle size={13} className="text-amber-700" />
-              <span className="font-bold">Pending Changes</span>
-            </>
-          )}
-        </div>
-
-        {/* 3. Notification Bell with Dropdown */}
-        {isSuperAdmin ? (
-          <Link
-            to="/notifications"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            aria-label="View notifications"
+        {!isSuperAdmin && (
+          <div
+            className={`hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium md:flex ${
+              pendingSync === 0
+                ? "border-slate-200 bg-slate-50 text-slate-600"
+                : isOnline
+                  ? "border-blue-100 bg-blue-50 text-blue-700"
+                  : "border-amber-100 bg-amber-50 text-amber-700"
+            }`}
           >
-            <Bell size={18} />
-          </Link>
-        ) : (
-          <div ref={notificationRef} className="relative">
-            <button
-              onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none"
-              aria-label="View notifications"
-            >
-              <Bell size={18} />
-              {unreadCount > 0 && (
-                <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white ring-2 ring-white">
-                  {unreadCount}
+            {pendingSync === 0 ? (
+              <>
+                <CheckCircle2 size={13} className="text-emerald-700" aria-hidden />
+                <span>{t("Synced")}</span>
+              </>
+            ) : isOnline ? (
+              <>
+                <RefreshCw size={13} className="animate-spin text-blue-600" aria-hidden />
+                <span>{t("Syncing {count}…", { count: pendingSync })}</span>
+              </>
+            ) : (
+              <>
+                <AlertTriangle size={13} className="text-amber-700" aria-hidden />
+                <span className="font-bold">
+                  {t("{count} waiting to sync", { count: pendingSync })}
                 </span>
-              )}
-            </button>
-
-            {/* Notifications Dropdown Panel */}
-            {notificationsOpen && (
-              <div className="absolute right-0 top-12 z-50 w-[320px] sm:w-[360px] rounded-xl border border-slate-200 bg-white shadow-xl overflow-hidden">
-                <div className="border-b border-slate-100 bg-slate-50 px-4 py-3 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                    Notifications
-                  </span>
-                  {unreadCount > 0 && (
-                    <button
-                      onClick={markAllAsRead}
-                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
-                    >
-                      Mark all read
-                    </button>
-                  )}
-                </div>
-
-                {/* Categorization Tabs */}
-                <div className="flex border-b border-slate-100 px-3 bg-white">
-                  {(["all", "alert", "sync"] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveNotificationTab(tab)}
-                      className={`flex-1 py-2 text-center text-xs font-bold capitalize transition-colors border-b-2 ${
-                        activeNotificationTab === tab
-                          ? "border-indigo-600 text-indigo-700"
-                          : "border-transparent text-slate-500 hover:text-slate-700"
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Notification Items */}
-                <div className="max-h-[280px] overflow-y-auto bg-white divide-y divide-slate-100">
-                  {filteredNotifications.length > 0 ? (
-                    filteredNotifications.map((notif) => (
-                      <div
-                        key={notif.id}
-                        onClick={() => toggleNotificationRead(notif.id)}
-                        className={`group flex items-start gap-2.5 p-3.5 hover:bg-slate-50/50 cursor-pointer transition-colors ${
-                          !notif.read ? "bg-indigo-50/20" : ""
-                        }`}
-                      >
-                        <div className="mt-0.5 shrink-0">
-                          {notif.category === "sync" ? (
-                            <RefreshCw
-                              size={13}
-                              className={`text-blue-600 ${!notif.read ? "animate-pulse" : ""}`}
-                            />
-                          ) : (
-                            <AlertTriangle size={13} className="text-amber-700" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-xs text-slate-700 leading-normal ${!notif.read ? "font-semibold" : ""}`}
-                          >
-                            {notif.text}
-                          </p>
-                          <span className="text-[10px] text-slate-500 font-medium block mt-1">
-                            {notif.time}
-                          </span>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeNotification(notif.id);
-                          }}
-                          className="text-slate-500 hover:text-slate-500 opacity-0 group-hover:opacity-100 shrink-0 p-0.5 transition-all"
-                          title="Remove notification"
-                        >
-                          <X size={12} />
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="py-10 text-center text-slate-500">
-                      <p className="text-xs">No notifications here</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-center">
-                  <Link
-                    to="/notifications"
-                    onClick={() => setNotificationsOpen(false)}
-                    className="text-xs font-bold text-slate-600 hover:text-slate-800 transition-colors"
-                  >
-                    View all activity
-                  </Link>
-                </div>
-              </div>
+              </>
             )}
           </div>
         )}
 
-        {/* 5. User Profile Dropdown */}
-        <div ref={profileRef} className="relative">
+        <div ref={notificationRef} className="relative">
           <button
-            onClick={() => setProfileOpen(!profileOpen)}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-1 hover:bg-slate-100 hover:border-slate-300 focus:outline-none transition-all duration-200"
-            aria-label="User profile menu"
+            type="button"
+            onClick={() => setNotificationsOpen(!notificationsOpen)}
+            className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            aria-label={
+              unreadCount
+                ? t("Notifications, {count} unread", { count: unreadCount })
+                : t("Notifications")
+            }
+            aria-expanded={notificationsOpen}
           >
-            {/* Small Avatar badge */}
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white uppercase shrink-0">
-              {initials}
-            </div>
-
-            {/* Small screen role name details */}
-            <div className="hidden lg:flex flex-col text-left pr-1.5">
-              <span className="text-xs font-bold text-slate-800 leading-tight">
-                {user?.name || user?.firstName || "Staff Member"}
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                {unreadCount > 9 ? "9+" : unreadCount}
               </span>
-              <span className="text-[10px] text-indigo-600 font-extrabold uppercase tracking-wide leading-none mt-0.5">
-                {userRole}
-              </span>
-            </div>
-
-            <ChevronDown size={12} className="text-slate-500 shrink-0 mr-0.5 hidden lg:block" />
+            )}
           </button>
 
-          {/* Profile Dropdown Menu */}
+          {notificationsOpen && (
+            <div className="fixed inset-x-3 top-16 z-50 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:w-[360px]">
+              <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-3">
+                <span className="text-xs font-bold uppercase tracking-wide text-slate-800">
+                  {t("Notifications")}
+                </span>
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={markAllRead}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"
+                  >
+                    {t("Mark all read")}
+                  </button>
+                )}
+              </div>
+              <ul className="max-h-[320px] divide-y divide-slate-100 overflow-y-auto">
+                {notificationsQuery.isLoading ? (
+                  <li className="py-10 text-center text-xs text-slate-500">{t("Loading…")}</li>
+                ) : notifications.length === 0 ? (
+                  <li className="py-10 text-center text-xs text-slate-500">
+                    {t("You're all caught up")}
+                  </li>
+                ) : (
+                  notifications.slice(0, 8).map((n) => (
+                    <li key={n.id}>
+                      <button
+                        type="button"
+                        onClick={() => !n.readAt && markRead.mutate(n.id)}
+                        className={`flex w-full items-start gap-2.5 p-3.5 text-left transition hover:bg-slate-50 ${n.readAt ? "" : "bg-indigo-50/40"}`}
+                      >
+                        <span
+                          className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.readAt ? "bg-transparent" : "bg-indigo-600"}`}
+                          aria-hidden
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span
+                            className={`block text-xs text-slate-800 ${n.readAt ? "" : "font-bold"}`}
+                          >
+                            {n.title}
+                          </span>
+                          <span className="mt-0.5 block text-xs leading-normal text-slate-600">
+                            {n.body}
+                          </span>
+                          <span className="mt-1 block text-[10px] font-medium text-slate-500">
+                            {timeAgo(n.createdAt)}
+                          </span>
+                        </span>
+                        {!n.readAt && <span className="sr-only">{t("Unread")}</span>}
+                      </button>
+                    </li>
+                  ))
+                )}
+              </ul>
+              <div className="border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-center">
+                <Link
+                  to="/notifications"
+                  onClick={() => setNotificationsOpen(false)}
+                  className="text-xs font-bold text-slate-600 hover:text-slate-800"
+                >
+                  {t("View all notifications")}
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div ref={profileRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-1 transition hover:border-slate-300 hover:bg-slate-100"
+            aria-label={t("Account menu")}
+            aria-expanded={profileOpen}
+          >
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold uppercase text-white">
+              {initials}
+            </span>
+            <span className="hidden flex-col pr-1.5 text-left lg:flex">
+              <span className="text-xs font-bold leading-tight text-slate-800">{displayName}</span>
+              <span className="mt-0.5 text-[10px] font-extrabold uppercase leading-none tracking-wide text-indigo-600">
+                {roleLabel}
+              </span>
+            </span>
+            <ChevronDown
+              size={12}
+              className="mr-0.5 hidden shrink-0 text-slate-500 lg:block"
+              aria-hidden
+            />
+          </button>
+
           {profileOpen && (
-            <div className="absolute right-0 top-12 z-50 w-52 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-              {/* User overview inside dropdown */}
-              <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                <p className="text-xs font-bold text-slate-900 truncate">
-                  {user?.name || user?.firstName || "Staff Member"}
-                </p>
-                <p className="text-[10px] text-slate-500 font-semibold truncate leading-tight mt-0.5">
+            <div className="absolute right-0 top-12 z-50 w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+              <div className="mb-1 border-b border-slate-100 px-3 py-2">
+                <p className="truncate text-xs font-bold text-slate-900">{displayName}</p>
+                <p className="mt-0.5 truncate text-[10px] font-semibold leading-tight text-slate-500">
                   {user?.email}
                 </p>
               </div>
-
-              <div className="space-y-0.5">
-                <Link
-                  to={isSuperAdmin ? "/super-admin/profile" : "/profile"}
-                  onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                >
-                  <User size={14} className="text-slate-500" />
-                  <span>View Profile</span>
-                </Link>
-
-                {isSuperAdmin ? null : (
-                  <Link
-                    to={userRole === "TEACHER" ? "/teacher/settings" : "/settings"}
-                    onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                  >
-                    <Settings size={14} className="text-slate-500" />
-                    <span>Account Settings</span>
-                  </Link>
-                )}
-
-                <button
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left"
-                >
-                  <LogOut size={14} className="text-red-600" />
-                  <span>Log out</span>
-                </button>
+              <div className="px-3 py-2 sm:hidden">
+                <LocaleSwitcher className="w-full justify-start" />
               </div>
+              <Link
+                to={isSuperAdmin ? "/super-admin/profile" : "/profile"}
+                onClick={() => setProfileOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <User size={14} className="text-slate-500" aria-hidden />
+                <span>{t("View profile")}</span>
+              </Link>
+              {!isSuperAdmin && (
+                <Link
+                  to={user?.role === "TEACHER" ? "/teacher/settings" : "/settings"}
+                  onClick={() => setProfileOpen(false)}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  <Settings size={14} className="text-slate-500" aria-hidden />
+                  <span>{t("Settings")}</span>
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50"
+              >
+                <LogOut size={14} aria-hidden />
+                <span>{t("Log out")}</span>
+              </button>
             </div>
           )}
         </div>

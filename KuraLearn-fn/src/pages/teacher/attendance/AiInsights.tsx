@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { AttendanceSummary } from "@/services/attendanceApi";
 import type { AttendanceRecord, Student, ViewMode } from "@/hooks/useAttendance";
+import { useT } from "@/i18n/I18nContext";
 
 function dateKey(value: Date | string) {
   return new Date(value).toISOString().split("T")[0];
@@ -53,6 +54,7 @@ export const AiInsights: React.FC<{
   onSelectStudent,
   onRefresh,
 }) => {
+  const t = useT();
   const [completedActions, setCompletedActions] = useState<Record<string, boolean>>({});
 
   // Group the year's actual records by month to calculate real monthly trends
@@ -175,17 +177,17 @@ export const AiInsights: React.FC<{
     HIGH: {
       border: "border-l-4 border-l-rose-500",
       text: "text-rose-700 bg-rose-50/50",
-      label: "High Priority",
+      label: t("High Priority"),
     },
     MEDIUM: {
       border: "border-l-4 border-l-amber-500",
       text: "text-amber-700 bg-amber-50/50",
-      label: "Urgent Check",
+      label: t("Urgent Check"),
     },
     LOW: {
       border: "border-l-4 border-l-violet-500",
       text: "text-violet-700 bg-violet-50/50",
-      label: "Smart Observation",
+      label: t("Smart Observation"),
     },
   };
 
@@ -198,10 +200,12 @@ export const AiInsights: React.FC<{
             <span className="p-1.5 bg-violet-50 rounded-lg text-violet-600 border border-violet-100">
               <Brain size={16} />
             </span>
-            Real-time Attendance Intelligence
+            {t("Real-time Attendance Intelligence")}
           </h2>
           <p className="text-xs font-semibold text-slate-500 mt-1">
-            Institutional behavior analytics for {selectedClassName || "this class"} as of{" "}
+            {t("Attendance insights for {name} as of", {
+              name: selectedClassName || t("this class"),
+            })}{" "}
             {currentDate.toLocaleDateString(undefined, {
               day: "numeric",
               month: "short",
@@ -216,10 +220,10 @@ export const AiInsights: React.FC<{
             className="flex items-center gap-1.5 h-8 rounded-lg bg-violet-50 border border-violet-200/60 px-3 text-xs font-extrabold text-violet-700 transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm"
           >
             <RotateCw size={13} className={loading ? "animate-spin" : ""} />
-            Re-Analyze AI
+            {t("Re-Analyze AI")}
           </button>
           <span className="rounded-full bg-emerald-50 border border-emerald-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-            Data Verified
+            {t("Data Verified")}
           </span>
         </div>
       </div>
@@ -229,43 +233,51 @@ export const AiInsights: React.FC<{
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-4">
           <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 flex items-center gap-1.5 border-b border-slate-100 pb-2">
             <TrendingUp size={14} className="text-violet-600 animate-pulse" />
-            📅 KuraLearn Yearly Attendance Analytics & Trend Analysis
+            {t("Yearly attendance trends")}
           </h3>
 
           {/* Yearly Stat Cards Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-slate-50/50 border border-slate-100 p-3 rounded-lg shadow-sm">
-              <div className="text-[10px] font-bold text-slate-500 uppercase">Avg Yearly Rate</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase">
+                {t("Avg Yearly Rate")}
+              </div>
               <div className="text-lg font-bold text-slate-800 mt-1">
-                {summary?.attendanceRate ? `${Math.round(summary.attendanceRate)}%` : "92%"}
+                {summary?.attendanceRate != null ? `${Math.round(summary.attendanceRate)}%` : "—"}
               </div>
               <div className="text-[10px] font-semibold text-slate-500 mt-0.5">
-                Verified Institutional
+                {t("This school year")}
               </div>
             </div>
             <div className="bg-slate-50/50 border border-slate-100 p-3 rounded-lg shadow-sm">
-              <div className="text-[10px] font-bold text-slate-500 uppercase">Total Logged</div>
-              <div className="text-lg font-bold text-slate-800 mt-1">
-                {summary?.totalRecords ?? 1420}
+              <div className="text-[10px] font-bold text-slate-500 uppercase">
+                {t("Total Logged")}
               </div>
-              <div className="text-[10px] font-semibold text-slate-500 mt-0.5">Records in year</div>
+              <div className="text-lg font-bold text-slate-800 mt-1">
+                {summary?.totalRecords ?? 0}
+              </div>
+              <div className="text-[10px] font-semibold text-slate-500 mt-0.5">
+                {t("Records in year")}
+              </div>
             </div>
             <div className="bg-emerald-50/20 border border-emerald-100/30 p-3 rounded-lg shadow-sm">
-              <div className="text-[10px] font-bold text-emerald-700 uppercase">Best Month</div>
+              <div className="text-[10px] font-bold text-emerald-700 uppercase">
+                {t("Best Month")}
+              </div>
               <div className="text-lg font-bold text-emerald-700 mt-1">
-                {bestMonth?.month ?? "March"}
+                {bestMonth?.month ?? "—"}
               </div>
               <div className="text-[10px] font-semibold text-emerald-700 mt-0.5">
-                Avg Rate: {bestMonth ? `${bestMonth.rate}%` : "96%"}
+                {t("Average: {rate}", { rate: bestMonth ? `${bestMonth.rate}%` : "—" })}
               </div>
             </div>
             <div className="bg-rose-50/20 border border-rose-100/30 p-3 rounded-lg shadow-sm">
-              <div className="text-[10px] font-bold text-rose-700 uppercase">Lowest Month</div>
-              <div className="text-lg font-bold text-rose-700 mt-1">
-                {worstMonth?.month ?? "November"}
+              <div className="text-[10px] font-bold text-rose-700 uppercase">
+                {t("Lowest Month")}
               </div>
+              <div className="text-lg font-bold text-rose-700 mt-1">{worstMonth?.month ?? "—"}</div>
               <div className="text-[10px] font-semibold text-rose-700 mt-0.5">
-                Avg Rate: {worstMonth ? `${worstMonth.rate}%` : "87%"}
+                {t("Average: {rate}", { rate: worstMonth ? `${worstMonth.rate}%` : "—" })}
               </div>
             </div>
           </div>
@@ -273,7 +285,7 @@ export const AiInsights: React.FC<{
           {/* Monthly Trends CSS Chart */}
           <div className="space-y-2">
             <h4 className="text-[11px] font-extrabold uppercase tracking-wide text-slate-500">
-              Monthly Attendance Trends
+              {t("Monthly Attendance Trends")}
             </h4>
             <div className="grid grid-cols-12 gap-1.5 items-end h-24 pt-4 border-b border-slate-100 px-2 bg-slate-50/30 rounded-lg">
               {monthlyTrends.map((m: { month: string; rate: number; total: number }) => (
@@ -306,7 +318,7 @@ export const AiInsights: React.FC<{
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             <div className="border border-slate-100 p-3 rounded-lg bg-slate-50/10">
               <h4 className="text-[10px] font-extrabold uppercase tracking-wide text-slate-500 mb-2">
-                Most Absent Classes (Yearly)
+                {t("Most Absent Classes (Yearly)")}
               </h4>
               <div className="space-y-2">
                 {(() => {
@@ -336,7 +348,7 @@ export const AiInsights: React.FC<{
                     >
                       <span className="text-slate-700">{c.name}</span>
                       <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100/20">
-                        {c.absences} Absences ({c.rate}%)
+                        {t("{count} absences ({rate}%)", { count: c.absences, rate: c.rate })}
                       </span>
                     </div>
                   ));
@@ -346,41 +358,31 @@ export const AiInsights: React.FC<{
 
             <div className="border border-slate-100 p-3 rounded-lg bg-slate-50/10 space-y-2">
               <h4 className="text-[10px] font-extrabold uppercase tracking-wide text-slate-500">
-                Yearly Performance Analysis
+                {t("Attendance by gender")}
               </h4>
               <div className="text-[11px] font-semibold text-slate-600 leading-relaxed space-y-1.5">
-                <p className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  <span>
-                    Girls recorded{" "}
-                    <strong>
-                      {summary?.attendanceRateGirls
-                        ? `${Math.round(summary.attendanceRateGirls)}%`
-                        : "93%"}
-                    </strong>{" "}
-                    attendance rate, outperforming Boys by{" "}
-                    <strong>
-                      {summary?.attendanceRateGirls && summary?.attendanceRateBoys
-                        ? `${Math.round(Math.abs(summary.attendanceRateGirls - summary.attendanceRateBoys))}%`
-                        : "2%"}
-                    </strong>
-                    .
-                  </span>
-                </p>
-                <p className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                  <span>
-                    Class attendance shows a{" "}
-                    <strong>
-                      +
-                      {summary?.attendanceRate
-                        ? Math.round((summary.attendanceRate - 88) * 10) / 10
-                        : "4.2"}
-                      % YoY Improvement
-                    </strong>{" "}
-                    compared to last academic year.
-                  </span>
-                </p>
+                {summary?.attendanceRateGirls != null && summary?.attendanceRateBoys != null ? (
+                  <>
+                    <p className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+                      <span>
+                        {t("Girls: {rate}% attendance", {
+                          rate: Math.round(summary.attendanceRateGirls),
+                        })}
+                      </span>
+                    </p>
+                    <p className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-blue-500" aria-hidden />
+                      <span>
+                        {t("Boys: {rate}% attendance", {
+                          rate: Math.round(summary.attendanceRateBoys),
+                        })}
+                      </span>
+                    </p>
+                  </>
+                ) : (
+                  <p>{t("Not enough attendance records yet to compare girls and boys.")}</p>
+                )}
               </div>
             </div>
           </div>
@@ -395,11 +397,11 @@ export const AiInsights: React.FC<{
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
               <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 flex items-center gap-1.5">
                 <Brain size={14} className="text-violet-700" />
-                AI Copilot Smart Recommendations
+                {t("AI Copilot Smart Recommendations")}
               </h3>
               {loading && (
                 <span className="text-[10px] font-bold text-violet-700 animate-pulse">
-                  Re-analyzing attendance logs...
+                  {t("Re-analyzing attendance logs...")}
                 </span>
               )}
             </div>
@@ -408,10 +410,10 @@ export const AiInsights: React.FC<{
               <div className="py-12 text-center space-y-3">
                 <Brain size={32} className="mx-auto text-violet-300 animate-bounce" />
                 <p className="text-xs font-bold text-slate-700 animate-pulse">
-                  Running advanced attendance regression models...
+                  {t("Running advanced attendance regression models...")}
                 </p>
                 <p className="text-[10px] font-semibold text-slate-500">
-                  Evaluating classroom trends, gender biases, and repeated absences.
+                  {t("Evaluating classroom trends, gender biases, and repeated absences.")}
                 </p>
               </div>
             ) : suggestions && suggestions.length > 0 ? (
@@ -464,7 +466,7 @@ export const AiInsights: React.FC<{
                             }`}
                           >
                             <span className="font-extrabold uppercase text-[10px] tracking-wide mr-1 text-slate-500">
-                              Action:
+                              {t("Action:")}
                             </span>
                             {card.action}
                           </span>
@@ -477,9 +479,11 @@ export const AiInsights: React.FC<{
             ) : (
               <div className="py-8 text-center text-slate-500">
                 <Brain size={24} className="mx-auto text-slate-500" />
-                <p className="text-xs font-bold text-slate-700 mt-2">No active observations</p>
+                <p className="text-xs font-bold text-slate-700 mt-2">
+                  {t("No active observations")}
+                </p>
                 <p className="text-[10px] font-semibold mt-1">
-                  Classroom attendance is running stable with zero alerts.
+                  {t("Classroom attendance is running stable with zero alerts.")}
                 </p>
               </div>
             )}
@@ -492,15 +496,16 @@ export const AiInsights: React.FC<{
           <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 flex items-center gap-1.5">
               <Percent size={14} className="text-indigo-700" />
-              Gender Analysis (
-              {viewBy === "yearly"
-                ? "Yearly"
-                : viewBy === "monthly"
-                  ? "Monthly"
-                  : viewBy === "weekly"
-                    ? "Weekly"
-                    : "30-Day"}
-              )
+              {t("Gender analysis ({period})", {
+                period:
+                  viewBy === "yearly"
+                    ? t("Yearly")
+                    : viewBy === "monthly"
+                      ? t("Monthly")
+                      : viewBy === "weekly"
+                        ? t("Weekly")
+                        : t("30-Day"),
+              })}
             </h3>
             <div className="space-y-3.5 pt-1">
               {/* Girls Progress */}
@@ -508,7 +513,7 @@ export const AiInsights: React.FC<{
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
                   <span className="flex items-center gap-1">
                     <span className="h-2 w-2 rounded-full bg-violet-500" />
-                    Girls Attendance Rate
+                    {t("Girls Attendance Rate")}
                   </span>
                   <span className="font-bold text-violet-700">{girlsRate}%</span>
                 </div>
@@ -525,7 +530,7 @@ export const AiInsights: React.FC<{
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
                   <span className="flex items-center gap-1">
                     <span className="h-2 w-2 rounded-full bg-sky-500" />
-                    Boys Attendance Rate
+                    {t("Boys Attendance Rate")}
                   </span>
                   <span className="font-bold text-sky-700">{boysRate}%</span>
                 </div>
@@ -543,7 +548,7 @@ export const AiInsights: React.FC<{
           <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 flex items-center gap-1.5">
               <CalendarDays size={14} className="text-emerald-700" />
-              Day-of-Week Attendance
+              {t("Day-of-Week Attendance")}
             </h3>
             <div className="space-y-2 pt-1.5">
               {weekdayRates.map((day) => (
@@ -575,7 +580,7 @@ export const AiInsights: React.FC<{
           <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500 flex items-center gap-1.5">
               <AlertTriangle size={14} className="text-rose-700" />
-              Chronic Absence Watchlist
+              {t("Chronic Absence Watchlist")}
             </h3>
 
             {frequentAbsentees.length > 0 ? (
@@ -605,14 +610,14 @@ export const AiInsights: React.FC<{
                             {student.user.name}
                           </p>
                           <p className="text-[10px] font-semibold text-slate-500">
-                            P4 Student ID: {student.studentCode || "N/A"}
+                            {t("P4 Student ID:")} {student.studentCode || "N/A"}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-1shrink-0">
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-100/30">
-                          {count} Absences
+                          {count} {t("Absences")}
                         </span>
                         <ChevronRight
                           size={12}
@@ -626,9 +631,11 @@ export const AiInsights: React.FC<{
             ) : (
               <div className="py-6 text-center text-slate-500 border border-dashed border-slate-200 rounded-lg">
                 <CheckCircle size={20} className="mx-auto text-emerald-400" />
-                <p className="text-[11px] font-bold text-slate-700 mt-1.5">No At-Risk Students</p>
+                <p className="text-[11px] font-bold text-slate-700 mt-1.5">
+                  {t("No At-Risk Students")}
+                </p>
                 <p className="text-[10px] font-semibold mt-0.5">
-                  Every student has solid consistency this month.
+                  {t("Every student has solid consistency this month.")}
                 </p>
               </div>
             )}

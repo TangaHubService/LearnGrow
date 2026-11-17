@@ -10,15 +10,21 @@ import {
 } from "@/components/student/StudentShared";
 import { useQuizResults } from "@/hooks/useStudentPortal";
 import { Skeleton } from "@/components/common/Skeleton";
+import { useT } from "@/i18n/I18nContext";
 
 export function QuizResultsPage() {
+  const t = useT();
   const { attemptId } = useParams<{ attemptId: string }>();
   const { data, isLoading, error, refetch } = useQuizResults(attemptId || "");
 
   if (isLoading) {
     return (
       <div>
-        <PageHeader brand="KuraLean Learning" title="Quiz results" subtitle="Loading results..." />
+        <PageHeader
+          brand={t("KuraLearn Learning")}
+          title={t("Quiz results")}
+          subtitle={t("Loading results...")}
+        />
         <div className="grid gap-4 sm:grid-cols-3">
           {[1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-24 w-full rounded-2xl" />
@@ -36,14 +42,14 @@ export function QuizResultsPage() {
   if (error || !data)
     return (
       <StudentEmptyState
-        title="Results not found"
-        message="The quiz result could not be retrieved."
+        title={t("Results not found")}
+        message={t("The quiz result could not be retrieved.")}
         action={
           <button
             onClick={() => refetch()}
             className="mt-4 text-indigo-600 font-bold flex items-center gap-2"
           >
-            <RefreshCw size={16} /> Retry
+            <RefreshCw size={16} /> {t("Retry")}
           </button>
         }
       />
@@ -56,25 +62,25 @@ export function QuizResultsPage() {
   return (
     <div>
       <PageHeader
-        brand="KuraLean Learning"
-        title="Quiz results"
+        brand={t("KuraLearn Learning")}
+        title={t("Quiz results")}
         subtitle={`${quiz.title || "Quiz"} - score ${score}%`}
         actions={
           <PrimaryLink to={`/ai?attemptId=${attempt.id}&mode=remedial`}>
-            AI remedial recommendation
+            {t("AI remedial recommendation")}
           </PrimaryLink>
         }
       />
       <div className="grid gap-4 sm:grid-cols-3">
-        <StudentStat label="Score" value={`${score}%`} icon={BarChart3} tone="#2563eb" />
+        <StudentStat label={t("Score")} value={`${score}%`} icon={BarChart3} tone="#2563eb" />
         <StudentStat
-          label="Stars"
+          label={t("Stars")}
           value={Math.max(1, Math.round(score / 20))}
           icon={Star}
           tone="#f59e0b"
         />
         <StudentStat
-          label="Correct"
+          label={t("Correct")}
           value={`${attempt.correctCount || 0}/${quiz.questions?.length || 0}`}
           icon={CheckCircle2}
           tone="#059669"
@@ -96,10 +102,10 @@ export function QuizResultsPage() {
                     <p
                       className={`text-sm font-bold ${isCorrect ? "text-emerald-700" : "text-amber-700"}`}
                     >
-                      Your answer: {userAnswer || "No answer"}
+                      {t("Your answer:")} {userAnswer || "No answer"}
                     </p>
                     <p className="text-sm font-bold text-slate-600">
-                      Correct answer: {question.correctAnswer}
+                      {t("Correct answer:")} {question.correctAnswer}
                     </p>
                   </div>
                 </div>
@@ -119,11 +125,13 @@ export function QuizResultsPage() {
         })}
       </div>
       <div className="mt-8 flex flex-wrap gap-3 pt-6 border-t border-slate-100">
-        <PrimaryLink to={`/quizzes/${quiz.id}`}>Retry quiz</PrimaryLink>
+        <PrimaryLink to={`/quizzes/${quiz.id}`}>{t("Retry quiz")}</PrimaryLink>
         {quiz.courseId && (
-          <SecondaryLink to={`/courses/${quiz.courseId}/path`}>Back to learning path</SecondaryLink>
+          <SecondaryLink to={`/courses/${quiz.courseId}/path`}>
+            {t("Back to learning path")}
+          </SecondaryLink>
         )}
-        <SecondaryLink to="/subjects">Explore other subjects</SecondaryLink>
+        <SecondaryLink to="/subjects">{t("Explore other subjects")}</SecondaryLink>
       </div>
     </div>
   );

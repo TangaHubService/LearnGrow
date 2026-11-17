@@ -192,3 +192,20 @@ export async function sendPasswordResetEmail(data: { to: string; name: string; r
   });
   await transporter.sendMail({ from: env.SMTP_FROM, to: data.to, subject, text });
 }
+
+/** A plain notification email (attendance alerts, updates). Logged instead of sent when SMTP is not set up. */
+export async function sendNotificationEmail(data: { to: string; name?: string | null; subject: string; body: string }): Promise<void> {
+  const text = `${data.name ? `Hello ${data.name},\n\n` : ""}${data.body}\n\n— KuraLearn`;
+  if (!env.SMTP_HOST) {
+    console.warn(`[Email Service] SMTP not configured. Notification "${data.subject}" was not emailed.`);
+    return;
+  }
+  const nodemailer = await import("nodemailer");
+  const transporter = nodemailer.createTransport({
+    host: env.SMTP_HOST,
+    port: env.SMTP_PORT,
+    secure: env.SMTP_SECURE,
+    auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined
+  });
+  await transporter.sendMail({ from: env.SMTP_FROM, to: data.to, subject: data.subject, text });
+}

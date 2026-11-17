@@ -2,6 +2,7 @@ import { Route } from "react-router-dom";
 import CourseWizardPage from "@/pages/teacher/CourseWizardPage";
 import { CourseDetailPage } from "@/pages/teacher/CourseDetailPage";
 import { CreateLessonPage } from "@/pages/teacher/CreateLessonPage";
+import { TeacherSyllabusPage } from "@/pages/teacher/TeacherSyllabusPage";
 import TeacherAssessmentDetailPage from "@/pages/teacher/TeacherAssessmentDetailPage";
 import { TeacherAssessmentsPage } from "@/pages/teacher/TeacherAssessmentsPage";
 import { TeacherCoursesPage } from "@/pages/teacher/TeacherCoursesPage";
@@ -33,6 +34,7 @@ export const teacherRoutes = (
     <Route path="/teacher/learners" element={<TeacherStudentsPage />} />
     <Route path="/teacher/students" element={<TeacherStudentsPage />} />
     <Route path="/teacher/lesson-plans" element={<TeacherLessonsPage />} />
+    <Route path="/teacher/syllabus" element={<TeacherSyllabusPage />} />
     <Route path="/teacher/lessons" element={<TeacherLessonsPage />} />
     <Route path="/teacher/lessons/new" element={<CreateLessonPage />} />
     <Route path="/teacher/lessons/:id/edit" element={<CreateLessonPage />} />

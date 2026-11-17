@@ -28,6 +28,7 @@ import { timetableRouter } from "./modules/timetable/timetable.routes.js";
 import { exportRouter } from "./modules/exports/export.routes.js";
 import { auditRouter } from "./modules/audit/audit.routes.js";
 import { virtualRouter } from "./modules/virtual/virtual.routes.js";
+import { syllabusRouter } from "./modules/syllabus/syllabus.routes.js";
 import { asyncHandler } from "./http/async-handler.js";
 import { setupPassword } from "./modules/staff/staff.controller.js";
 
@@ -74,6 +75,7 @@ export function createApp() {
   app.use("/api/v1/exports", exportRouter);
   app.use("/api/v1/audit", auditRouter);
   app.use("/api/v1/virtual", virtualRouter);
+  app.use("/api/v1/syllabus", syllabusRouter);
 
   // Public route — staff password setup via invitation token (no auth required)
   app.post("/api/v1/staff/setup-password", asyncHandler(setupPassword));

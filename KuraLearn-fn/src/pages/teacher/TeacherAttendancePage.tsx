@@ -7,8 +7,10 @@ import { AttendanceFilters } from "./attendance/AttendanceFilters";
 import { AttendanceGrid } from "./attendance/AttendanceGrid";
 import { AiInsights } from "./attendance/AiInsights";
 import { formatDateRange } from "@/utils/dateUtils";
+import { useT } from "@/i18n/I18nContext";
 
 const TeacherAttendancePage: React.FC = () => {
+  const t = useT();
   const {
     classes,
     selectedClassId,
@@ -78,7 +80,7 @@ const TeacherAttendancePage: React.FC = () => {
     <div className="mx-auto min-h-screen max-w-[1500px] space-y-5 bg-slate-50/30 p-3 sm:p-5 md:p-8">
       <div className="flex flex-col gap-1 print:hidden">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 md:text-[28px]">
-          Attendance
+          {t("Attendance")}
         </h1>
         <div className="text-sm font-semibold text-slate-500">
           {selectedClassName ?? "Class attendance"}
@@ -109,8 +111,8 @@ const TeacherAttendancePage: React.FC = () => {
 
       <div className="flex gap-2 border-b border-slate-200 print:hidden">
         {[
-          { id: "overview", label: "Attendance List" },
-          { id: "ai-insights", label: "AI Insights" },
+          { id: "overview", label: t("Attendance List") },
+          { id: "ai-insights", label: t("AI Insights") },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -152,7 +154,7 @@ const TeacherAttendancePage: React.FC = () => {
               <input
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search name, code, or gender"
+                placeholder={t("Search name, code, or gender")}
                 className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50"
               />
             </label>
@@ -189,13 +191,13 @@ const TeacherAttendancePage: React.FC = () => {
       >
         <div className="space-y-6">
           <InfoGrid>
-            <DetailRow label="Student Code" value={selectedStudent?.studentCode} />
-            <DetailRow label="Gender" value={selectedStudent?.gender} />
+            <DetailRow label={t("Student Code")} value={selectedStudent?.studentCode} />
+            <DetailRow label={t("Gender")} value={selectedStudent?.gender} />
           </InfoGrid>
           <div>
-            <h3 className="text-sm font-bold text-slate-800 mb-3">Attendance History</h3>
+            <h3 className="text-sm font-bold text-slate-800 mb-3">{t("Attendance History")}</h3>
             {loadingHistory ? (
-              <p className="text-xs font-bold text-slate-500">Loading history...</p>
+              <p className="text-xs font-bold text-slate-500">{t("Loading history...")}</p>
             ) : (
               <div className="space-y-2">
                 {studentHistory?.map((h: any) => (
